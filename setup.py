@@ -37,7 +37,7 @@ def readme() -> str:
 
 setup(
     name="hiplot-mm",
-    version="0.0.1rc1",
+    version="0.0.2",
     description="High dimensional Interactive Plotting tool",
     long_description=readme(),
     long_description_content_type="text/markdown",

@@ -65,7 +65,7 @@ export interface ParallelPlotDisplayData {
 export interface ParallelPlotData extends HiPlotPluginData, ParallelPlotDisplayData {
 };
 
-const TOP_MARGIN_PIXELS = 80;
+const TOP_MARGIN_PIXELS = 100;
 export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlotState> {
   on_resize: () => void = null;
   m = [
@@ -267,8 +267,8 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       this.yscale[k] = this.createScale(k);
       return true;
     }.bind(this)).reverse().sort(function(this: ParallelPlot, a: string, b: string) {
-      const pda = this.state.order.findIndex((e) => e == a);
-      const pdb = this.state.order.findIndex((e) => e == b);
+      const pda = this.state.order.findIndex((e) => e == b);
+      const pdb = this.state.order.findIndex((e) => e == a);
       return (pdb == -1 ? this.state.order.length : pdb) - (pda == -1 ? this.state.order.length : pda);
     }.bind(this));
     this.setState({
