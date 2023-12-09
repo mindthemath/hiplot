@@ -70,9 +70,9 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
   on_resize: () => void = null;
   m = [
     TOP_MARGIN_PIXELS, // top
-    TOP_MARGIN_PIXELS * 0.5, // right
-    10, // bottom
-    10 // left
+    TOP_MARGIN_PIXELS * 0.125, // right
+    TOP_MARGIN_PIXELS * 0.125, // bottom
+    TOP_MARGIN_PIXELS * 0.25, // left
   ]; // Margins
   // Available space minus margins
   w: number;
@@ -683,10 +683,10 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
 
   updateAxisTitlesAnglesAndFontSize() {
     // Set optimal rotation angle and scale fonts so that everything fits on screen
-    const MIN_ROTATION_ANGLE = 20;
-    const MAX_ROTATION_ANGLE = 70;
+    const MIN_ROTATION_ANGLE = 90;
+    const MAX_ROTATION_ANGLE = 90;
     const MAX_FONT_SIZE = 16;
-    const MIN_FONT_SIZE = 6;
+    const MIN_FONT_SIZE = 10;
     const MAX_X = this.dimensions_dom.node().parentElement.parentElement.getBoundingClientRect().right;
     const ROTATION_ANGLE_RADS = Math.max(MIN_ROTATION_ANGLE * Math.PI / 180, Math.min(MAX_ROTATION_ANGLE * Math.PI / 180,
       Math.atan(24 * this.state.dimensions.length / this.state.width)
