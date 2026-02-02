@@ -20,15 +20,26 @@ There are several modes to HiPlot:
 - In a jupyter notebook (to visualize python data), or in [Streamlit apps](https://mindthemath.github.io/hiplot/tuto_streamlit.html)
 - In CLI to render standalone HTML
 
+## Quick Start
 
 ```bash
-# Core package (HTML export only)
+# Render a CSV to interactive HTML (no install needed)
+uvx hiplot-mm data.csv > output.html
+
+# Or start an interactive server
+uvx --from 'hiplot-mm[server]' hiplot --port 8765
+```
+
+## Installation
+
+```bash
+# Core package (HTML export, CLI rendering)
 pip install hiplot-mm
 
 # With Jupyter notebook support
 pip install hiplot-mm[notebook]
 
-# With web server support (hiplot CLI command)
+# With web server support (hiplot command)
 pip install hiplot-mm[server]
 
 # With Streamlit support
@@ -86,7 +97,7 @@ uv build
 
 **Run the dev server:**
 ```bash
-uv run hiplot --port 8765
+uv run --extra server hiplot --port 8765
 ```
 
 

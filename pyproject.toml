@@ -81,8 +81,9 @@ dev = [
 ]
 
 [project.scripts]
-hiplot-mm = "hiplot.server:run_server_main"
+hiplot = "hiplot.server:run_server_main"
 hiplot-render = "hiplot.render:hiplot_render_main"
+hiplot-mm = "hiplot.render:hiplot_render_main"
 
 [project.urls]
 Homepage = "https://github.com/mindthemath/hiplot"

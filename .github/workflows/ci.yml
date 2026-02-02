@@ -65,8 +65,11 @@ jobs:
 
       - name: Test CLI commands
         run: |
-          uv run hiplot-mm --help
+          uv sync
+          uv run --extra server hiplot --help
           uv run hiplot-render --help
+          # new alias for hiplot-render: hiplot-mm
+          uv run hiplot-mm --help
 
   package-verify:
     name: Verify Package Build
@@ -139,5 +142,8 @@ jobs:
 
       - name: Test CLI commands
         run: |
-          uv run hiplot-mm --help
+          uv sync
+          uv run --extra server hiplot --help
           uv run hiplot-render --help
+          # new alias for hiplot-render: hiplot-mm
+          uv run hiplot-mm --help
