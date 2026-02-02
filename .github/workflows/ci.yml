@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['*']
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-js:
+    name: Build JavaScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build production bundle
+        run: bun run build
+
+      - name: Upload JS bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: js-bundle
+          path: hiplot/static/built/
+          retention-days: 7
+
+  mypy-pytest:
+    name: Type Check & Tests (Python ${{ matrix.python-version }})
+    needs: build-js
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download JS bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: js-bundle
+          path: hiplot/static/built/
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run ty
+        run: make check
+
+      - name: Run pytest
+        run: make test
+
+      - name: Test CLI commands
+        run: |
+          uv run hiplot-mm --help
+          uv run hiplot-render --help
+
+  package-verify:
+    name: Verify Package Build
+    needs: build-js
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download JS bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: js-bundle
+          path: hiplot/static/built/
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Build package
+        run: uv build
+
+      - name: Verify wheel install
+        run: |
+          uv venv test-wheel
+          VIRTUAL_ENV=test-wheel uv pip install dist/*.whl
+          test-wheel/bin/python -c "import hiplot as hip; hip.Experiment"
+          test-wheel/bin/python -c "import hiplot as hip; print(hip.__version__)"
+          test-wheel/bin/hiplot-render demo --format html > /dev/null
+
+      - name: Verify sdist install
+        run: |
+          uv venv test-sdist
+          VIRTUAL_ENV=test-sdist uv pip install dist/*.tar.gz
+          test-sdist/bin/python -c "import hiplot as hip; hip.Experiment"
+          test-sdist/bin/hiplot-render demo --format html > /dev/null
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+          retention-days: 7
+
+  windows-test:
+    name: Windows Tests
+    needs: build-js
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download JS bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: js-bundle
+          path: hiplot/static/built/
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run pytest
+        run: uv run pytest hiplot
+
+      - name: Test CLI commands
+        run: |
+          uv run hiplot-mm --help
+          uv run hiplot-render --help
