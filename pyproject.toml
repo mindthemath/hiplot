@@ -61,10 +61,10 @@ all = [
 # Development dependencies
 dev = [
     "pytest",
-    "mypy",
+    "ty",
     "ipykernel",
     "wheel",
-    "selenium",
+    # "selenium",
     "mistune==0.8.4",
     "twine",
     "pre-commit",
@@ -74,14 +74,14 @@ dev = [
     "optuna",
     "sphinx==5.2.0",
     "guzzle_sphinx_theme==0.7.11",
-    "m2r2==0.3.3",
+    "m2r2>=0.3.4",
     "flask",
     "flask-compress",
     "ipython>=7.0.1",
 ]
 
 [project.scripts]
-hiplot = "hiplot.server:run_server_main"
+hiplot-mm = "hiplot.server:run_server_main"
 hiplot-render = "hiplot.render:hiplot_render_main"
 
 [project.urls]

@@ -36,7 +36,7 @@ def html_inlinize(html: str, replace_local: bool = True) -> str:
     static_root = str(Path(__file__).parent)
     soup = BeautifulSoup(html, "html.parser")
     for i in soup.find_all("link"):
-        href = i["href"]
+        href = str(i["href"])
         if href.startswith("http") or href.startswith("//"):
             continue
         if not replace_local:
@@ -54,7 +54,7 @@ def html_inlinize(html: str, replace_local: bool = True) -> str:
             i["href"] = f"data:{SUFFIX_TO_TYPE[file.suffix]};base64,{base64.b64encode(file.open('rb').read()).decode('ascii')}"
     for i in soup.find_all("script"):
         try:
-            src = i["src"]
+            src = str(i["src"])
         except KeyError:
             continue
         if src.startswith("http") or src.startswith("//"):
