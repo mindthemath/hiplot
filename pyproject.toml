@@ -100,3 +100,9 @@ hiplot = [
     "static/built/streamlit_component/*",
     "templates/*",
 ]
+
+[tool.ty.src]
+exclude = [
+    ".circleci/",
+    "examples/",
+]

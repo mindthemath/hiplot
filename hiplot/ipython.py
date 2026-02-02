@@ -111,7 +111,7 @@ class IPythonExperimentDisplayed(exp.ExperimentDisplayed):
             # msg is the comm_open message
 
             # Register handler for later messages
-            @comm.on_msg  # type: ignore
+            @comm.on_msg
             def _recv(msg: t.Dict[str, t.Any]) -> None:
                 self._num_recv += 1
                 msg_data = msg["content"]["data"]
@@ -145,7 +145,7 @@ class IPythonExperimentDisplayed(exp.ExperimentDisplayed):
         last_msg = self._last_data_per_type.get("brush_extents")
         if last_msg is None:
             raise self.no_data_received_error
-        return last_msg  # type: ignore
+        return last_msg
 
 
 def _should_embed_js_with_html() -> bool:
