@@ -77,6 +77,25 @@ export class ContextMenu extends React.Component<ContextMenuProps, ContextMenuSt
             this.trigger_callbacks.forEach(function(trigger) {
                 trigger.cb(me.state.column, cm);
             });
+            // After content is added, check if menu overflows viewport and reposition if needed
+            requestAnimationFrame(() => {
+                const rect = cm.getBoundingClientRect();
+                const parent = cm.parentElement.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+
+                // Check right edge overflow
+                if (rect.right > viewportWidth) {
+                    const newLeft = Math.max(0, this.state.left - (rect.right - viewportWidth) - 10);
+                    cm.style.left = `${newLeft}px`;
+                }
+
+                // Check bottom edge overflow
+                if (rect.bottom > viewportHeight) {
+                    const newTop = Math.max(0, this.state.top - (rect.bottom - viewportHeight) - 10);
+                    cm.style.top = `${newTop}px`;
+                }
+            });
         }
     }
     render() {

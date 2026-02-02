@@ -36,12 +36,22 @@ export function foDynamicSizeFitContent(fo: SVGForeignObjectElement, minmax?: [n
     const tooltip = fo.children[0].children[1] as HTMLDivElement;
     const anchor_x = leftPos(anchor, w, minmax);
     fo.setAttribute("x", `${anchor_x}`);
-    // Set tooltip
+    // Set tooltip position - flip to left side if it would overflow the right edge
     if (tooltip) {
-        const tooltip_anchor_x = leftPos(anchor, TOOLTIP_WIDTH_PX, minmax) - anchor_x;
-        const tooltip_width = Math.min(TOOLTIP_WIDTH_PX, TOOLTIP_WIDTH_PX - tooltip_anchor_x);
-        tooltip.style.marginLeft = `${tooltip_anchor_x}px`;
-        tooltip.style.width = `${tooltip_width}px`;
+        // Calculate absolute position of the label
+        const labelRight = minmax ? -minmax[0] + anchor_x + w : 0;
+        const containerWidth = minmax ? minmax[1] - minmax[0] : 0;
+        const spaceOnRight = containerWidth - labelRight;
+
+        // If not enough space on right, position tooltip to the left of the label
+        if (spaceOnRight < TOOLTIP_WIDTH_PX) {
+            // Position tooltip to the left of the label
+            tooltip.style.marginLeft = `${-TOOLTIP_WIDTH_PX - 5}px`;
+        } else {
+            // Position tooltip normally (to the right/below the label)
+            tooltip.style.marginLeft = `0px`;
+        }
+        tooltip.style.width = `${TOOLTIP_WIDTH_PX}px`;
     }
     fo.style.width = `${w}px`;
     fo.style.height = `${h}px`;
@@ -53,7 +63,12 @@ export function foCreateAxisLabel(pd: ParamDef, cm?: React.RefObject<ContextMenu
     const span = d3.select(fo).append("xhtml:div")
         .classed(style.tooltipContainer, true)
         .classed(style.label, true);
-    span.append("xhtml:span")
+
+    // Long-press support for mobile devices
+    let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+    const LONG_PRESS_DURATION = 500; // ms
+
+    const labelSpan = span.append("xhtml:span")
         .attr("class", pd.label_css)
         .classed("label-name", true)
         .classed(style.axisLabelText, true)
@@ -66,11 +81,32 @@ export function foCreateAxisLabel(pd: ParamDef, cm?: React.RefObject<ContextMenu
                 event.stopPropagation();
             }
         });
+
+    // Add touch events for mobile long-press support
+    if (cm) {
+        labelSpan
+            .on("touchstart", function(event: TouchEvent) {
+                const touch = event.touches[0];
+                longPressTimer = setTimeout(() => {
+                    cm.current.show(touch.pageX, touch.pageY, pd.name);
+                    longPressTimer = null;
+                }, LONG_PRESS_DURATION);
+            })
+            .on("touchend touchcancel touchmove", function() {
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            });
+    }
+
     if (tooltip) {
+        // Update tooltip text for mobile-friendly instructions
+        const mobileTooltip = tooltip.replace("right click", "long-press");
         span.append("div")
             .classed(style.tooltiptext, true)
             .classed(style.tooltipBot, true)
-            .text(tooltip);
+            .text(mobileTooltip);
     }
     return fo;
 }
