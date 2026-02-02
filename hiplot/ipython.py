@@ -8,10 +8,37 @@ import typing as t
 import json
 from pathlib import Path
 
-import IPython.display
-from ipykernel.comm import Comm
 from . import experiment as exp
 from .render import escapejs, make_experiment_standalone_page
+
+# Lazy imports for optional dependencies
+if t.TYPE_CHECKING:
+    import IPython.display
+    from ipykernel.comm import Comm
+
+
+def _get_ipython_display() -> t.Any:
+    """Lazy import of IPython.display with helpful error message."""
+    try:
+        import IPython.display
+        return IPython.display
+    except ImportError as e:
+        raise ImportError(
+            "IPython is required for notebook support. "
+            "Install it with: pip install hiplot-mm[notebook]"
+        ) from e
+
+
+def _get_comm_class() -> t.Any:
+    """Lazy import of ipykernel.comm.Comm with helpful error message."""
+    try:
+        from ipykernel.comm import Comm
+        return Comm
+    except ImportError as e:
+        raise ImportError(
+            "ipykernel is required for notebook support. "
+            "Install it with: pip install hiplot-mm[notebook]"
+        ) from e
 
 
 class GetSelectedFailure(Exception):
@@ -27,8 +54,9 @@ class NotebookJSBundleInjector:
 
     @classmethod
     def ensure_injected(cls) -> None:
+        IPython_display = _get_ipython_display()
         bundle = Path(__file__).parent / "static" / "built" / "hiplot.bundle.js"
-        IPython.display.display(IPython.display.Javascript(f"""
+        IPython_display.display(IPython_display.Javascript(f"""
 {bundle.read_text("utf-8")}
 // Local variables can't be accessed in other cells, so let's
 // manually create a global variable
@@ -76,7 +104,9 @@ class IPythonExperimentDisplayed(exp.ExperimentDisplayed):
         self._selected_ids: t.List[str] = []
         self._last_data_per_type: t.Dict[str, t.Any] = {}
 
-        def target_func(comm: Comm, open_msg: t.Dict[str, t.Any]) -> None:  # pylint: disable=unused-argument
+        Comm = _get_comm_class()
+
+        def target_func(comm: "Comm", open_msg: t.Dict[str, t.Any]) -> None:  # pylint: disable=unused-argument
             # comm is the kernel Comm instance
             # msg is the comm_open message
 
@@ -89,7 +119,7 @@ class IPythonExperimentDisplayed(exp.ExperimentDisplayed):
                 self._last_data_per_type[msg_data["type"]] = msg_data["data"]
 
         try:
-            ip: Any = get_ipython()  # type: ignore  # pylint: disable=undefined-variable
+            ip: t.Any = get_ipython()  # type: ignore  # pylint: disable=undefined-variable
             ip.kernel.comm_manager.register_target(comm_name, target_func)
         except NameError:  # NameError: name 'get_ipython' is not defined
             # We are not in an ipython environment - for example in testing
@@ -133,6 +163,8 @@ def display_exp(
         embed_js_with_html: t.Optional[bool] = None,
         **kwargs: t.Any
 ) -> IPythonExperimentDisplayed:
+    IPython_display = _get_ipython_display()
+
     if embed_js_with_html is None:
         embed_js_with_html = _should_embed_js_with_html()
 
@@ -185,5 +217,5 @@ catch(err) {{
     else:
         NotebookJSBundleInjector.ensure_injected()
 
-    IPython.display.display(IPython.display.HTML(index_html))
+    IPython_display.display(IPython_display.HTML(index_html))
     return displayed_xp

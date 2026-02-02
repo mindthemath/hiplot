@@ -18,7 +18,9 @@ class _StreamlitHelpers:
     def is_running_within_streamlit() -> bool:
         try:
             from streamlit import runtime
-        except:  # pylint: disable=bare-except
+        except ImportError:
+            return False
+        except Exception:  # pylint: disable=broad-except
             return False
         return bool(runtime.exists())
 
@@ -26,10 +28,17 @@ class _StreamlitHelpers:
     def create_component(cls) -> tp.Optional[tp.Callable[..., tp.Any]]:
         if cls.component is not None:
             return cls.component
-        from streamlit import runtime
+        try:
+            from streamlit import runtime
+        except ImportError as e:
+            raise ImportError(
+                "Streamlit is required for Streamlit support. "
+                "Install it with: pip install hiplot-mm[streamlit]"
+            ) from e
         try:
             import streamlit.components.v1 as components
         except ModuleNotFoundError as e:
+            import streamlit as st
             raise RuntimeError(f"""Your streamlit version ({st.__version__}) is too old and does not support components.
 Please update streamlit with `pip install -U streamlit`""") from e
         assert runtime.exists()
