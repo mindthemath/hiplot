@@ -69,7 +69,7 @@ class StepParallelPlot extends React.Component<TutorialStepProps, {}> {
     render() {
         return (
         <div className="alert alert-primary" role="alert">
-            <h4 className="alert-heading">Step 1/4: The parallel plot</h4>
+            <h4 className="alert-heading">Step 1/4: The Parallel Plot</h4>
             <p>The first plot you see above is a <strong>Parallel Plot</strong>.
                 Parallel plots are a convenient way to visualize and filter high-dimensional data.
                 HiPlot will draw one vertical scaled axis for each metric you have in your dataset,
@@ -161,7 +161,6 @@ interface State {
 
 export class HiPlotTutorial extends React.Component<Props, State> {
     steps = [
-        (p: TutorialStepProps) => <StepHiPlotInfo {...p} />,
         (p: TutorialStepProps) => <StepParallelPlot {...p} />,
         (p: TutorialStepProps) => <StepLearnToSlice {...p} />,
         (p: TutorialStepProps) => <StepMoveAndRemoveColumns {...p} />,

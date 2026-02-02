@@ -229,9 +229,27 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
   }.bind(this);
 
   render() {
+    const restorableCount = this.getRestorableColumnsCount();
     return (
     <ResizableH initialHeight={this.state.height} onResize={this.onResize.bind(this)}>
     <div ref={this.root_ref} className={`${style["parallel-plot-chart"]} pplot-root`} style={{"height": this.state.height}}>
+          {restorableCount > 0 && (
+            <button
+              className="btn btn-sm btn-outline-secondary"
+              style={{
+                position: 'absolute',
+                top: '5px',
+                right: '10px',
+                zIndex: 100,
+                fontSize: '12px',
+                padding: '2px 8px'
+              }}
+              onClick={this.restore_all_columns.bind(this)}
+              title="Restore columns that were dragged off the plot"
+            >
+              Restore {restorableCount} column{restorableCount > 1 ? 's' : ''}
+            </button>
+          )}
           <canvas ref={this.foreground_ref} className={style["background-canvas"]}></canvas>
           <canvas ref={this.highlighted_ref} className={style["highlight-canvas"]}></canvas>
           <svg ref={this.svg_ref} width={this.state.width} height={this.state.height}>
@@ -864,6 +882,29 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
         dimensions: prevState.dimensions.concat([d])
       };
     });
+  }
+  restore_all_columns(): void {
+    const toRestore = Array.from(this.state.hide).filter(d => this.can_restore_axis(d));
+    if (toRestore.length === 0) {
+      return;
+    }
+    this.setState(function(prevState) {
+      var newHide = new Set(prevState.hide);
+      var newDimensions = prevState.dimensions.slice();
+      toRestore.forEach(d => {
+        newHide.delete(d);
+        if (newDimensions.indexOf(d) === -1) {
+          newDimensions.push(d);
+        }
+      });
+      return {
+        hide: newHide,
+        dimensions: newDimensions
+      };
+    });
+  }
+  getRestorableColumnsCount(): number {
+    return Array.from(this.state.hide).filter(d => this.can_restore_axis(d)).length;
   }
   path = function(this: ParallelPlot, d: Datapoint, ctx: CanvasRenderingContext2D, color?: string) {
     if (color) ctx.strokeStyle = color;

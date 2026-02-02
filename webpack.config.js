@@ -161,22 +161,22 @@ LICENSE file in the root directory of this source tree."),
 }};
 
 
-// Make sure we generate ES3 code
+// Modern ES2020 output - ES3/ES5 support is no longer needed in 2024+
 const webpackOutputEnvironment = {
   // The environment supports arrow functions ('() => { ... }').
-  arrowFunction: false,
+  arrowFunction: true,
   // The environment supports BigInt as literal (123n).
-  bigIntLiteral: false,
+  bigIntLiteral: true,
   // The environment supports const and let for variable declarations.
-  const: false,
+  const: true,
   // The environment supports destructuring ('{ a, b } = obj').
-  destructuring: false,
+  destructuring: true,
   // The environment supports an async import() function to import EcmaScript modules.
-  dynamicImport: false,
+  dynamicImport: true,
   // The environment supports 'for of' iteration ('for (const x of array) { ... }').
-  forOf: false,
+  forOf: true,
   // The environment supports ECMAScript Module syntax to import ECMAScript modules (import ... from '...').
-  module: false,
+  module: true,
 };
 
 module.exports = [
