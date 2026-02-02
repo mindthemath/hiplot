@@ -115,6 +115,9 @@ interface HiPlotState extends IDatasets {
     persistentState: PersistentState;
     dark: boolean;
     dataProvider: DataProviderClass;
+
+    // Track hidden columns count for header button
+    restorableColumnsCount: number;
 }
 
 function detectIsDarkTheme(): boolean {
@@ -178,7 +181,8 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
             colorby: null,
             dark: this.props.dark === null ? detectIsDarkTheme() : this.props.dark,
             persistentState: props.persistentState !== undefined && props.persistentState !== null ? props.persistentState : new PersistentStateInMemory("", {}),
-            dataProvider: this.props.dataProvider ? this.props.dataProvider : StaticDataProvider
+            dataProvider: this.props.dataProvider ? this.props.dataProvider : StaticDataProvider,
+            restorableColumnsCount: 0
         };
         Object.keys(props.plugins).forEach((name, index) => {
             this.plugins_window_state[name] = {};
@@ -512,7 +516,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
             ...datasets
         };
         const createPluginProps = function(this: HiPlot, name: string): React.ClassAttributes<React.ComponentClass<HiPlotPluginData>> & HiPlotPluginData {
-            return {
+            const baseProps = {
                 ref: this.plugins_ref[name],
                 ...(this.state.experiment.display_data && this.state.experiment.display_data[name] ? this.state.experiment.display_data[name] : {}),
                 ...datasets,
@@ -533,6 +537,11 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
                 setHighlighted: this.setHighlighted.bind(this),
                 asserts: this.props.asserts,
             };
+            // Add callback for ParallelPlot to notify when hidden columns change
+            if (name === DefaultPlugins.PARALLEL_PLOT) {
+                (baseProps as any).onHiddenColumnsChange = this.onHiddenColumnsChange.bind(this);
+            }
+            return baseProps;
         }.bind(this);
         return (
         <div ref={this.rootRef} className={`hip_thm--${this.state.dark ? "dark" : "light"}`}>
@@ -545,6 +554,8 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
                 dataProvider={this.state.dataProvider}
                 loadStatus={this.state.loadStatus}
                 dark={this.state.dark}
+                restorableColumnsCount={this.state.restorableColumnsCount}
+                onRestoreColumns={this.restoreAllColumns.bind(this)}
                 {...controlProps}
             />
             {this.state.loadStatus == HiPlotLoadStatus.Error &&
@@ -574,6 +585,30 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
             }
         }
        throw new Error("Can not find plugin" + cls);
+    }
+    onHiddenColumnsChange(count: number): void {
+        if (count !== this.state.restorableColumnsCount) {
+            this.setState({ restorableColumnsCount: count });
+        }
+    }
+    getRestorableColumnsCount(): number {
+        const ppRef = this.plugins_ref[DefaultPlugins.PARALLEL_PLOT];
+        if (ppRef && ppRef.current) {
+            const pp = ppRef.current as unknown as ParallelPlot;
+            if (pp.getRestorableColumnsCount) {
+                return pp.getRestorableColumnsCount();
+            }
+        }
+        return 0;
+    }
+    restoreAllColumns(): void {
+        const ppRef = this.plugins_ref[DefaultPlugins.PARALLEL_PLOT];
+        if (ppRef && ppRef.current) {
+            const pp = ppRef.current as unknown as ParallelPlot;
+            if (pp.restore_all_columns) {
+                pp.restore_all_columns();
+            }
+        }
     }
 }
 

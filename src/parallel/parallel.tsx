@@ -63,6 +63,8 @@ export interface ParallelPlotDisplayData {
 // DISPLAYS_DATA_DOC_END
 
 export interface ParallelPlotData extends HiPlotPluginData, ParallelPlotDisplayData {
+  // Callback to notify parent when hidden columns change
+  onHiddenColumnsChange?: (count: number) => void;
 };
 
 const TOP_MARGIN_PIXELS = 100;
@@ -144,6 +146,10 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
     }
     if (prevState.hide != this.state.hide) {
       this.props.persistentState.set('hide', Array.from(this.state.hide));
+      // Notify parent of hidden columns count change
+      if (this.props.onHiddenColumnsChange) {
+        this.props.onHiddenColumnsChange(this.getRestorableColumnsCount());
+      }
     }
     if (prevState.order != this.state.order) {
       this.props.persistentState.set('order', this.state.order);
@@ -160,6 +166,10 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       redrawAllForeignObjectsIfSafari();
       this.update_ticks();
       this.updateAxisTitlesAnglesAndFontSize();
+      // Notify parent of hidden columns count change (dimensions affects can_restore_axis)
+      if (this.props.onHiddenColumnsChange) {
+        this.props.onHiddenColumnsChange(this.getRestorableColumnsCount());
+      }
     }
     // Highlight polylines
     if (prevProps.rows_highlighted != this.props.rows_highlighted) {
@@ -229,27 +239,9 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
   }.bind(this);
 
   render() {
-    const restorableCount = this.getRestorableColumnsCount();
     return (
     <ResizableH initialHeight={this.state.height} onResize={this.onResize.bind(this)}>
     <div ref={this.root_ref} className={`${style["parallel-plot-chart"]} pplot-root`} style={{"height": this.state.height}}>
-          {restorableCount > 0 && (
-            <button
-              className="btn btn-sm btn-outline-secondary"
-              style={{
-                position: 'absolute',
-                top: '5px',
-                right: '10px',
-                zIndex: 100,
-                fontSize: '12px',
-                padding: '2px 8px'
-              }}
-              onClick={this.restore_all_columns.bind(this)}
-              title="Restore columns that were dragged off the plot"
-            >
-              Restore {restorableCount} column{restorableCount > 1 ? 's' : ''}
-            </button>
-          )}
           <canvas ref={this.foreground_ref} className={style["background-canvas"]}></canvas>
           <canvas ref={this.highlighted_ref} className={style["highlight-canvas"]}></canvas>
           <svg ref={this.svg_ref} width={this.state.width} height={this.state.height}>
@@ -297,6 +289,13 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
 
     if (this.props.context_menu_ref && this.props.context_menu_ref.current) {
         this.props.context_menu_ref.current.addCallback(this.columnContextMenu.bind(this), this);
+    }
+    // Notify parent of initial hidden columns count
+    if (this.props.onHiddenColumnsChange) {
+        const count = this.getRestorableColumnsCount();
+        if (count > 0) {
+            this.props.onHiddenColumnsChange(count);
+        }
     }
   }
   columnContextMenu(column: string, cm: HTMLDivElement) {
