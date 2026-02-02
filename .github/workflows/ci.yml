@@ -32,8 +32,8 @@ jobs:
           path: hiplot/static/built/
           retention-days: 7
 
-  mypy-pytest:
-    name: Type Check & Tests (Python ${{ matrix.python-version }})
+  typecheck-pytest:
+    name: ${{ format('Type Check & Tests (Python {0})', matrix.python-version) }}
     needs: build-js
     runs-on: ubuntu-latest
     strategy:
