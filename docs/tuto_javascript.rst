@@ -3,11 +3,11 @@
 NPM library (javascript)
 ===============================
 
-HiPlot is released as a React component in an `NPM package <https://www.npmjs.com/package/hiplot>`_, and can be embeded in any javascript/React codebase.
+HiPlot is released as a React component in an `NPM package <https://www.npmjs.com/package/hiplot-mm>`_, and can be embeded in any javascript/React codebase.
 
 .. warning::
 
-    The Javascript library API is very recent, subject to changes, and less used compared to the python API. Please report any bug or suggestion by creating a `github issue <https://github.com/facebookresearch/hiplot/issues/new>`_
+    The Javascript library API is very recent, subject to changes, and less used compared to the python API. Please report any bug or suggestion by creating a `github issue <https://github.com/mindthemath/hiplot/issues/new>`_
 
 
 

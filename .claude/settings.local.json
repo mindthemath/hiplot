@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "mcp__plugin_playwright_playwright__browser_drag",
+      "Bash(bun run build:*)",
+      "Bash(pip uninstall:*)"
+    ]
+  }
+}

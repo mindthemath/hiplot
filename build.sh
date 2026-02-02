@@ -1,15 +1,27 @@
+#!/bin/bash
+set -e
+
+# HiPlot Build Script
+# For simple builds, you can just run:
+#   bun run build && uv build
+#
+# This script handles the full build including NPM package preparation.
+
+echo "=== Cleaning build directories ==="
 rm -rf hiplot/static/built/*
-rm -rf dist && mkdir dist pypi-build
-mkdir -p npm-build/dist npm-build/dist-dev dist
-cp .circleci/hotfixes/internmap.js node_modules/internmap/src/index.js
-npm run build-dev
-mv dist/* npm-build/dist-dev/
-npm run build
-npm run prepublish
-mv dist/* npm-build/dist/ && mkdir -p hiplot/static/built/ && cp npm-build/dist/hiplot.bundle.js hiplot/static/built/
+rm -rf npm-dist/*
+mkdir -p hiplot/static/built npm-dist
 
-mkdir -p npm-package/hiplot
+echo "=== Building JavaScript bundles ==="
+bun run build
 
-cp -r package.json tsconfig.json webpack.config.js README.md LICENSE src npm-build/dist npm-package/hiplot
-rm -rf npm-package/hiplot/dist/hiplot-*  # Leftover from setup.py
-python setup.py sdist bdist_wheel
+echo "=== Generating TypeScript declarations (for NPM) ==="
+bun run prepublish
+
+echo "=== Building Python package ==="
+uv build
+
+echo "=== Build complete ==="
+echo "NPM artifacts: npm-dist/"
+echo "Python artifacts: dist/"
+echo "Python bundle: hiplot/static/built/"

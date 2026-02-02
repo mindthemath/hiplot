@@ -65,7 +65,7 @@ project = 'HiPlot'
 copyright = '2020, Facebook AI Research (FAIR)'  # pylint:disable=redefined-builtin
 author = 'Facebook AI Research (FAIR)'
 
-github_doc_root = 'https://github.com/facebookresearch/hiplot'
+github_doc_root = 'https://github.com/mindthemath/hiplot'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -108,7 +108,7 @@ extensions.append("guzzle_sphinx_theme")
 html_theme_options = {
     # Set the name of the project to appear in the sidebar
     "project_nav_name": "HiPlot",
-    "base_url": "https://facebookresearch.github.io/hiplot/",
+    "base_url": "https://mindthemath.github.io/hiplot/",
 }
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

@@ -1475,7 +1475,7 @@ wheels = [
 
 [[package]]
 name = "hiplot-mm"
-version = "0.0.3rc0"
+version = "0.0.3rc1"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },

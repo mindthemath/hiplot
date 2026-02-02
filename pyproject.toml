@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hiplot-mm"
-version = "0.0.3rc0"
+version = "0.0.3rc1"
 description = "High dimensional Interactive Plotting tool"
 readme = "README.md"
 license = "MIT"
@@ -85,9 +85,9 @@ hiplot = "hiplot.server:run_server_main"
 hiplot-render = "hiplot.render:hiplot_render_main"
 
 [project.urls]
-Homepage = "https://github.com/facebookresearch/hiplot"
+Homepage = "https://github.com/mindthemath/hiplot"
 Documentation = "https://facebookresearch.github.io/hiplot/"
-Repository = "https://github.com/facebookresearch/hiplot"
+Repository = "https://github.com/mindthemath/hiplot"
 
 [tool.setuptools.packages.find]
 include = ["hiplot*"]

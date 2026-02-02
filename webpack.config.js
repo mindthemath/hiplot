@@ -12,7 +12,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 var remToPx = require('postcss-rem-to-pixel');
 const webpack = require("webpack");
 
-const distPath = path.resolve(__dirname, 'dist');
+const distPath = path.resolve(__dirname, 'npm-dist');
 
 class WhenDoneCopyToHiplotStaticDir {
   constructor(installs) {
@@ -185,8 +185,8 @@ env => {
   const pyBuilt = path.resolve(__dirname, 'hiplot', 'static', 'built');
 
   var installs = {};
-  // Everything has to be installed both in `dist/` and `hiplot/static/built/` for CI testing
-  const installToFolders = [path.resolve(pyBuilt, ''), path.resolve(__dirname, 'dist', 'streamlit_component')];
+  // Everything has to be installed both in `npm-dist/` and `hiplot/static/built/` for CI testing
+  const installToFolders = [path.resolve(pyBuilt, ''), path.resolve(__dirname, 'npm-dist', 'streamlit_component')];
   installToFolders.forEach(function(sc) {
     installs[path.resolve(sc, 'streamlit_component', 'hiplot_streamlit.bundle.js')] = 'hiplot_streamlit.bundle.js';
     installs[path.resolve(sc, 'streamlit_component', 'index.html')] = '../src/index_streamlit.html';
