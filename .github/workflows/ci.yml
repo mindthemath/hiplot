@@ -26,7 +26,7 @@ jobs:
         run: bun run build
 
       - name: Upload JS bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: js-bundle
           path: hiplot/static/built/
@@ -49,7 +49,7 @@ jobs:
           path: hiplot/static/built/
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
 
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
@@ -82,7 +82,7 @@ jobs:
           path: hiplot/static/built/
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
 
       - name: Set up Python
         run: uv python install 3.12
@@ -106,7 +106,7 @@ jobs:
           test-sdist/bin/hiplot-render demo --format html > /dev/null
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: python-package
           path: dist/
@@ -126,7 +126,7 @@ jobs:
           path: hiplot/static/built/
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
 
       - name: Set up Python
         run: uv python install 3.12

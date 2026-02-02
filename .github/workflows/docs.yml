@@ -35,7 +35,7 @@ jobs:
         run: bun run build
 
       - name: Upload JS bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: js-bundle
           path: hiplot/static/built/
@@ -55,7 +55,7 @@ jobs:
           path: hiplot/static/built/
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
 
       - name: Set up Python
         run: uv python install 3.12
@@ -92,7 +92,7 @@ jobs:
           uv run make html
 
       - name: Upload docs artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: docs/_build/html
 

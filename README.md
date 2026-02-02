@@ -3,6 +3,7 @@
 ![Logo](https://raw.githubusercontent.com/mindthemath/hiplot/main/hiplot/static/logo.png)
 
 [![CI](https://github.com/mindthemath/hiplot/actions/workflows/ci.yml/badge.svg)](https://github.com/mindthemath/hiplot/actions/workflows/ci.yml)
+[![Release](https://github.com/mindthemath/hiplot/actions/workflows/release.yml/badge.svg)](https://github.com/mindthemath/hiplot/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 [![PyPI version](https://img.shields.io/pypi/v/hiplot-mm.svg)](https://pypi.python.org/pypi/hiplot-mm/)
 [![PyPI downloads](https://img.shields.io/pypi/dm/hiplot-mm.svg)](https://pypi.python.org/pypi/hiplot-mm/)
