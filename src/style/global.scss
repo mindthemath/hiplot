@@ -25,6 +25,47 @@
 
 
         // Datatables
+        .dataTables_wrapper {
+            margin-top: 16px;
+
+            // Make the top row display Show and Search on same line
+            > .row:first-child {
+                display: flex;
+                flex-wrap: nowrap !important;
+                justify-content: space-between;
+                align-items: center;
+
+                // Override Bootstrap column classes that cause wrapping
+                > div {
+                    flex: 0 0 auto !important;
+                    max-width: none !important;
+                    width: auto !important;
+                }
+            }
+
+            // Prevent "Show [dropdown] entries" from wrapping
+            .dataTables_length {
+                white-space: nowrap;
+                font-weight: normal;
+
+                label {
+                    font-weight: normal;
+                }
+            }
+
+            // Style search box - appears on same row, flush-right
+            .dataTables_filter {
+                font-weight: normal;
+                text-align: right;
+
+                label {
+                    font-weight: normal;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5em;
+                }
+            }
+        }
         .dt-buttons {
             margin-left: 10px;
         }
