@@ -14,7 +14,7 @@ import {
 import { HiPlot } from "./hiplot";
 import JSON5 from "json5";
 
-import ReactDOM from "react-dom";
+import ReactDOMClient from "react-dom/client";
 import { ComponentProps } from "./streamlit/StreamlitReact";
 
 
@@ -90,9 +90,12 @@ class ReactTemplate extends StreamlitComponentBase<State> {
 const componentWrapped = withStreamlitConnection(ReactTemplate)
 
 
-ReactDOM.render(
-  <React.StrictMode>
-    {React.createElement(componentWrapped)}
-  </React.StrictMode>,
-  document.getElementById("root")
-)
+const rootElement = document.getElementById("root");
+if (rootElement) {
+  const root = ReactDOMClient.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      {React.createElement(componentWrapped)}
+    </React.StrictMode>,
+  );
+}

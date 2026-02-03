@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import ReactDOM from "react-dom";
+import ReactDOMClient from "react-dom/client";
 import {HiPlot, defaultPlugins, HiPlotProps} from "./component";
 import React from "react";
 import { PersistentStateInURL } from "./lib/savedstate";
@@ -47,7 +47,14 @@ export function build_props(extra?: any): HiPlotProps {
 }
 
 export function render(element: HTMLElement, extra?: any) {
-    return ReactDOM.render(<React.StrictMode><HiPlot {...build_props(extra)} /></React.StrictMode>, element);
+    const rootKey = "__hiplot_root";
+    const existingRoot = (element as any)[rootKey] as ReactDOMClient.Root | undefined;
+    const root = existingRoot ?? ReactDOMClient.createRoot(element);
+    if (!existingRoot) {
+        (element as any)[rootKey] = root;
+    }
+    root.render(<React.StrictMode><HiPlot {...build_props(extra)} /></React.StrictMode>);
+    return root;
 }
 
 // Expose global for non-module consumers (legacy HTML templates).
