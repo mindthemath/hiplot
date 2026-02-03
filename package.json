@@ -5,7 +5,8 @@
   "main": "npm-dist/hiplot.lib.js",
   "types": "npm-dist/hiplot.d.ts",
   "peerDependencies": {
-    "react": ">=16"
+    "react": ">=19",
+    "react-dom": ">=19"
   },
   "devDependencies": {
     "@babel/cli": "^7.28.6",
@@ -111,7 +112,8 @@
   "dependencies": {
     "@babel/helpers": "^7.28.6",
     "@babel/runtime": "^7.28.6",
-    "@babel/traverse": "^7.29.0"
+    "@babel/traverse": "^7.29.0",
+    "datatables.net": "^2.3.7"
   },
   "overrides": {
     "semver": "^7.5.4",
