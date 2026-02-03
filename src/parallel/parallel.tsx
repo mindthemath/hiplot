@@ -723,22 +723,17 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       ));
       this.style.fontSize = newFontSize + "px";
 
-      // Safari has bugs with foreignObject + CSS transform + position
-      // See: https://bugs.webkit.org/show_bug.cgi?id=23113
-      // Use writing-mode for vertical text on Safari to avoid transform entirely
-      if (IS_SAFARI) {
-        // writing-mode: vertical-rl makes text vertical without CSS transform
-        // This avoids the Safari foreignObject positioning bug
-        this.style.writingMode = "vertical-rl";
-        this.style.textOrientation = "mixed";
-        this.style.transform = ""; // Clear any transform - triggers the Safari bug
-        // No position:fixed needed when not using transform
-      } else {
-        this.style.transform = "rotate(" + (360 - ROTATION_ANGLE_RADS * 180 / Math.PI) + "deg)";
-      }
+      // Use writing-mode for vertical text on all browsers
+      // This avoids Safari's foreignObject + CSS transform bugs (WebKit Bug #23113)
+      // and provides a consistent look across all platforms
+      this.style.writingMode = "vertical-lr";
+      this.style.textOrientation = "mixed";
+      this.style.transform = "";
 
       const fo = this.parentElement.parentElement as any as SVGForeignObjectElement;
-      fo.setAttribute("y", -newFontSize + "");
+      // Position labels at the top of the margin area (TOP_MARGIN_PIXELS = 100)
+      // The axis is at y=100, so we need y=-95 to position labels near y=5 absolute
+      fo.setAttribute("y", (-TOP_MARGIN_PIXELS + 5) + "");
     });
   }
 
