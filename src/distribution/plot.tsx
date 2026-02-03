@@ -120,7 +120,6 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
   }
 
   createHistogram(): d3.HistogramGeneratorNumber<any, any> {
-    const me = this;
     var thresholds = [];
     var valueFn: (d: any) => number;
     if (this.props.param_def.type == ParamType.CATEGORICAL) {
@@ -130,11 +129,11 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
       for (var i = 1; i < domainCount; ++i) {
         thresholds.push(i / domainCount);
       }
-      valueFn = function (d) {
+      valueFn = (d) => {
         if (!domainCount) {
           return NaN;
         }
-        const key = convert_to_categorical_input(d[me.props.axis]);
+        const key = convert_to_categorical_input(d[this.props.axis]);
         const idx = indexByValue.get(key);
         if (idx === undefined) {
           return NaN;
@@ -146,9 +145,7 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
         thresholds.push(i / this.props.nbins);
       }
       const scaleCopy = this.dataScale.copy().range([0, 1]);
-      valueFn = function (d) {
-        return scaleCopy(d[me.props.axis]);
-      };
+      valueFn = (d) => scaleCopy(d[this.props.axis]);
     }
     var histogram = d3.histogram().value(valueFn).domain([0, 1]).thresholds(thresholds);
     return histogram;
