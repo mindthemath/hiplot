@@ -169,6 +169,7 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
             //@ts-ignore
             colReorder: true,
         });
+        dom.wrap('<div class="hiplot-table-scroll"></div>');
         const btnsContainer = $(this.table_container.current).find('.col-md-6:eq(1)');
         btnsContainer.addClass("btn-group");
         this.dt.buttons().container().appendTo(btnsContainer);
@@ -301,7 +302,7 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
         return (
         <div className={`${style.wrap} container-fluid ${style["horizontal-scrollable"]}`}>
         <div className={"row"}>
-            <div ref={this.table_container} className={`col-md-12 sample-table-container`}>
+            <div ref={this.table_container} className={`col-md-12 sample-table-container ${style.tableContainer}`}>
             <table ref={this.table_ref} className="table-hover table-sm sample-rows-table display table-striped table-bordered dataTable">
             </table>
             </div>

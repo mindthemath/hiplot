@@ -23,7 +23,7 @@
   text-decoration: none;
 }
 .wrap {
-  padding: 0 3.5%;
+  padding: 0 20px;
 }
 .resize rect {
   fill: none;
@@ -132,6 +132,26 @@
 
 .horizontal-scrollable {
   overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.horizontal-scrollable :global(.row) {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.horizontal-scrollable :global(.row > [class*="col-"]) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.tableContainer {
+  box-sizing: border-box;
+}
+
+.tableContainer :global(.sample-rows-table) {
+  display: inline-block;
+  margin-right: 20px;
 }
 
 .colorBlock {

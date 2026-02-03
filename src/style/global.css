@@ -110,6 +110,22 @@
     margin-left: 10px;
 }
 
+.hip_thm--dark .dataTables_wrapper .dataTables_paginate,
+.hip_thm--light .dataTables_wrapper .dataTables_paginate {
+    text-align: center;
+}
+
+.hip_thm--dark .dataTables_wrapper .dataTables_paginate .pagination,
+.hip_thm--light .dataTables_wrapper .dataTables_paginate .pagination {
+    justify-content: center;
+}
+
+.hip_thm--dark .hiplot-table-scroll,
+.hip_thm--light .hiplot-table-scroll {
+    overflow-x: auto;
+}
+
+
 .hip_thm--dark .table-hover tbody tr:hover,
 .hip_thm--light .table-hover tbody tr:hover {
     color: #fff;
