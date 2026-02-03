@@ -1,0 +1,109 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hiplot-mm"
+version = "0.0.3"
+description = "High dimensional Interactive Plotting tool"
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "Facebook AI Research"},
+    {name = "mathematicalmichael @ Mind the Math, LLC"},
+]
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+
+# Core dependencies - minimal set needed for basic functionality
+dependencies = [
+    "beautifulsoup4",
+    "jinja2",
+]
+
+[project.optional-dependencies]
+# Web server support (hiplot CLI command)
+server = [
+    "flask",
+    "flask-compress",
+]
+
+# Jupyter notebook support (experiment.display())
+notebook = [
+    "ipython>=7.0.1",
+    "ipykernel",
+]
+
+# Streamlit support (experiment.display_st())
+streamlit = [
+    "streamlit>=0.63",
+]
+
+# All optional dependencies
+all = [
+    "hiplot-mm[server,notebook,streamlit]",
+]
+
+# Development dependencies
+dev = [
+    "pytest",
+    "ty",
+    "ipykernel",
+    "wheel",
+    # "selenium",
+    "mistune==0.8.4",
+    "twine",
+    "pre-commit",
+    "pandas",
+    "streamlit>=0.63",
+    "beautifulsoup4",
+    "optuna",
+    "sphinx==5.2.0",
+    "guzzle_sphinx_theme==0.7.11",
+    "m2r2>=0.3.4",
+    "flask",
+    "flask-compress",
+    "ipython>=7.0.1",
+]
+
+[project.scripts]
+hiplot = "hiplot.server:run_server_main"
+hiplot-render = "hiplot.render:hiplot_render_main"
+hiplot-mm = "hiplot.render:hiplot_render_main"
+
+[project.urls]
+Homepage = "https://github.com/mindthemath/hiplot"
+Documentation = "https://facebookresearch.github.io/hiplot/"
+Repository = "https://github.com/mindthemath/hiplot"
+
+[tool.setuptools.packages.find]
+include = ["hiplot*"]
+
+[tool.setuptools.package-data]
+hiplot = [
+    "py.typed",
+    "static/*",
+    "static/built/*",
+    "static/built/streamlit_component/*",
+    "templates/*",
+]
+
+[tool.ty.src]
+exclude = [
+    ".circleci/",
+    "examples/",
+]

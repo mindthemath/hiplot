@@ -41,13 +41,43 @@ export function convert_to_categorical_input(v: any): any {
     return "" + v;
 }
 
+// Natural sort comparator that handles numeric strings correctly
+// e.g., "1", "2", "10" instead of "1", "10", "2"
+function naturalSortComparator(a: string, b: string): number {
+    // Split strings into segments of numbers and non-numbers
+    const segmentA = a.match(/(\d+|\D+)/g) || [];
+    const segmentB = b.match(/(\d+|\D+)/g) || [];
+
+    const maxLen = Math.max(segmentA.length, segmentB.length);
+    for (let i = 0; i < maxLen; i++) {
+        const partA = segmentA[i] || '';
+        const partB = segmentB[i] || '';
+
+        const numA = parseInt(partA, 10);
+        const numB = parseInt(partB, 10);
+
+        // Both are numbers - compare numerically
+        if (!isNaN(numA) && !isNaN(numB)) {
+            if (numA !== numB) {
+                return numA - numB;
+            }
+        } else {
+            // At least one is not a number - compare as strings
+            if (partA !== partB) {
+                return partA.localeCompare(partB);
+            }
+        }
+    }
+    return 0;
+}
+
 export function d3_scale_categorical(distinct_values: Array<any>): d3.ScalePoint<any> {
     const valuesSet = new Set();
     for (var idx = 0; idx < distinct_values.length; ++idx) {
         valuesSet.add(convert_to_categorical_input(distinct_values[idx]));
     }
     distinct_values = Array.from(valuesSet);
-    distinct_values.sort();
+    distinct_values.sort(naturalSortComparator);
     const scale = d3.scalePoint().domain(distinct_values);
 
     function scale_fn(x: any): number {

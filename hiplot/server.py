@@ -18,8 +18,14 @@ def run_server(fetchers: List[exp.ExperimentFetcher], host: str = '127.0.0.1', p
     """
     Runs the HiPlot server, given a list of ExperimentFetchers - functions that convert a URI into a :class:`hiplot.Experiment`
     """
-    from flask import Flask, render_template, jsonify, request
-    from flask_compress import Compress
+    try:
+        from flask import Flask, render_template, jsonify, request
+        from flask_compress import Compress
+    except ImportError as e:
+        raise ImportError(
+            "Flask is required to run the HiPlot server. "
+            "Install it with: pip install hiplot-mm[server]"
+        ) from e
 
     app = Flask(__name__)
 
@@ -45,7 +51,7 @@ def run_server(fetchers: List[exp.ExperimentFetcher], host: str = '127.0.0.1', p
 
 def run_server_main() -> int:
     parser = argparse.ArgumentParser(prog="HiPlot", description="Start HiPlot webserver")
-    parser.add_argument('--version', action='version', version=f'{pkginfo.package_name} {pkginfo.version}')
+    parser.add_argument('--version', action='version', version=f'{pkginfo.package_name} {pkginfo.__version__}')
     parser.add_argument("--host", type=str, default="127.0.0.1")
     parser.add_argument("--port", type=int, default=5005)
     parser.add_argument("--dev", action='store_true', help="Enable Flask Debug mode (watches for files modifications, etc..)")

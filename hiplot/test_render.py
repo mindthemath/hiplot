@@ -17,8 +17,8 @@ def test_demos_ipython() -> None:
         v().display()
 
 
-@unittest.mock.patch('streamlit._is_running_with_streamlit', new=True, create=True)
-def test_demos_streamlit() -> None:
+@unittest.mock.patch('streamlit.runtime.exists', return_value=True)
+def test_demos_streamlit(_mock: unittest.mock.MagicMock) -> None:
     for k, v in README_DEMOS.items():
         print(k)
         v().display_st(key=f'hiplot{k}a')

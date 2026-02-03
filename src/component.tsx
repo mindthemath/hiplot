@@ -115,6 +115,9 @@ interface HiPlotState extends IDatasets {
     persistentState: PersistentState;
     dark: boolean;
     dataProvider: DataProviderClass;
+
+    // Track hidden columns count for header button
+    restorableColumnsCount: number;
 }
 
 function detectIsDarkTheme(): boolean {
@@ -178,7 +181,8 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
             colorby: null,
             dark: this.props.dark === null ? detectIsDarkTheme() : this.props.dark,
             persistentState: props.persistentState !== undefined && props.persistentState !== null ? props.persistentState : new PersistentStateInMemory("", {}),
-            dataProvider: this.props.dataProvider ? this.props.dataProvider : StaticDataProvider
+            dataProvider: this.props.dataProvider ? this.props.dataProvider : StaticDataProvider,
+            restorableColumnsCount: 0
         };
         Object.keys(props.plugins).forEach((name, index) => {
             this.plugins_window_state[name] = {};
@@ -327,6 +331,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
 
         // Setup contextmenu when we right-click a parameter
         this.contextMenuRef.current.addCallback(this.columnContextMenu.bind(this), this);
+        this.contextMenuRef.current.addCallback(this.columnContextMenuFooter.bind(this), this, "last");
 
         // Load experiment provided in constructor if any
         if (this.props.experiment) {
@@ -422,6 +427,20 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
         }.bind(this));
         contextmenu.append($('<div class="dropdown-divider"></div>'));
 
+        const ppRef = this.plugins_ref[DefaultPlugins.PARALLEL_PLOT];
+        const pp = ppRef && ppRef.current ? ppRef.current as unknown as ParallelPlot : null;
+        if (pp && pp.toggleInvertAxis) {
+            var invert_axis = $('<a class="dropdown-item" href="#">Invert axis</a>');
+            invert_axis.click(function(this: HiPlot, event) {
+                const extent = pp.toggleInvertAxis(column);
+                if (pp.update_ticks) {
+                    pp.update_ticks(column, extent);
+                }
+                event.preventDefault();
+            }.bind(this));
+            contextmenu.append(invert_axis);
+        }
+
         // Color by
         var link_colorize = $('<a class="dropdown-item" href="#">Use for coloring</a>');
         link_colorize.click(function(this: HiPlot, event) {
@@ -434,6 +453,31 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
             link_colorize.addClass('disabled').css('pointer-events', 'none');
         }
         contextmenu.append(link_colorize);
+
+    }
+    columnContextMenuFooter(column: string, cm: HTMLDivElement) {
+        var contextmenu = $(cm);
+        const ppRef = this.plugins_ref[DefaultPlugins.PARALLEL_PLOT];
+        const pp = ppRef && ppRef.current ? ppRef.current as unknown as ParallelPlot : null;
+        contextmenu.append($('<div class="dropdown-divider"></div>'));
+
+        if (pp && pp.can_hide_axis && pp.can_hide_axis(column)) {
+            var hide_axis = $('<a class="dropdown-item" href="#">Hide axis</a>');
+            hide_axis.click(function(this: HiPlot, event) {
+                if (pp.remove_axis) {
+                    pp.remove_axis(column);
+                }
+                event.preventDefault();
+            }.bind(this));
+            contextmenu.append(hide_axis);
+        }
+
+        var close_menu = $('<a class="dropdown-item" href="#">Close menu</a>');
+        close_menu.click(function(this: HiPlot, event) {
+            this.contextMenuRef.current.hide();
+            event.preventDefault();
+        }.bind(this));
+        contextmenu.append(close_menu);
     }
     createNewParamsDef(rows_filtered: Array<Datapoint>): ParamDefMap {
         var new_pd = Object.assign({}, this.state.params_def);
@@ -512,7 +556,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
             ...datasets
         };
         const createPluginProps = function(this: HiPlot, name: string): React.ClassAttributes<React.ComponentClass<HiPlotPluginData>> & HiPlotPluginData {
-            return {
+            const baseProps = {
                 ref: this.plugins_ref[name],
                 ...(this.state.experiment.display_data && this.state.experiment.display_data[name] ? this.state.experiment.display_data[name] : {}),
                 ...datasets,
@@ -533,6 +577,11 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
                 setHighlighted: this.setHighlighted.bind(this),
                 asserts: this.props.asserts,
             };
+            // Add callback for ParallelPlot to notify when hidden columns change
+            if (name === DefaultPlugins.PARALLEL_PLOT) {
+                (baseProps as any).onHiddenColumnsChange = this.onHiddenColumnsChange.bind(this);
+            }
+            return baseProps;
         }.bind(this);
         return (
         <div ref={this.rootRef} className={`hip_thm--${this.state.dark ? "dark" : "light"}`}>
@@ -545,6 +594,8 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
                 dataProvider={this.state.dataProvider}
                 loadStatus={this.state.loadStatus}
                 dark={this.state.dark}
+                restorableColumnsCount={this.state.restorableColumnsCount}
+                onRestoreColumns={this.restoreAllColumns.bind(this)}
                 {...controlProps}
             />
             {this.state.loadStatus == HiPlotLoadStatus.Error &&
@@ -575,6 +626,30 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
         }
        throw new Error("Can not find plugin" + cls);
     }
+    onHiddenColumnsChange(count: number): void {
+        if (count !== this.state.restorableColumnsCount) {
+            this.setState({ restorableColumnsCount: count });
+        }
+    }
+    getRestorableColumnsCount(): number {
+        const ppRef = this.plugins_ref[DefaultPlugins.PARALLEL_PLOT];
+        if (ppRef && ppRef.current) {
+            const pp = ppRef.current as unknown as ParallelPlot;
+            if (pp.getRestorableColumnsCount) {
+                return pp.getRestorableColumnsCount();
+            }
+        }
+        return 0;
+    }
+    restoreAllColumns(): void {
+        const ppRef = this.plugins_ref[DefaultPlugins.PARALLEL_PLOT];
+        if (ppRef && ppRef.current) {
+            const pp = ppRef.current as unknown as ParallelPlot;
+            if (pp.restore_all_columns) {
+                pp.restore_all_columns();
+            }
+        }
+    }
 }
 
 interface DocsCreditsProps {
@@ -597,7 +672,7 @@ class DocAndCredits extends React.Component<DocsCreditsProps> {
                       <strong>Brush</strong>: Drag vertically along an axis.<br/>
                       <strong>Remove Brush</strong>: Tap the axis background.<br/>
                       <strong>Reorder Axes</strong>: Drag a label horizontally.<br/>
-                      <strong>Invert Axis</strong>: Tap an axis label.<br/>
+                      <strong>Invert Axis</strong>: Click an axis label (desktop) or use the label menu (mobile).<br/>
                       <strong>Remove Axis</strong>: Drag axis label to the left edge.<br/>
                     </p>
                   </div>

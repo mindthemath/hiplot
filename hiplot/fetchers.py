@@ -306,7 +306,7 @@ def get_fetcher(fetcher_spec: str) -> hip.ExperimentFetcher:
     if module is None:
         raise RuntimeError(f"Unable to create fetcher '{fetcher_spec}'")
 
-    return getattr(module, parts[-1])  # type: ignore
+    return getattr(module, parts[-1])
 
 
 def get_fetchers(add_fetchers: tp.List[str]) -> tp.List[hip.ExperimentFetcher]:

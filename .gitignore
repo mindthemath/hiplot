@@ -17,6 +17,7 @@ env/
 build/
 develop-eggs/
 dist/
+npm-dist/
 downloads/
 eggs/
 .eggs/
@@ -116,3 +117,10 @@ docs/build
 hiplot/static/built
 src/**/*css.d.ts
 *.code-workspace
+
+
+npm-build
+npm-package
+.playwright-mcp
+test_data/
+test-results

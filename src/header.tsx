@@ -29,6 +29,10 @@ interface HeaderBarProps extends IDatasets, HiPlotDataControlProps {
 
     dark: boolean;
     dataProvider: DataProviderClass;
+
+    // Optional: restore hidden columns in parallel plot
+    restorableColumnsCount?: number;
+    onRestoreColumns?: () => void;
 };
 
 interface HeaderBarState {
@@ -130,6 +134,11 @@ export class HeaderBar extends React.Component<HeaderBarProps, HeaderBarState> {
                         }
                         <ExportDataCSVBtn {...this.props} />
                         <button title="Start HiPlot tutorial" className="btn btn-sm btn-light" onClick={this.onToggleTutorial.bind(this)}>Help</button>
+                        {this.props.restorableColumnsCount > 0 && this.props.onRestoreColumns &&
+                            <button title="Restore hidden columns in parallel plot" className="btn btn-sm btn-light" onClick={this.props.onRestoreColumns}>
+                                Restore {this.props.restorableColumnsCount} column{this.props.restorableColumnsCount > 1 ? 's' : ''}
+                            </button>
+                        }
 
                         <div style={{clear:'both'}}></div>
                     </div>

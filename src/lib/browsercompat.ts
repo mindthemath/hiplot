@@ -1,29 +1,21 @@
 
 export const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+export const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+export const IS_MOBILE_SAFARI = IS_SAFARI && IS_IOS;
+export const IS_MOBILE = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints > 0 && /Mobi|Android/i.test(navigator.userAgent));
 
-export function redrawObject(fo: SVGForeignObjectElement) {
+/**
+ * Safari has a bug where foreignObjects don't visually update when their parent's
+ * transform changes. This function forces a redraw by removing and re-adding them.
+ * Works on mobile Safari but not reliably on desktop Safari.
+ */
+export function redrawForeignObject(fo: SVGForeignObjectElement) {
     const parent = fo.parentNode;
     parent.removeChild(fo);
     parent.appendChild(fo);
-
-}
-export function redrawAllForeignObjectsIfSafari() {
-    if (!IS_SAFARI) {
-        return;
-    }
-    const fo = document.getElementsByTagName("foreignObject");
-    Array.from(fo).forEach(redrawObject);
 }
 
-export function setupBrowserCompat(root: HTMLDivElement) {
-    /**
-     * Safari has a lot of trouble with foreignObjects inside canvas. Especially when we apply rotations, etc...
-     * As it considers the parent of the objects inside the FO to be the canvas origin, and not the FO.
-     * See https://stackoverflow.com/questions/51313873/svg-foreignobject-not-working-properly-on-safari
-     * Applying the fix in the link above fixes their position upon scroll - we don't want that, so we
-     * manually force-redraw them upon scroll.
-     */
-    if (IS_SAFARI) {
-        root.addEventListener("wheel", redrawAllForeignObjectsIfSafari);
-    }
+export function setupBrowserCompat(_root: HTMLDivElement) {
+    // No browser-specific setup needed currently
 }

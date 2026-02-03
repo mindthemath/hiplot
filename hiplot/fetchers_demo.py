@@ -50,8 +50,8 @@ def demo_line_xy() -> hip.Experiment:
         if i > 10:
             from_parent = random.choice(exp.datapoints[-10:])
             dp.from_uid = from_parent.uid  # <-- Connect the parent to the child
-            dp.values['loss'] += from_parent.values['loss']  # type: ignore
-            dp.values['param'] *= from_parent.values['param']  # type: ignore
+            dp.values['loss'] += from_parent.values['loss']
+            dp.values['param'] *= from_parent.values['param']
         exp.datapoints.append(dp)
     # DEMO_LINE_XY_END
     return exp

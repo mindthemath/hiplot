@@ -23,6 +23,7 @@ interface ContextMenuState {
 export class ContextMenu extends React.Component<ContextMenuProps, ContextMenuState> {
     context_menu_div: React.RefObject<HTMLDivElement> = React.createRef();
     trigger_callbacks: Array<{cb: (column: string, element: HTMLDivElement) => void, obj: any}> = [];
+    trigger_callbacks_last: Array<{cb: (column: string, element: HTMLDivElement) => void, obj: any}> = [];
     hide: any;
     constructor(props: ContextMenuProps) {
         super(props);
@@ -39,11 +40,16 @@ export class ContextMenu extends React.Component<ContextMenuProps, ContextMenuSt
         }.bind(this);
         $(window).on("click", this.hide);
     }
-    addCallback(fn: (column: string, element: HTMLDivElement) => void, obj: any) {
-        this.trigger_callbacks.push({cb: fn, obj: obj});
+    addCallback(fn: (column: string, element: HTMLDivElement) => void, obj: any, priority: "normal" | "last" = "normal") {
+        if (priority === "last") {
+            this.trigger_callbacks_last.push({cb: fn, obj: obj});
+        } else {
+            this.trigger_callbacks.push({cb: fn, obj: obj});
+        }
     }
     removeCallbacks(obj: any) {
         this.trigger_callbacks = this.trigger_callbacks.filter(trigger => trigger.obj != obj);
+        this.trigger_callbacks_last = this.trigger_callbacks_last.filter(trigger => trigger.obj != obj);
     }
     show(pageX: number, pageY: number, column: string) {
         // This assumes parent has `relative` positioning
@@ -76,6 +82,28 @@ export class ContextMenu extends React.Component<ContextMenuProps, ContextMenuSt
             var me = this;
             this.trigger_callbacks.forEach(function(trigger) {
                 trigger.cb(me.state.column, cm);
+            });
+            this.trigger_callbacks_last.forEach(function(trigger) {
+                trigger.cb(me.state.column, cm);
+            });
+            // After content is added, check if menu overflows viewport and reposition if needed
+            requestAnimationFrame(() => {
+                const rect = cm.getBoundingClientRect();
+                const parent = cm.parentElement.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+
+                // Check right edge overflow
+                if (rect.right > viewportWidth) {
+                    const newLeft = Math.max(0, this.state.left - (rect.right - viewportWidth) - 10);
+                    cm.style.left = `${newLeft}px`;
+                }
+
+                // Check bottom edge overflow
+                if (rect.bottom > viewportHeight) {
+                    const newTop = Math.max(0, this.state.top - (rect.bottom - viewportHeight) - 10);
+                    cm.style.top = `${newTop}px`;
+                }
             });
         }
     }

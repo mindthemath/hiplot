@@ -5,7 +5,7 @@
 from .experiment import (Experiment, ExperimentFetcherDoesntApply, ExperimentValidationError, ExperimentValidationCircularRef,
                          ExperimentValidationMissingParent, Datapoint, ExperimentDisplayed, ValueDef, ValueType, Displays)
 from .server import run_server, run_server_main
-from .pkginfo import version as __version__, package_name
+from .pkginfo import __version__, package_name
 
 from . import fetchers
 

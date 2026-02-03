@@ -19,8 +19,7 @@ import style from "../hiplot.scss";
 import { HiPlotPluginData } from "../plugin";
 import { ResizableH } from "../lib/resizable";
 import { Filter, FilterType, apply_filters } from "../filters";
-import { foDynamicSizeFitContent, foCreateAxisLabel } from "../lib/svghelpers";
-import { IS_SAFARI, redrawAllForeignObjectsIfSafari } from "../lib/browsercompat";
+import { IS_MOBILE } from "../lib/browsercompat";
 
 interface StringMapping<V> { [key: string]: V; };
 
@@ -63,16 +62,18 @@ export interface ParallelPlotDisplayData {
 // DISPLAYS_DATA_DOC_END
 
 export interface ParallelPlotData extends HiPlotPluginData, ParallelPlotDisplayData {
+  // Callback to notify parent when hidden columns change
+  onHiddenColumnsChange?: (count: number) => void;
 };
 
-const TOP_MARGIN_PIXELS = 80;
+const TOP_MARGIN_PIXELS = 120;
 export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlotState> {
   on_resize: () => void = null;
   m = [
     TOP_MARGIN_PIXELS, // top
-    TOP_MARGIN_PIXELS * 0.5, // right
-    10, // bottom
-    10 // left
+    TOP_MARGIN_PIXELS * 0.125, // right
+    TOP_MARGIN_PIXELS * 0.125, // bottom
+    TOP_MARGIN_PIXELS * 0.25, // left
   ]; // Margins
   // Available space minus margins
   w: number;
@@ -104,6 +105,71 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
   yscale: StringMapping<any> = {}; // d3.scale
   axis: d3.Axis<number>;
   d3brush = d3.brushY();
+
+  private labelTextFromHtml(html: string, fallback: string): string {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html || "";
+    const text = (tmp.textContent || tmp.innerText || "").trim();
+    return text.length ? text : fallback;
+  }
+
+  private normalizeBrushSelection(sel: d3.BrushSelection): [number, number] | null {
+    if (!sel) {
+      return null;
+    }
+    if (Array.isArray(sel[0])) {
+      const box = sel as [[number, number], [number, number]];
+      return [box[0][1], box[1][1]];
+    }
+    return sel as [number, number];
+  }
+
+  private getBrushExtents() {
+    const extents: {[key: string]: [number, number] | null} = {};
+    if (!this.dimensions_dom) {
+      return extents;
+    }
+    const self = this;
+    this.dimensions_dom.selectAll("." + style.brush).each(function(this: SVGGElement, dim: string) {
+      extents[dim] = self.normalizeBrushSelection(d3.brushSelection(this));
+    });
+    return extents;
+  }
+
+  toggleInvertAxis(d: string) {
+    // save extent before inverting
+    const extents = this.getBrushExtents();
+    const currentExtent = extents[d];
+    const extent = currentExtent ? [this.h - currentExtent[1], this.h - currentExtent[0]] : null;
+    const div = d3.select(this.root_ref.current);
+
+    if (this.state.invert.has(d)) {
+      this.setState(function(prevState) {
+        var newInvert = new Set(prevState.invert);
+        newInvert.delete(d);
+        return {
+          invert: newInvert
+        };
+      });
+      this.setScaleRange(d);
+      div.selectAll("." + style.label)
+        .filter(function(p) { return p == d; })
+        .style("text-decoration", null);
+    } else {
+      this.setState(function(prevState) {
+        var newInvert = new Set(prevState.invert);
+        newInvert.add(d);
+        return {
+          invert: newInvert
+        };
+      });
+      this.setScaleRange(d);
+      div.selectAll("." + style.label)
+        .filter(function(p) { return p == d; })
+        .style("text-decoration", "underline");
+    }
+    return extent;
+  }
 
   constructor(props: ParallelPlotData) {
     super(props);
@@ -144,6 +210,10 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
     }
     if (prevState.hide != this.state.hide) {
       this.props.persistentState.set('hide', Array.from(this.state.hide));
+      // Notify parent of hidden columns count change
+      if (this.props.onHiddenColumnsChange) {
+        this.props.onHiddenColumnsChange(this.getRestorableColumnsCount());
+      }
     }
     if (prevState.order != this.state.order) {
       this.props.persistentState.set('order', this.state.order);
@@ -153,13 +223,17 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       this.xscale.domain(this.state.dimensions);
       this.dimensions_dom.filter(function(this: ParallelPlot, p) { return this.state.dimensions.indexOf(p) == -1; }.bind(this)).remove();
       this.dimensions_dom = this.dimensions_dom.filter(function(this: ParallelPlot, p) { return this.state.dimensions.indexOf(p) !== -1; }.bind(this));
-      if (!this.state.dragging && !IS_SAFARI) {
+      if (!this.state.dragging) {
         g = g.transition();
       }
       g.attr("transform", function(this: ParallelPlot, p) { return "translate(" + this.position(p) + ")"; }.bind(this));
-      redrawAllForeignObjectsIfSafari();
+
       this.update_ticks();
       this.updateAxisTitlesAnglesAndFontSize();
+      // Notify parent of hidden columns count change (dimensions affects can_restore_axis)
+      if (this.props.onHiddenColumnsChange) {
+        this.props.onHiddenColumnsChange(this.getRestorableColumnsCount());
+      }
     }
     // Highlight polylines
     if (prevProps.rows_highlighted != this.props.rows_highlighted) {
@@ -267,8 +341,8 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       this.yscale[k] = this.createScale(k);
       return true;
     }.bind(this)).reverse().sort(function(this: ParallelPlot, a: string, b: string) {
-      const pda = this.state.order.findIndex((e) => e == a);
-      const pdb = this.state.order.findIndex((e) => e == b);
+      const pda = this.state.order.findIndex((e) => e == b);
+      const pdb = this.state.order.findIndex((e) => e == a);
       return (pdb == -1 ? this.state.order.length : pdb) - (pda == -1 ? this.state.order.length : pda);
     }.bind(this));
     this.setState({
@@ -279,6 +353,13 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
 
     if (this.props.context_menu_ref && this.props.context_menu_ref.current) {
         this.props.context_menu_ref.current.addCallback(this.columnContextMenu.bind(this), this);
+    }
+    // Notify parent of initial hidden columns count
+    if (this.props.onHiddenColumnsChange) {
+        const count = this.getRestorableColumnsCount();
+        if (count > 0) {
+            this.props.onHiddenColumnsChange(count);
+        }
     }
   }
   columnContextMenu(column: string, cm: HTMLDivElement) {
@@ -361,13 +442,15 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             me.setState({dimensions: new_dimensions});
           }
           me.dimensions_dom.attr("transform", function(d) { return "translate(" + me.position(d) + ")"; });
-          redrawAllForeignObjectsIfSafari();
+
         })
         .on("end", function(event, d: string) {
           if (!me.state.dragging.dragging) {
             // no movement, invert axis
-            var extent = invert_axis(d);
-            me.update_ticks(d, extent);
+            if (!IS_MOBILE) {
+              var extent = me.toggleInvertAxis(d);
+              me.update_ticks(d, extent);
+            }
           } else {
             // remove axis if dragged all the way left
             if (me.state.dragging.pos < 12 || me.state.dragging.pos > me.w-12) {
@@ -376,11 +459,8 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
               const element = this;
               me.setState({order: Array.from(me.state.dimensions), dragging: null}, function() {
                 // reorder axes
-                var drag: any = d3.select(this);
-                if (!IS_SAFARI) {
-                  drag = drag.transition();
-                }
-                d3.select(element.parentElement.parentElement).attr("transform", "translate(" + me.xscale(d) + ")");
+                const parentG = d3.select(element.parentElement.parentElement);
+                parentG.transition().attr("transform", "translate(" + me.xscale(d) + ")");
                 var extents = brush_extends();
                 extent = extents[d];
                 me.update_ticks(d, extent);
@@ -412,17 +492,72 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             // @ts-ignore
             d3.select(this).call(me.get_axis(d));
         })
-        .append(function(dim) { return foCreateAxisLabel(me.props.params_def[dim], me.props.context_menu_ref, "Drag to move, right click for options"); })
-          .attr("y", -20)
+        .append("text")
+          .text(function(dim) {
+            const pd = me.props.params_def[dim];
+            return me.labelTextFromHtml(pd.label_html, pd.name);
+          })
           .attr("text-anchor", "left")
           .classed("pplot-label", true)
-          .classed(style.pplotLabel, true);
-      me.dimensions_dom.selectAll(".label-name").style("font-size", "20px");
-      me.dimensions_dom.selectAll(".pplot-label").each(function(this: SVGForeignObjectElement, d: string) {
-        foDynamicSizeFitContent(this, [-me.xscale(d) + 5, -me.xscale(d) + me.state.width - 5]);
-      }).attr("x", 0).style("width", "1px");
+          .classed("label-name", true)
+          .classed(style.label, true)
+          .classed(style.axisLabelText, true)
+          .classed(style.pplotLabel, true)
+          .each(function(dim) {
+            d3.select(this).append("title")
+              .text(IS_MOBILE ? "Long-press for options" : "Right click for options");
+          })
+          .on("contextmenu", function(event, dim: string) {
+            if (me.props.context_menu_ref && me.props.context_menu_ref.current) {
+              me.props.context_menu_ref.current.show(event.pageX, event.pageY, dim);
+              event.preventDefault();
+              event.stopPropagation();
+            }
+          })
+          .on("touchstart", function(event, dim: string) {
+            const target = this as SVGTextElement;
+            if (!me.props.context_menu_ref || !me.props.context_menu_ref.current) {
+              return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            (target as any).__longPressFired = false;
+            const touch = (event as TouchEvent).touches[0];
+            const timer = window.setTimeout(() => {
+              me.props.context_menu_ref.current.show(touch.pageX, touch.pageY, dim);
+              (target as any).__longPressFired = true;
+              (target as any).__longPressTimer = null;
+            }, 500);
+            (target as any).__longPressTimer = timer;
+          })
+          .on("touchend touchcancel touchmove", function(event, dim: string) {
+            const target = this as SVGTextElement;
+            const timer = (target as any).__longPressTimer;
+            if (timer) {
+              window.clearTimeout(timer);
+              (target as any).__longPressTimer = null;
+            }
+            if ((target as any).__longPressFired) {
+              event.preventDefault();
+              event.stopPropagation();
+              return;
+            }
+            if (event.type !== "touchend") {
+              return;
+            }
+            const isDragging = me.state.dragging && me.state.dragging.dragging;
+            if (isDragging) {
+              return;
+            }
+            if (me.props.context_menu_ref && me.props.context_menu_ref.current) {
+              const touch = (event as TouchEvent).changedTouches[0];
+              me.props.context_menu_ref.current.show(touch.pageX, touch.pageY, dim);
+              event.preventDefault();
+              event.stopPropagation();
+            }
+          });
       me.updateAxisTitlesAnglesAndFontSize();
-      me.dimensions_dom.selectAll("foreignObject").call(create_drag_beh());
+      me.dimensions_dom.selectAll(".pplot-label").call(create_drag_beh());
 
       // Add and store a brush for each axis.
       me.dimensions_dom.append("svg:g")
@@ -439,45 +574,8 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             .text("Drag or resize this filter");
     };
 
-    function invert_axis(d: string) {
-      // save extent before inverting
-      var extents = brush_extends();
-      var extent = extents[d] !== null ? [me.h - extents[d][1], me.h - extents[d][0]] : null;
-
-      if (me.state.invert.has(d)) {
-        me.setState(function(prevState, props) {
-          var newInvert = new Set(prevState.invert);
-          newInvert.delete(d);
-          return {
-            invert: newInvert
-          };
-        });
-        me.setScaleRange(d);
-        div.selectAll("." + style.label)
-          .filter(function(p) { return p == d; })
-          .style("text-decoration", null);
-      } else {
-        me.setState(function(prevState, props) {
-          var newInvert = new Set(prevState.invert);
-          newInvert.add(d);
-          return {
-            invert: newInvert
-          };
-        });
-        me.setScaleRange(d);
-        div.selectAll("." + style.label)
-          .filter(function(p) { return p == d; })
-          .style("text-decoration", "underline");
-      }
-      return extent;
-    }
-
     function brush_extends() {
-      var extents = {};
-      me.dimensions_dom.selectAll("." + style.brush).each(function(this: SVGGElement, dim: string) {
-        extents[dim] = d3.brushSelection(this);
-      });
-      return extents;
+      return me.getBrushExtents();
     }
 
     function brush() {
@@ -487,7 +585,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       if (me.props.context_menu_ref !== undefined) {
         me.props.context_menu_ref.current.hide();
       }
-      var extents = brush_extends();
+      const extents: {[key: string]: [number, number] | null} = brush_extends();
       var actives = me.state.dimensions.filter(function(p) { return extents[p] !== null && extents[p] !== undefined; });
 
       // hack to hide ticks beyond extent
@@ -528,7 +626,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       // Get lines within extents
       var filters: Array<Filter> = actives.map(function(dimension) {
         const scale = me.yscale[dimension];
-        var extent = extents[dimension];
+        const extent = extents[dimension] as [number, number];
         const range = scale_pixels_range(scale, extent);
         if (range.type == ParamType.CATEGORICAL && !range.values) {
           // Select nothing
@@ -580,7 +678,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             .forEach(function(d) {
               if (actives.every(function(dimension) {
                 var scale = me.yscale[dimension];
-                var extent = extents[dimension];
+                var extent = extents[dimension] as [number, number];
                 var value = d[dimension];
                 return extent[0] + 1 <= scale(value) && scale(value) <= extent[1] - 1;
               })) {
@@ -588,7 +686,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
               }
               if (actives.every(function(dimension) {
                 var scale = me.yscale[dimension];
-                var extent = extents[dimension];
+                var extent = extents[dimension] as [number, number];
                 var value = d[dimension];
                 return extent[0] - 1 <= scale(value) && scale(value) <= extent[1] + 1;
               })) {
@@ -682,35 +780,15 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
 
 
   updateAxisTitlesAnglesAndFontSize() {
-    // Set optimal rotation angle and scale fonts so that everything fits on screen
-    const MIN_ROTATION_ANGLE = 20;
-    const MAX_ROTATION_ANGLE = 70;
-    const MAX_FONT_SIZE = 16;
-    const MIN_FONT_SIZE = 6;
-    const MAX_X = this.dimensions_dom.node().parentElement.parentElement.getBoundingClientRect().right;
-    const ROTATION_ANGLE_RADS = Math.max(MIN_ROTATION_ANGLE * Math.PI / 180, Math.min(MAX_ROTATION_ANGLE * Math.PI / 180,
-      Math.atan(24 * this.state.dimensions.length / this.state.width)
-    ));
-    const maxWidthForTop = TOP_MARGIN_PIXELS / Math.sin(ROTATION_ANGLE_RADS) - MAX_FONT_SIZE;
-    this.dimensions_dom.selectAll(".label-name").each(function(this: HTMLSpanElement) {
-      // Scale the font-size up or down depending on the text-length
-      const beginX = this.getBoundingClientRect().left;
-      const maxWidth = Math.min(
-        // Should not go outside of the svg (top)
-        maxWidthForTop,
-        // Should not go outside of the svg (right)
-        (MAX_X - beginX) / Math.cos(ROTATION_ANGLE_RADS)
-      );
-      const newFontSize = Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE,
-        maxWidth / this.clientWidth * parseFloat(this.style.fontSize)
-      ));
-      this.style.fontSize = newFontSize + "px";
-      this.style.transform = "rotate(" + (360 - ROTATION_ANGLE_RADS * 180 / Math.PI) + "deg)";
-      if (IS_SAFARI) {
-        this.parentElement.style.position = "fixed";
-      }
-      const fo = this.parentElement.parentElement as any as SVGForeignObjectElement;
-      fo.setAttribute("y", -newFontSize + "");
+    const FONT_SIZE = 12;
+    this.dimensions_dom.selectAll(".pplot-label").each(function(this: SVGTextElement) {
+      this.style.fontSize = FONT_SIZE + "px";
+      this.style.writingMode = "";
+      this.style.textOrientation = "";
+      this.setAttribute("x", "10");
+      this.setAttribute("y", "0");
+      this.setAttribute("text-anchor", "start");
+      this.setAttribute("transform", "rotate(-90)");
     });
   }
 
@@ -864,6 +942,33 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
         dimensions: prevState.dimensions.concat([d])
       };
     });
+  }
+  restore_all_columns(): void {
+    const toRestore = Array.from(this.state.hide).filter(d => this.can_restore_axis(d));
+    if (toRestore.length === 0) {
+      return;
+    }
+    this.setState(function(prevState) {
+      var newHide = new Set(prevState.hide);
+      var newDimensions = prevState.dimensions.slice();
+      toRestore.forEach(d => {
+        newHide.delete(d);
+        if (newDimensions.indexOf(d) === -1) {
+          newDimensions.push(d);
+        }
+      });
+      return {
+        hide: newHide,
+        dimensions: newDimensions
+      };
+    });
+  }
+  getRestorableColumnsCount(): number {
+    return Array.from(this.state.hide).filter(d => this.can_restore_axis(d)).length;
+  }
+
+  can_hide_axis(d: string): boolean {
+    return this.state.dimensions.indexOf(d) !== -1;
   }
   path = function(this: ParallelPlot, d: Datapoint, ctx: CanvasRenderingContext2D, color?: string) {
     if (color) ctx.strokeStyle = color;

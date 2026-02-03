@@ -1,17 +1,18 @@
 {
   "name": "hiplot",
-  "version": "0.0.0",
+  "version": "0.0.3",
   "description": "HiPlot is a lightweight interactive visualization tool to help AI researchers discover correlations and patterns in high-dimensional data using parallel plots and other graphical ways to represent information.",
-  "main": "dist/hiplot.lib.js",
-  "types": "dist/hiplot.d.ts",
+  "main": "npm-dist/hiplot.lib.js",
+  "types": "npm-dist/hiplot.d.ts",
   "peerDependencies": {
     "react": ">=16"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.10",
-    "@babel/core": "^7.12.10",
+    "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.12.11",
     "@babel/preset-typescript": "^7.12.7",
+    "@playwright/test": "^1.58.1",
     "@types/bootstrap": "^4.6.0",
     "@types/d3": "^7.4.0",
     "@types/d3-array": "^3.0.3",
@@ -42,7 +43,7 @@
     "@types/underscore": "^1.10.24",
     "bootstrap": "^4.6.0",
     "color": "^4.0.0",
-    "css-loader": "^6.7.1",
+    "css-loader": "^6.11.0",
     "d3": "^7.6.1",
     "datatables.net-bs4": "^1.12.1",
     "datatables.net-buttons": "^1.7.1",
@@ -64,22 +65,23 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.2.4",
-    "sass": "^1.34.1",
+    "sass": "^1.97.3",
     "sass-loader": "^12.0.0",
     "seedrandom": "^3.0.5",
     "source-map-loader": "^0.2.4",
     "style-loader": "^2.0.0",
-    "ts-loader": "^9.4.1",
+    "ts-loader": "^9.5.4",
     "typed-scss-modules": "^1.4.0",
     "typescript": "^3.9.7",
     "underscore": "^1.12.0",
     "url-loader": "^3.0.0",
-    "webpack": "^5.74.0",
-    "webpack-bundle-analyzer": "^4.7.0",
+    "webpack": "^5.104.1",
+    "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^3.3.12",
     "worker-loader": "^2.0.0"
   },
   "scripts": {
+    "postinstall": "node -e \"require('fs').writeFileSync('node_modules/internmap/src/index.js', '// Hotfix: https://github.com/mbostock/internmap/issues/3\\nexport const InternMap = Map;\\nexport const InternSet = Set;\\n')\"",
     "build": "npm-run-all tsm webpack",
     "build-dev": "npm-run-all tsm webpack-dev",
     "build-dev-watch": "npm-run-all tsm webpack-dev-watch",
@@ -99,5 +101,22 @@
   "bugs": {
     "url": "https://github.com/facebookresearch/hiplot/issues"
   },
-  "homepage": "https://github.com/facebookresearch/hiplot#readme"
+  "homepage": "https://github.com/facebookresearch/hiplot#readme",
+  "dependencies": {
+    "@babel/helpers": "^7.28.6",
+    "@babel/runtime": "^7.28.6",
+    "@babel/traverse": "^7.29.0"
+  },
+  "overrides": {
+    "semver": "^7.5.4",
+    "braces": "^3.0.3",
+    "micromatch": "^4.0.8",
+    "ws": "^7.5.10",
+    "postcss": "^8.4.31",
+    "@babel/traverse": "^7.23.2",
+    "@babel/runtime": "^7.26.10",
+    "json5": "^2.2.3",
+    "cross-spawn": "^7.0.6",
+    "lodash": "^4.17.23"
+  }
 }
