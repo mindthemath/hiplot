@@ -163,23 +163,13 @@
   border-radius: 6px;
 }
 
-/* Show the tooltip text when you mouse over the tooltip container */
-.axisLabelText:hover + .tooltiptext {
-  visibility: visible;
-}
+/* Axis label text - no hover effects to avoid Safari foreignObject bugs */
 .axisLabelText {
   color: #5e5e5e;
-}
-.axisLabelText:hover {
-  color: black;
-  text-decoration: underline dotted;
 }
 
 :global(.hip_thm--dark) .axisLabelText {
   color: #b7b7b7;
-}
-:global(.hip_thm--dark) .axisLabelText:hover {
-  color: white;
 }
 
 /* Histogram */
