@@ -500,6 +500,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
           .attr("text-anchor", "left")
           .classed("pplot-label", true)
           .classed("label-name", true)
+          .classed(style.label, true)
           .classed(style.axisLabelText, true)
           .classed(style.pplotLabel, true)
           .each(function(dim) {
@@ -964,6 +965,10 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
   }
   getRestorableColumnsCount(): number {
     return Array.from(this.state.hide).filter(d => this.can_restore_axis(d)).length;
+  }
+
+  can_hide_axis(d: string): boolean {
+    return this.state.dimensions.indexOf(d) !== -1;
   }
   path = function(this: ParallelPlot, d: Datapoint, ctx: CanvasRenderingContext2D, color?: string) {
     if (color) ctx.strokeStyle = color;

@@ -331,6 +331,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
 
         // Setup contextmenu when we right-click a parameter
         this.contextMenuRef.current.addCallback(this.columnContextMenu.bind(this), this);
+        this.contextMenuRef.current.addCallback(this.columnContextMenuFooter.bind(this), this, "last");
 
         // Load experiment provided in constructor if any
         if (this.props.experiment) {
@@ -452,6 +453,31 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
             link_colorize.addClass('disabled').css('pointer-events', 'none');
         }
         contextmenu.append(link_colorize);
+
+    }
+    columnContextMenuFooter(column: string, cm: HTMLDivElement) {
+        var contextmenu = $(cm);
+        const ppRef = this.plugins_ref[DefaultPlugins.PARALLEL_PLOT];
+        const pp = ppRef && ppRef.current ? ppRef.current as unknown as ParallelPlot : null;
+        contextmenu.append($('<div class="dropdown-divider"></div>'));
+
+        if (pp && pp.can_hide_axis && pp.can_hide_axis(column)) {
+            var hide_axis = $('<a class="dropdown-item" href="#">Hide axis</a>');
+            hide_axis.click(function(this: HiPlot, event) {
+                if (pp.remove_axis) {
+                    pp.remove_axis(column);
+                }
+                event.preventDefault();
+            }.bind(this));
+            contextmenu.append(hide_axis);
+        }
+
+        var close_menu = $('<a class="dropdown-item" href="#">Close menu</a>');
+        close_menu.click(function(this: HiPlot, event) {
+            this.contextMenuRef.current.hide();
+            event.preventDefault();
+        }.bind(this));
+        contextmenu.append(close_menu);
     }
     createNewParamsDef(rows_filtered: Array<Datapoint>): ParamDefMap {
         var new_pd = Object.assign({}, this.state.params_def);
