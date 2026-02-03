@@ -7,9 +7,14 @@ clean:
 
 build:
 	bun run build
+
+pkg: build
 	uv build
 
 test:
+	bun run test:js
+
+pytest: build
 	uv run pytest hiplot --durations=10
 
 check:

@@ -92,6 +92,7 @@
     "vite:build:test": "HIPLOT_WEB_NAME=hiplot_test HIPLOT_WEB_ENTRY=./src/hiplot_test.tsx vite build -c vite.web.config.ts",
     "vite:build:streamlit": "HIPLOT_WEB_NAME=hiplot_streamlit HIPLOT_WEB_ENTRY=./src/hiplot_streamlit.tsx vite build -c vite.web.config.ts",
     "vite:build:lib": "vite build -c vite.lib.config.ts",
+    "test:js": "bunx playwright test",
     "vite:dev": "vite -c vite.web.config.ts",
     "webpack": "webpack --progress",
     "webpack-dev": "webpack --progress --mode development --env debug",

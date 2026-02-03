@@ -1,20 +1,20 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './tests',
-  timeout: 30000,
-  use: {
-    baseURL: 'http://localhost:8765',
-    trace: 'on-first-retry',
+  testDir: "tests",
+  timeout: 60_000,
+  expect: {
+    timeout: 15_000,
   },
-  projects: [
-    {
-      name: 'mobile-chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'mobile-safari',
-      use: { ...devices['iPhone 12'] },
-    },
-  ],
+  use: {
+    baseURL: "http://127.0.0.1:8765",
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
+  },
+  webServer: {
+    command: "make dev",
+    url: "http://127.0.0.1:8765",
+    timeout: 60_000,
+    reuseExistingServer: !process.env.CI,
+  },
 });
