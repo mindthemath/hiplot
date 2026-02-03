@@ -16,3 +16,5 @@ check:
 	# uv run mypy --strict --implicit-reexport hiplot
 	uv run ty check
 
+dev:
+	uv run hiplot --port 8765

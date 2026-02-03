@@ -19,8 +19,7 @@ import style from "../hiplot.scss";
 import { HiPlotPluginData } from "../plugin";
 import { ResizableH } from "../lib/resizable";
 import { Filter, FilterType, apply_filters } from "../filters";
-import { foDynamicSizeFitContent, foCreateAxisLabel } from "../lib/svghelpers";
-import { IS_SAFARI, redrawForeignObject } from "../lib/browsercompat";
+import { IS_MOBILE } from "../lib/browsercompat";
 
 interface StringMapping<V> { [key: string]: V; };
 
@@ -107,6 +106,13 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
   axis: d3.Axis<number>;
   d3brush = d3.brushY();
 
+  private labelTextFromHtml(html: string, fallback: string): string {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html || "";
+    const text = (tmp.textContent || tmp.innerText || "").trim();
+    return text.length ? text : fallback;
+  }
+
   constructor(props: ParallelPlotData) {
     super(props);
     this.state = {
@@ -159,27 +165,10 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       this.xscale.domain(this.state.dimensions);
       this.dimensions_dom.filter(function(this: ParallelPlot, p) { return this.state.dimensions.indexOf(p) == -1; }.bind(this)).remove();
       this.dimensions_dom = this.dimensions_dom.filter(function(this: ParallelPlot, p) { return this.state.dimensions.indexOf(p) !== -1; }.bind(this));
-      if (!this.state.dragging && !IS_SAFARI) {
+      if (!this.state.dragging) {
         g = g.transition();
       }
       g.attr("transform", function(this: ParallelPlot, p) { return "translate(" + this.position(p) + ")"; }.bind(this));
-
-      // Safari: apply CSS transforms to foreignObjects during drag, redraw after
-      if (IS_SAFARI) {
-        if (this.state.dragging) {
-          const me = this;
-          this.dimensions_dom.each(function(dim: string) {
-            const fo = d3.select(this).select("foreignObject");
-            const delta = me.position(dim) - me.xscale(dim);
-            fo.style("transform", delta !== 0 ? `translateX(${delta}px)` : null);
-          });
-        } else {
-          // Not dragging - force redraw all foreignObjects to ensure correct position
-          this.dimensions_dom.selectAll("foreignObject").each(function() {
-            redrawForeignObject(this as SVGForeignObjectElement);
-          });
-        }
-      }
 
       this.update_ticks();
       this.updateAxisTitlesAnglesAndFontSize();
@@ -396,22 +385,8 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
           }
           me.dimensions_dom.attr("transform", function(d) { return "translate(" + me.position(d) + ")"; });
 
-          // Safari doesn't update foreignObject positions when parent transforms change.
-          // Apply the position delta directly to each foreignObject as a CSS transform.
-          if (IS_SAFARI) {
-            me.dimensions_dom.each(function(dim: string) {
-              const fo = d3.select(this).select("foreignObject");
-              const delta = me.position(dim) - me.xscale(dim);
-              fo.style("transform", delta !== 0 ? `translateX(${delta}px)` : null);
-            });
-          }
         })
         .on("end", function(event, d: string) {
-          // Clear Safari CSS transforms from foreignObjects
-          if (IS_SAFARI) {
-            me.dimensions_dom.selectAll("foreignObject").style("transform", null);
-          }
-
           if (!me.state.dragging.dragging) {
             // no movement, invert axis
             var extent = invert_axis(d);
@@ -425,15 +400,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
               me.setState({order: Array.from(me.state.dimensions), dragging: null}, function() {
                 // reorder axes
                 const parentG = d3.select(element.parentElement.parentElement);
-                if (IS_SAFARI) {
-                  // Skip transition on Safari - it causes foreignObject positioning issues
-                  parentG.attr("transform", "translate(" + me.xscale(d) + ")");
-                  // Force redraw of the foreignObject to ensure correct position
-                  const fo = parentG.select("foreignObject").node() as SVGForeignObjectElement;
-                  if (fo) redrawForeignObject(fo);
-                } else {
-                  parentG.transition().attr("transform", "translate(" + me.xscale(d) + ")");
-                }
+                parentG.transition().attr("transform", "translate(" + me.xscale(d) + ")");
                 var extents = brush_extends();
                 extent = extents[d];
                 me.update_ticks(d, extent);
@@ -465,17 +432,49 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             // @ts-ignore
             d3.select(this).call(me.get_axis(d));
         })
-        .append(function(dim) { return foCreateAxisLabel(me.props.params_def[dim], me.props.context_menu_ref, null); })
-          .attr("y", -20)
+        .append("text")
+          .text(function(dim) {
+            const pd = me.props.params_def[dim];
+            return me.labelTextFromHtml(pd.label_html, pd.name);
+          })
           .attr("text-anchor", "left")
           .classed("pplot-label", true)
-          .classed(style.pplotLabel, true);
-      me.dimensions_dom.selectAll(".label-name").style("font-size", "12px");
-      me.dimensions_dom.selectAll(".pplot-label").each(function(this: SVGForeignObjectElement, d: string) {
-        foDynamicSizeFitContent(this, [-me.xscale(d) + 5, -me.xscale(d) + me.state.width - 5]);
-      }).attr("x", 0).style("width", "1px");
+          .classed("label-name", true)
+          .classed(style.axisLabelText, true)
+          .classed(style.pplotLabel, true)
+          .each(function(dim) {
+            d3.select(this).append("title")
+              .text(IS_MOBILE ? "Long-press for options" : "Right click for options");
+          })
+          .on("contextmenu", function(event, dim: string) {
+            if (me.props.context_menu_ref && me.props.context_menu_ref.current) {
+              me.props.context_menu_ref.current.show(event.pageX, event.pageY, dim);
+              event.preventDefault();
+              event.stopPropagation();
+            }
+          })
+          .on("touchstart", function(event, dim: string) {
+            const target = this as SVGTextElement;
+            if (!me.props.context_menu_ref || !me.props.context_menu_ref.current) {
+              return;
+            }
+            const touch = (event as TouchEvent).touches[0];
+            const timer = window.setTimeout(() => {
+              me.props.context_menu_ref.current.show(touch.pageX, touch.pageY, dim);
+              (target as any).__longPressTimer = null;
+            }, 500);
+            (target as any).__longPressTimer = timer;
+          })
+          .on("touchend touchcancel touchmove", function() {
+            const target = this as SVGTextElement;
+            const timer = (target as any).__longPressTimer;
+            if (timer) {
+              window.clearTimeout(timer);
+              (target as any).__longPressTimer = null;
+            }
+          });
       me.updateAxisTitlesAnglesAndFontSize();
-      me.dimensions_dom.selectAll("foreignObject").call(create_drag_beh());
+      me.dimensions_dom.selectAll(".pplot-label").call(create_drag_beh());
 
       // Add and store a brush for each axis.
       me.dimensions_dom.append("svg:g")
@@ -736,18 +735,14 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
 
   updateAxisTitlesAnglesAndFontSize() {
     const FONT_SIZE = 12;
-    this.dimensions_dom.selectAll(".label-name").each(function(this: HTMLSpanElement) {
+    this.dimensions_dom.selectAll(".pplot-label").each(function(this: SVGTextElement) {
       this.style.fontSize = FONT_SIZE + "px";
-
-      // Use writing-mode for vertical text on all browsers
-      // This provides a unified look and avoids Safari's foreignObject bugs
-      this.style.writingMode = "vertical-lr";
-      this.style.textOrientation = "mixed";
-      this.style.transform = "";
-
-      const fo = this.parentElement.parentElement as any as SVGForeignObjectElement;
-      // Position labels at the very top of the margin area
-      fo.setAttribute("y", (-TOP_MARGIN_PIXELS + 2) + "");
+      this.style.writingMode = "";
+      this.style.textOrientation = "";
+      this.setAttribute("x", "10");
+      this.setAttribute("y", "0");
+      this.setAttribute("text-anchor", "start");
+      this.setAttribute("transform", "rotate(-90)");
     });
   }
 
