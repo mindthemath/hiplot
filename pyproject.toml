@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hiplot-mm"
-version = "0.0.3rc4"
+version = "0.0.3rc5"
 description = "High dimensional Interactive Plotting tool"
 readme = "README.md"
 license = "MIT"

@@ -66,7 +66,7 @@ export interface ParallelPlotData extends HiPlotPluginData, ParallelPlotDisplayD
   onHiddenColumnsChange?: (count: number) => void;
 };
 
-const TOP_MARGIN_PIXELS = 100;
+const TOP_MARGIN_PIXELS = 120;
 export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlotState> {
   on_resize: () => void = null;
   m = [
