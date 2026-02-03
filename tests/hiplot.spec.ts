@@ -140,3 +140,40 @@ test("hide and restore axis via context menu", async ({ page }) => {
       .toBe(countBefore);
   }
 });
+
+test("distribution switches axes on menu selection", async ({ page }) => {
+  await loadDemo(page);
+  const labels = page.locator(".pplot-label");
+  await expect(labels.first()).toBeVisible();
+  const labelTexts = await labels.evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const textParts = Array.from(node.childNodes)
+        .filter((child) => child.nodeType === Node.TEXT_NODE)
+        .map((child) => (child.textContent || "").trim())
+        .filter((text) => text.length > 0);
+      return textParts.join(" ").trim();
+    }),
+  );
+  const uniqueLabels = Array.from(new Set(labelTexts.filter((text) => text.length > 0)));
+  expect(uniqueLabels.length).toBeGreaterThanOrEqual(2);
+  const axis1 = uniqueLabels[0];
+  const axis2 = uniqueLabels[1];
+  const axis1Index = labelTexts.findIndex((text) => text === axis1);
+  const axis2Index = labelTexts.findIndex((text) => text === axis2);
+  expect(axis1Index).toBeGreaterThanOrEqual(0);
+  expect(axis2Index).toBeGreaterThanOrEqual(0);
+
+  await labels.nth(axis1Index).click({ button: "right" });
+  await expect(page.locator(".context-menu.show")).toBeVisible();
+  await page.locator(".context-menu .dropdown-item", { hasText: "View distribution" }).click();
+  await expect(
+    page.locator(`[data-testid="distribution-plot"][data-axis="${axis1}"]`),
+  ).toBeVisible();
+
+  await labels.nth(axis2Index).click({ button: "right" });
+  await expect(page.locator(".context-menu.show")).toBeVisible();
+  await page.locator(".context-menu .dropdown-item", { hasText: "View distribution" }).click();
+  await expect(
+    page.locator(`[data-testid="distribution-plot"][data-axis="${axis2}"]`),
+  ).toBeVisible();
+});

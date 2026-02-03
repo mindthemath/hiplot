@@ -317,15 +317,15 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
 
     render() {
         const leftAxisLabel = this.isVertical() ? "Density" : this.props.axis;
-        return (<div>
+        return (<div data-testid="distribution-plot" data-axis={this.props.axis}>
             <svg width={this.props.width} height={this.props.height}>
                 <g transform={`translate(${margin.left}, 15)`} textAnchor="start" fontWeight="bold">
                     <text style={{stroke: "white", strokeWidth: "0.2em"}}>{leftAxisLabel}</text>
                     <text>{leftAxisLabel}</text>
                 </g>
                 <g ref={this.svgContainer} className={style['distr-graph-svg']} transform={`translate(${margin.left}, ${margin.top})`}>
-                    <g className={style.histAll} ref={this.histAll}></g>
-                    <g className={style.histSelected} ref={this.histSelected}></g>
+                    <g data-testid="distribution-hist-all" className={style.histAll} ref={this.histAll}></g>
+                    <g data-testid="distribution-hist-selected" className={style.histSelected} ref={this.histSelected}></g>
                     <g className="axisLeft" ref={this.axisLeft}></g>
                     <g className="axisRight" ref={this.axisRight} transform={`translate(${this.figureWidth()}, 0)`}></g>
                     <g className="axisBottom" ref={this.axisBottom} transform={`translate(0, ${this.figureHeight()})`}></g>
