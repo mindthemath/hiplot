@@ -68,13 +68,14 @@ export interface ParallelPlotData extends HiPlotPluginData, ParallelPlotDisplayD
 };
 
 const TOP_MARGIN_PIXELS = 120;
+const H_MARGIN_PIXELS = 20;
 export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlotState> {
   on_resize: () => void = null;
   m = [
     TOP_MARGIN_PIXELS, // top
-    TOP_MARGIN_PIXELS * 0.125, // right
+    H_MARGIN_PIXELS * 0.25, // right
     TOP_MARGIN_PIXELS * 0.125, // bottom
-    TOP_MARGIN_PIXELS * 0.25, // left
+    H_MARGIN_PIXELS * 1.75 , // left
   ]; // Margins
   // Available space minus margins
   w: number;
