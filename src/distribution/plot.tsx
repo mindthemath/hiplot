@@ -9,6 +9,7 @@ import React from "react";
 import * as d3 from "d3";
 import style from "../hiplot.module.css";
 import { create_d3_scale_without_outliers, ParamDef } from "../infertypes";
+import { convert_to_categorical_input } from "../lib/d3_scales";
 import { foCreateAxisLabel, foDynamicSizeFitContent } from "../lib/svghelpers";
 import { ParamType, Datapoint } from "../types";
 
@@ -112,18 +113,35 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
 
     createHistogram(): d3.HistogramGeneratorNumber<any, any> {
         const me = this;
-        const scaleCopy = this.dataScale.copy().range([0, 1]);
         var thresholds = [];
+        var valueFn: (d: any) => number;
         if (this.props.param_def.type == ParamType.CATEGORICAL) {
-            thresholds = this.props.param_def.distinct_values.map((v) => scaleCopy(v));
-            thresholds = thresholds.map((value, index) => index == 0 ? value : (value + thresholds[index - 1]) / 2);
+            const domain: string[] = this.dataScale.domain();
+            const domainCount = domain.length;
+            const indexByValue = new Map(domain.map((value, index) => [value, index]));
+            for (var i = 1; i < domainCount; ++i) {
+                thresholds.push(i / domainCount);
+            }
+            valueFn = function(d) {
+                if (!domainCount) {
+                    return NaN;
+                }
+                const key = convert_to_categorical_input(d[me.props.axis]);
+                const idx = indexByValue.get(key);
+                if (idx === undefined) {
+                    return NaN;
+                }
+                return (idx + 0.5) / domainCount;
+            };
         } else {
             for (var i = 1; i < this.props.nbins; ++i) {
                 thresholds.push(i / this.props.nbins);
             }
+            const scaleCopy = this.dataScale.copy().range([0, 1]);
+            valueFn = function(d) { return scaleCopy(d[me.props.axis]); };
         }
         var histogram = d3.histogram()
-            .value(function(d) { return scaleCopy(d[me.props.axis]); })
+            .value(valueFn)
             .domain([0, 1])
             .thresholds(thresholds);
         return histogram;
@@ -171,7 +189,17 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
                 .duration(animate ? this.props.animateMs : 0)
                 .call(d3.axisBottom(densityScale).ticks(1 + this.props.width/50));
             // Compute reordering of the bins - we want to display higher densities first.
-            var ordered1 = Array.from(binsOrdering).sort((a, b) => allHist.selected.bins[a].length - allHist.selected.bins[b].length);
+            var ordered1 = Array.from(binsOrdering)
+                .map(function(value, index) {
+                    return {index: value, count: allHist.selected.bins[value].length, original: index};
+                })
+                .sort(function(a, b) {
+                    if (a.count != b.count) {
+                        return a.count - b.count;
+                    }
+                    return a.original - b.original;
+                })
+                .map(function(entry) { return entry.index; });
             ordered1.forEach(function(value, idx) {
                 binsOrdering[value] = idx;
             });
