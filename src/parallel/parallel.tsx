@@ -113,6 +113,64 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
     return text.length ? text : fallback;
   }
 
+  private normalizeBrushSelection(sel: d3.BrushSelection): [number, number] | null {
+    if (!sel) {
+      return null;
+    }
+    if (Array.isArray(sel[0])) {
+      const box = sel as [[number, number], [number, number]];
+      return [box[0][1], box[1][1]];
+    }
+    return sel as [number, number];
+  }
+
+  private getBrushExtents() {
+    const extents: {[key: string]: [number, number] | null} = {};
+    if (!this.dimensions_dom) {
+      return extents;
+    }
+    const self = this;
+    this.dimensions_dom.selectAll("." + style.brush).each(function(this: SVGGElement, dim: string) {
+      extents[dim] = self.normalizeBrushSelection(d3.brushSelection(this));
+    });
+    return extents;
+  }
+
+  toggleInvertAxis(d: string) {
+    // save extent before inverting
+    const extents = this.getBrushExtents();
+    const currentExtent = extents[d];
+    const extent = currentExtent ? [this.h - currentExtent[1], this.h - currentExtent[0]] : null;
+    const div = d3.select(this.root_ref.current);
+
+    if (this.state.invert.has(d)) {
+      this.setState(function(prevState) {
+        var newInvert = new Set(prevState.invert);
+        newInvert.delete(d);
+        return {
+          invert: newInvert
+        };
+      });
+      this.setScaleRange(d);
+      div.selectAll("." + style.label)
+        .filter(function(p) { return p == d; })
+        .style("text-decoration", null);
+    } else {
+      this.setState(function(prevState) {
+        var newInvert = new Set(prevState.invert);
+        newInvert.add(d);
+        return {
+          invert: newInvert
+        };
+      });
+      this.setScaleRange(d);
+      div.selectAll("." + style.label)
+        .filter(function(p) { return p == d; })
+        .style("text-decoration", "underline");
+    }
+    return extent;
+  }
+
   constructor(props: ParallelPlotData) {
     super(props);
     this.state = {
@@ -389,8 +447,10 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
         .on("end", function(event, d: string) {
           if (!me.state.dragging.dragging) {
             // no movement, invert axis
-            var extent = invert_axis(d);
-            me.update_ticks(d, extent);
+            if (!IS_MOBILE) {
+              var extent = me.toggleInvertAxis(d);
+              me.update_ticks(d, extent);
+            }
           } else {
             // remove axis if dragged all the way left
             if (me.state.dragging.pos < 12 || me.state.dragging.pos > me.w-12) {
@@ -458,19 +518,41 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             if (!me.props.context_menu_ref || !me.props.context_menu_ref.current) {
               return;
             }
+            event.preventDefault();
+            event.stopPropagation();
+            (target as any).__longPressFired = false;
             const touch = (event as TouchEvent).touches[0];
             const timer = window.setTimeout(() => {
               me.props.context_menu_ref.current.show(touch.pageX, touch.pageY, dim);
+              (target as any).__longPressFired = true;
               (target as any).__longPressTimer = null;
             }, 500);
             (target as any).__longPressTimer = timer;
           })
-          .on("touchend touchcancel touchmove", function() {
+          .on("touchend touchcancel touchmove", function(event, dim: string) {
             const target = this as SVGTextElement;
             const timer = (target as any).__longPressTimer;
             if (timer) {
               window.clearTimeout(timer);
               (target as any).__longPressTimer = null;
+            }
+            if ((target as any).__longPressFired) {
+              event.preventDefault();
+              event.stopPropagation();
+              return;
+            }
+            if (event.type !== "touchend") {
+              return;
+            }
+            const isDragging = me.state.dragging && me.state.dragging.dragging;
+            if (isDragging) {
+              return;
+            }
+            if (me.props.context_menu_ref && me.props.context_menu_ref.current) {
+              const touch = (event as TouchEvent).changedTouches[0];
+              me.props.context_menu_ref.current.show(touch.pageX, touch.pageY, dim);
+              event.preventDefault();
+              event.stopPropagation();
             }
           });
       me.updateAxisTitlesAnglesAndFontSize();
@@ -491,45 +573,8 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             .text("Drag or resize this filter");
     };
 
-    function invert_axis(d: string) {
-      // save extent before inverting
-      var extents = brush_extends();
-      var extent = extents[d] !== null ? [me.h - extents[d][1], me.h - extents[d][0]] : null;
-
-      if (me.state.invert.has(d)) {
-        me.setState(function(prevState, props) {
-          var newInvert = new Set(prevState.invert);
-          newInvert.delete(d);
-          return {
-            invert: newInvert
-          };
-        });
-        me.setScaleRange(d);
-        div.selectAll("." + style.label)
-          .filter(function(p) { return p == d; })
-          .style("text-decoration", null);
-      } else {
-        me.setState(function(prevState, props) {
-          var newInvert = new Set(prevState.invert);
-          newInvert.add(d);
-          return {
-            invert: newInvert
-          };
-        });
-        me.setScaleRange(d);
-        div.selectAll("." + style.label)
-          .filter(function(p) { return p == d; })
-          .style("text-decoration", "underline");
-      }
-      return extent;
-    }
-
     function brush_extends() {
-      var extents = {};
-      me.dimensions_dom.selectAll("." + style.brush).each(function(this: SVGGElement, dim: string) {
-        extents[dim] = d3.brushSelection(this);
-      });
-      return extents;
+      return me.getBrushExtents();
     }
 
     function brush() {
@@ -539,7 +584,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       if (me.props.context_menu_ref !== undefined) {
         me.props.context_menu_ref.current.hide();
       }
-      var extents = brush_extends();
+      const extents: {[key: string]: [number, number] | null} = brush_extends();
       var actives = me.state.dimensions.filter(function(p) { return extents[p] !== null && extents[p] !== undefined; });
 
       // hack to hide ticks beyond extent
@@ -580,7 +625,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       // Get lines within extents
       var filters: Array<Filter> = actives.map(function(dimension) {
         const scale = me.yscale[dimension];
-        var extent = extents[dimension];
+        const extent = extents[dimension] as [number, number];
         const range = scale_pixels_range(scale, extent);
         if (range.type == ParamType.CATEGORICAL && !range.values) {
           // Select nothing
@@ -632,7 +677,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             .forEach(function(d) {
               if (actives.every(function(dimension) {
                 var scale = me.yscale[dimension];
-                var extent = extents[dimension];
+                var extent = extents[dimension] as [number, number];
                 var value = d[dimension];
                 return extent[0] + 1 <= scale(value) && scale(value) <= extent[1] - 1;
               })) {
@@ -640,7 +685,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
               }
               if (actives.every(function(dimension) {
                 var scale = me.yscale[dimension];
-                var extent = extents[dimension];
+                var extent = extents[dimension] as [number, number];
                 var value = d[dimension];
                 return extent[0] - 1 <= scale(value) && scale(value) <= extent[1] + 1;
               })) {

@@ -426,6 +426,20 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
         }.bind(this));
         contextmenu.append($('<div class="dropdown-divider"></div>'));
 
+        const ppRef = this.plugins_ref[DefaultPlugins.PARALLEL_PLOT];
+        const pp = ppRef && ppRef.current ? ppRef.current as unknown as ParallelPlot : null;
+        if (pp && pp.toggleInvertAxis) {
+            var invert_axis = $('<a class="dropdown-item" href="#">Invert axis</a>');
+            invert_axis.click(function(this: HiPlot, event) {
+                const extent = pp.toggleInvertAxis(column);
+                if (pp.update_ticks) {
+                    pp.update_ticks(column, extent);
+                }
+                event.preventDefault();
+            }.bind(this));
+            contextmenu.append(invert_axis);
+        }
+
         // Color by
         var link_colorize = $('<a class="dropdown-item" href="#">Use for coloring</a>');
         link_colorize.click(function(this: HiPlot, event) {
@@ -632,7 +646,7 @@ class DocAndCredits extends React.Component<DocsCreditsProps> {
                       <strong>Brush</strong>: Drag vertically along an axis.<br/>
                       <strong>Remove Brush</strong>: Tap the axis background.<br/>
                       <strong>Reorder Axes</strong>: Drag a label horizontally.<br/>
-                      <strong>Invert Axis</strong>: Tap an axis label.<br/>
+                      <strong>Invert Axis</strong>: Click an axis label (desktop) or use the label menu (mobile).<br/>
                       <strong>Remove Axis</strong>: Drag axis label to the left edge.<br/>
                     </p>
                   </div>

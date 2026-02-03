@@ -17,4 +17,4 @@ check:
 	uv run ty check
 
 dev:
-	uv run hiplot --port 8765
+	uv run hiplot --port 8765 --host 0.0.0.0
