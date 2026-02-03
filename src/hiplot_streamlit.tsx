@@ -12,6 +12,7 @@ import {
   Streamlit,
 } from "./streamlit"
 import { HiPlot } from "./hiplot";
+import JSON5 from "json5";
 
 import ReactDOM from "react-dom";
 import { ComponentProps } from "./streamlit/StreamlitReact";
@@ -32,7 +33,7 @@ class ReactTemplate extends StreamlitComponentBase<State> {
       selected_uids: null,
       filtered_uids: null,
       brush_extents: null,
-      experiment: eval('(' + props.args.experiment + ')'),
+      experiment: JSON5.parse(props.args.experiment),
       experimentJson: props.args.experiment,
     };
   }
@@ -75,7 +76,7 @@ class ReactTemplate extends StreamlitComponentBase<State> {
     const newExp = this.props.args['experiment'];
     if (newExp != this.state.experimentJson) {
       this.setState({
-        experiment: eval('(' + newExp + ')'),
+        experiment: JSON5.parse(newExp),
         experimentJson: newExp
       });
     }

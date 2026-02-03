@@ -3,7 +3,34 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import fs from "fs";
 import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
-import remToPx from "postcss-rem-to-pixel";
+
+type RemToPxOptions = {
+  propList: string[];
+  rootValue?: number;
+};
+
+function remToPxPlugin(options: RemToPxOptions) {
+  const rootValue = options.rootValue ?? 16;
+  const propList = options.propList;
+  const matchesProp = (prop: string) =>
+    propList.some((pattern) =>
+      pattern.endsWith("*") ? prop.startsWith(pattern.slice(0, -1)) : prop === pattern,
+    );
+  const remRegex = /(-?\d*\.?\d+)rem\b/g;
+  return {
+    postcssPlugin: "rem-to-px",
+    Declaration(decl: { prop: string; value: string }) {
+      if (!matchesProp(decl.prop) || !decl.value.includes("rem")) {
+        return;
+      }
+      decl.value = decl.value.replace(remRegex, (_match, num) => {
+        const px = parseFloat(num) * rootValue;
+        return `${Number.isNaN(px) ? num : px}px`;
+      });
+    },
+  };
+}
+remToPxPlugin.postcss = true;
 
 function packageNameFull(isDebug: boolean): string {
   const version = process.env.HIPLOT_VERSION ?? "0.0.0";
@@ -76,6 +103,7 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: false,
       sourcemap: true,
       target: "es2020",
+      chunkSizeWarningLimit: 2000,
       rollupOptions: {
         input: entryPath,
         output: {
@@ -93,7 +121,7 @@ export default defineConfig(({ mode }) => {
       postcss: {
         plugins: [
           // Keep rem-to-px conversion (previously applied to global CSS only).
-          remToPx({
+          remToPxPlugin({
             propList: ["font", "font-size", "line-height", "letter-spacing", "padding*", "border*"],
           }),
         ],

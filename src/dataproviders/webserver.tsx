@@ -11,6 +11,7 @@ import {DataProviderProps} from "../plugin";
 import {HiPlotLoadStatus} from "../types";
 import React from "react";
 import style from "../hiplot.module.css";
+import JSON5 from "json5";
 
 
 export const PSTATE_LOAD_URI = 'load_uri';
@@ -90,9 +91,8 @@ export function loadURIFromWebServer(uri: string): LoadURIPromise {
     return new Promise(function(resolve, reject) {
         $.get( "/data?uri=" + encodeURIComponent(uri), resolve, "json").fail(function(data) {
             if (data.readyState == 4 && data.status == 200) {
-                console.log('Unable to parse JSON with JS default decoder (Maybe it contains NaNs?). Using eval');
-                resolve(eval('(' + data.responseText + ')')); // Less secure, but so much faster...
-//                resolve(JSON5.parse(data.responseText));
+                console.log('Unable to parse JSON with JS default decoder (Maybe it contains NaNs?). Using JSON5.');
+                resolve(JSON5.parse(data.responseText));
             }
             else if (data.status == 0) {
                 resolve({
