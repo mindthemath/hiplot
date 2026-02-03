@@ -8,7 +8,7 @@
 import $ from "jquery";
 import * as _ from 'underscore';
 import React from "react";
-import './style/global';
+import './style/global.css';
 
 import { Datapoint, ParamType, HiPlotExperiment, HiPlotLoadStatus, PSTATE_COLOR_BY, PSTATE_PARAMS, DatapointLookup, IDatasets, PSTATE_FILTERS } from "./types";
 import { RowsDisplayTable } from "./rowsdisplaytable";
@@ -18,7 +18,7 @@ import { ParallelPlot } from "./parallel/parallel";
 import { PlotXY } from "./plotxy";
 import { SelectedCountProgressBar, HiPlotDataControlProps } from "./controls";
 import { ErrorDisplay, HeaderBar } from "./header";
-import { HiPlotPluginData, DataProviderClass } from "./plugin";
+import type { HiPlotPluginData, DataProviderClass } from "./plugin";
 import { StaticDataProvider } from "./dataproviders/static";
 import { uncompress } from "./lib/compress";
 import { setupBrowserCompat } from "./lib/browsercompat";
@@ -28,7 +28,7 @@ import LogoSVG from "../hiplot/static/logo.svg";
 //@ts-ignore
 import LogoSVGW from "../hiplot/static/logo-w.svg";
 //@ts-ignore
-import style from "./hiplot.css";
+import style from "./hiplot.module.css";
 import { ContextMenu } from "./contextmenu";
 import { HiPlotDistributionPlugin } from "./distribution/plugin";
 import { Filter, FilterType, apply_filters, apply_filter } from "./filters";
@@ -37,8 +37,9 @@ import { Filter, FilterType, apply_filters, apply_filter } from "./filters";
 export { PlotXY } from "./plotxy";
 export { ParallelPlot } from "./parallel/parallel";
 export { RowsDisplayTable } from "./rowsdisplaytable";
-export { HiPlotPluginData } from "./plugin";
-export { Datapoint, HiPlotExperiment, IDatasets, HiPlotLoadStatus } from "./types";
+export type { HiPlotPluginData } from "./plugin";
+export type { Datapoint, HiPlotExperiment, IDatasets } from "./types";
+export { HiPlotLoadStatus } from "./types";
 
 
 type PluginComponent<P> = React.Component<P, any>;

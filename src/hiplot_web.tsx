@@ -16,8 +16,10 @@ import { UploadDataProvider } from "./dataproviders/upload";
 
 export function build_props(extra?: any): HiPlotProps {
     const searchParams = new URLSearchParams(location.search);
-    const darkParam = searchParams.get("hiplot.dark") ?? searchParams.get("HIPLOT.dark");
-    const darkValue = darkParam === null ? null : JSON.parse(darkParam);
+    const darkParam = searchParams.get("hip.dark") ?? searchParams.get("hiplot.dark") ?? searchParams.get("HIPLOT.dark");
+    const darkValue = darkParam === null
+        ? false
+        : (darkParam === "auto" ? null : JSON.parse(darkParam));
     var props = {
         experiment: null,
         persistentState: new PersistentStateInURL("hip"),
@@ -46,4 +48,12 @@ export function build_props(extra?: any): HiPlotProps {
 
 export function render(element: HTMLElement, extra?: any) {
     return ReactDOM.render(<React.StrictMode><HiPlot {...build_props(extra)} /></React.StrictMode>, element);
+}
+
+// Expose global for non-module consumers (legacy HTML templates).
+if (typeof window !== "undefined") {
+    (window as any).hiplot = {
+        render,
+        build_props,
+    };
 }

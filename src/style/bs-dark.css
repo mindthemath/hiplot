@@ -65,9 +65,6 @@
   color-scheme: dark;
 }
 
-/* Web font */
-@import url("https://fonts.googleapis.com/css?family=Lato:400,700,400italic&display=swap");
-
 /* Component overrides for dark theme */
 .hip_thm--dark .table {
   --bs-table-color: var(--bs-body-color);

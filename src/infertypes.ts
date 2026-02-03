@@ -7,7 +7,7 @@
 import $ from "jquery";
 import * as d3 from "d3";
 
-import * as color from "color";
+import color from "color";
 
 import { PersistentState } from "./lib/savedstate";
 import { categoricalColorScheme } from "./lib/categoricalcolors";

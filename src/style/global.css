@@ -6,6 +6,7 @@
  */
 
 /* Import Bootstrap and theme files */
+@import url("https://fonts.googleapis.com/css?family=Lato:400,700,400italic&display=swap");
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 @import "./bs-dark.css";

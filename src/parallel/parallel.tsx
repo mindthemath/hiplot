@@ -15,8 +15,8 @@ import _ from 'underscore';
 
 import { Datapoint, ParamType } from "../types";
 import { create_d3_scale, scale_pixels_range, ParamDef } from "../infertypes";
-import style from "../hiplot.css";
-import pstyle from "./parallel.css";
+import style from "../hiplot.module.css";
+import pstyle from "./parallel.module.css";
 import { HiPlotPluginData } from "../plugin";
 import { ResizableH } from "../lib/resizable";
 import { Filter, FilterType, apply_filters } from "../filters";

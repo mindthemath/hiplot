@@ -15,7 +15,7 @@ import "datatables.net-buttons-bs5";
 
 
 import { Datapoint } from "./types";
-import style from "./hiplot.css";
+import style from "./hiplot.module.css";
 import { HiPlotPluginData } from "./plugin";
 import _ from "underscore";
 import { FilterType } from "./filters";

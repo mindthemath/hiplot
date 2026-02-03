@@ -8,7 +8,7 @@
 import * as d3 from "d3";
 
 import seedrandom from "seedrandom";
-import * as color from "color";
+import color from "color";
 
 
 function hashCode(str: string): number {

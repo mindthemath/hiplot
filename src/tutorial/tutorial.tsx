@@ -7,7 +7,7 @@
 
 import $ from "jquery";
 import React from "react";
-import style from "./style.css";
+import style from "./style.module.css";
 
 
 //@ts-ignore

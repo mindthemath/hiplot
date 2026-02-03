@@ -10,7 +10,7 @@ import {LoadURIPromise} from "../component";
 import {DataProviderProps} from "../plugin";
 import {HiPlotLoadStatus} from "../types";
 import React from "react";
-import style from "../hiplot.css";
+import style from "../hiplot.module.css";
 
 
 export const PSTATE_LOAD_URI = 'load_uri';
