@@ -429,12 +429,12 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             // @ts-ignore
             d3.select(this).call(me.get_axis(d));
         })
-        .append(function(dim) { return foCreateAxisLabel(me.props.params_def[dim], me.props.context_menu_ref, "Drag to move, right click for options"); })
+        .append(function(dim) { return foCreateAxisLabel(me.props.params_def[dim], me.props.context_menu_ref, null); })
           .attr("y", -20)
           .attr("text-anchor", "left")
           .classed("pplot-label", true)
           .classed(style.pplotLabel, true);
-      me.dimensions_dom.selectAll(".label-name").style("font-size", "20px");
+      me.dimensions_dom.selectAll(".label-name").style("font-size", "12px");
       me.dimensions_dom.selectAll(".pplot-label").each(function(this: SVGForeignObjectElement, d: string) {
         foDynamicSizeFitContent(this, [-me.xscale(d) + 5, -me.xscale(d) + me.state.width - 5]);
       }).attr("x", 0).style("width", "1px");
@@ -699,41 +699,19 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
 
 
   updateAxisTitlesAnglesAndFontSize() {
-    // Set optimal rotation angle and scale fonts so that everything fits on screen
-    const MIN_ROTATION_ANGLE = 90;
-    const MAX_ROTATION_ANGLE = 90;
-    const MAX_FONT_SIZE = 16;
-    const MIN_FONT_SIZE = 10;
-    const MAX_X = this.dimensions_dom.node().parentElement.parentElement.getBoundingClientRect().right;
-    const ROTATION_ANGLE_RADS = Math.max(MIN_ROTATION_ANGLE * Math.PI / 180, Math.min(MAX_ROTATION_ANGLE * Math.PI / 180,
-      Math.atan(24 * this.state.dimensions.length / this.state.width)
-    ));
-    const maxWidthForTop = TOP_MARGIN_PIXELS / Math.sin(ROTATION_ANGLE_RADS) - MAX_FONT_SIZE;
+    const FONT_SIZE = 12;
     this.dimensions_dom.selectAll(".label-name").each(function(this: HTMLSpanElement) {
-      // Scale the font-size up or down depending on the text-length
-      const beginX = this.getBoundingClientRect().left;
-      const maxWidth = Math.min(
-        // Should not go outside of the svg (top)
-        maxWidthForTop,
-        // Should not go outside of the svg (right)
-        (MAX_X - beginX) / Math.cos(ROTATION_ANGLE_RADS)
-      );
-      const newFontSize = Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE,
-        maxWidth / this.clientWidth * parseFloat(this.style.fontSize)
-      ));
-      this.style.fontSize = newFontSize + "px";
+      this.style.fontSize = FONT_SIZE + "px";
 
       // Use writing-mode for vertical text on all browsers
-      // This avoids Safari's foreignObject + CSS transform bugs (WebKit Bug #23113)
-      // and provides a consistent look across all platforms
+      // This provides a unified look and avoids Safari's foreignObject bugs
       this.style.writingMode = "vertical-lr";
       this.style.textOrientation = "mixed";
       this.style.transform = "";
 
       const fo = this.parentElement.parentElement as any as SVGForeignObjectElement;
-      // Position labels at the top of the margin area (TOP_MARGIN_PIXELS = 100)
-      // The axis is at y=100, so we need y=-95 to position labels near y=5 absolute
-      fo.setAttribute("y", (-TOP_MARGIN_PIXELS + 5) + "");
+      // Position labels at the very top of the margin area
+      fo.setAttribute("y", (-TOP_MARGIN_PIXELS + 2) + "");
     });
   }
 
