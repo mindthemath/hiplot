@@ -10,6 +10,7 @@ import * as d3 from "d3";
 import { ParamDef } from "../infertypes";
 import style from "../hiplot.scss";
 import { ContextMenu } from "../contextmenu";
+import { IS_MOBILE } from "./browsercompat";
 
 
 function leftPos(anchor: string, w: number, minmax?: [number, number]): number {
@@ -101,12 +102,12 @@ export function foCreateAxisLabel(pd: ParamDef, cm?: React.RefObject<ContextMenu
     }
 
     if (tooltip) {
-        // Update tooltip text for mobile-friendly instructions
-        const mobileTooltip = tooltip.replace("right click", "long-press");
+        // Update tooltip text for mobile-friendly instructions only on mobile devices
+        const displayTooltip = IS_MOBILE ? tooltip.replace("right click", "long-press") : tooltip;
         span.append("div")
             .classed(style.tooltiptext, true)
             .classed(style.tooltipBot, true)
-            .text(mobileTooltip);
+            .text(displayTooltip);
     }
     return fo;
 }

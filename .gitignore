@@ -123,3 +123,4 @@ npm-build
 npm-package
 .playwright-mcp
 test_data/
+test-results

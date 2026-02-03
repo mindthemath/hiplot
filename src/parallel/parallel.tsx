@@ -20,7 +20,7 @@ import { HiPlotPluginData } from "../plugin";
 import { ResizableH } from "../lib/resizable";
 import { Filter, FilterType, apply_filters } from "../filters";
 import { foDynamicSizeFitContent, foCreateAxisLabel } from "../lib/svghelpers";
-import { IS_SAFARI, redrawAllForeignObjectsIfSafari } from "../lib/browsercompat";
+import { IS_SAFARI, IS_MOBILE_SAFARI, redrawAllForeignObjectsIfSafari } from "../lib/browsercompat";
 
 interface StringMapping<V> { [key: string]: V; };
 
@@ -722,10 +722,21 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
         maxWidth / this.clientWidth * parseFloat(this.style.fontSize)
       ));
       this.style.fontSize = newFontSize + "px";
-      this.style.transform = "rotate(" + (360 - ROTATION_ANGLE_RADS * 180 / Math.PI) + "deg)";
+
+      // Safari has bugs with foreignObject + CSS transform + position
+      // See: https://bugs.webkit.org/show_bug.cgi?id=23113
+      // Use writing-mode for vertical text on Safari to avoid transform entirely
       if (IS_SAFARI) {
-        this.parentElement.style.position = "fixed";
+        // writing-mode: vertical-rl makes text vertical without CSS transform
+        // This avoids the Safari foreignObject positioning bug
+        this.style.writingMode = "vertical-rl";
+        this.style.textOrientation = "mixed";
+        this.style.transform = ""; // Clear any transform - triggers the Safari bug
+        // No position:fixed needed when not using transform
+      } else {
+        this.style.transform = "rotate(" + (360 - ROTATION_ANGLE_RADS * 180 / Math.PI) + "deg)";
       }
+
       const fo = this.parentElement.parentElement as any as SVGForeignObjectElement;
       fo.setAttribute("y", -newFontSize + "");
     });

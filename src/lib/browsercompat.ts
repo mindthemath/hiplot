@@ -1,5 +1,9 @@
 
 export const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+export const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+export const IS_MOBILE_SAFARI = IS_SAFARI && IS_IOS;
+export const IS_MOBILE = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints > 0 && /Mobi|Android/i.test(navigator.userAgent));
 
 export function redrawObject(fo: SVGForeignObjectElement) {
     const parent = fo.parentNode;

@@ -12,6 +12,7 @@
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.12.11",
     "@babel/preset-typescript": "^7.12.7",
+    "@playwright/test": "^1.58.1",
     "@types/bootstrap": "^4.6.0",
     "@types/d3": "^7.4.0",
     "@types/d3-array": "^3.0.3",
