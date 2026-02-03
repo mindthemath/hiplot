@@ -14,6 +14,15 @@ pkg: build
 test:
 	bun run test:js
 
+lint:
+	bun run lint
+
+fmt:
+	bun run fmt
+
+fmt-check:
+	bun run fmt:check
+
 pytest: build
 	uv run pytest hiplot --durations=10
 

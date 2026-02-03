@@ -72,7 +72,7 @@ commands:
       - attach_built_js
       - restore_cache:
           keys:
-          - v2-e2e-selenium<< parameters.browser >>-dependencies-{{ checksum "requirements/main.txt" }}-{{ checksum "requirements/dev.txt" }}
+            - v2-e2e-selenium<< parameters.browser >>-dependencies-{{ checksum "requirements/main.txt" }}-{{ checksum "requirements/dev.txt" }}
       - run:
           name: install dependencies
           command: |
@@ -240,7 +240,7 @@ jobs:
           at: hiplot/static
       - restore_cache:
           keys:
-          - v2-mypy_pytest-dependencies-{{ checksum "requirements/main.txt" }}-{{ checksum "requirements/dev.txt" }}
+            - v2-mypy_pytest-dependencies-{{ checksum "requirements/main.txt" }}-{{ checksum "requirements/dev.txt" }}
       - run:
           name: install dependencies
           command: |

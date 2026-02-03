@@ -2,11 +2,39 @@
   "name": "hiplot",
   "version": "0.0.3",
   "description": "HiPlot is a lightweight interactive visualization tool to help AI researchers discover correlations and patterns in high-dimensional data using parallel plots and other graphical ways to represent information.",
+  "homepage": "https://github.com/facebookresearch/hiplot#readme",
+  "bugs": {
+    "url": "https://github.com/facebookresearch/hiplot/issues"
+  },
+  "license": "MIT",
+  "author": "Facebook AI Research",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebookresearch/hiplot.git"
+  },
   "main": "npm-dist/hiplot.lib.js",
   "types": "npm-dist/hiplot.d.ts",
-  "peerDependencies": {
-    "react": ">=19",
-    "react-dom": ">=19"
+  "scripts": {
+    "postinstall": "node -e \"require('fs').writeFileSync('node_modules/internmap/src/index.js', '// Hotfix: https://github.com/mbostock/internmap/issues/3\\nexport const InternMap = Map;\\nexport const InternSet = Set;\\n')\"",
+    "build": "bun run tcm && bun run vite:build:web && bun run vite:build:test && bun run vite:build:streamlit && bun run vite:build:lib",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "lint": "oxlint",
+    "prepublish": "npm-run-all tcm prepublish-ts",
+    "tcm": "tcm src",
+    "vite:build:web": "HIPLOT_WEB_NAME=hiplot HIPLOT_WEB_ENTRY=./src/hiplot_web.tsx vite build -c vite.web.config.mts",
+    "vite:build:test": "HIPLOT_WEB_NAME=hiplot_test HIPLOT_WEB_ENTRY=./src/hiplot_test.tsx vite build -c vite.web.config.mts",
+    "vite:build:streamlit": "HIPLOT_WEB_NAME=hiplot_streamlit HIPLOT_WEB_ENTRY=./src/hiplot_streamlit.tsx vite build -c vite.web.config.mts",
+    "vite:build:lib": "vite build -c vite.lib.config.mts",
+    "test:js": "bunx playwright test",
+    "vite:dev": "vite -c vite.web.config.mts",
+    "prepublish-ts": "tsc"
+  },
+  "dependencies": {
+    "@babel/helpers": "^7.28.6",
+    "@babel/runtime": "^7.28.6",
+    "@babel/traverse": "^7.29.0",
+    "datatables.net": "^2.3.7"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.1",
@@ -51,6 +79,8 @@
     "hoist-non-react-statics": "^3.3.2",
     "jquery": "^3.7.1",
     "json5": "^2.2.3",
+    "oxfmt": "^0.27.0",
+    "oxlint": "^1.41.0",
     "postcss-loader": "^8.2.0",
     "randomcolor": "^0.6.2",
     "react": "^19.2.4",
@@ -63,45 +93,20 @@
     "vite": "^7.3.1",
     "vite-plugin-css-injected-by-js": "^3.5.2"
   },
-  "scripts": {
-    "postinstall": "node -e \"require('fs').writeFileSync('node_modules/internmap/src/index.js', '// Hotfix: https://github.com/mbostock/internmap/issues/3\\nexport const InternMap = Map;\\nexport const InternSet = Set;\\n')\"",
-    "build": "bun run tcm && bun run vite:build:web && bun run vite:build:test && bun run vite:build:streamlit && bun run vite:build:lib",
-    "prepublish": "npm-run-all tcm prepublish-ts",
-    "tcm": "tcm src",
-    "vite:build:web": "HIPLOT_WEB_NAME=hiplot HIPLOT_WEB_ENTRY=./src/hiplot_web.tsx vite build -c vite.web.config.mts",
-    "vite:build:test": "HIPLOT_WEB_NAME=hiplot_test HIPLOT_WEB_ENTRY=./src/hiplot_test.tsx vite build -c vite.web.config.mts",
-    "vite:build:streamlit": "HIPLOT_WEB_NAME=hiplot_streamlit HIPLOT_WEB_ENTRY=./src/hiplot_streamlit.tsx vite build -c vite.web.config.mts",
-    "vite:build:lib": "vite build -c vite.lib.config.mts",
-    "test:js": "bunx playwright test",
-    "vite:dev": "vite -c vite.web.config.mts",
-    "prepublish-ts": "tsc"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/facebookresearch/hiplot.git"
-  },
-  "author": "Facebook AI Research",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/facebookresearch/hiplot/issues"
-  },
-  "homepage": "https://github.com/facebookresearch/hiplot#readme",
-  "dependencies": {
-    "@babel/helpers": "^7.28.6",
-    "@babel/runtime": "^7.28.6",
-    "@babel/traverse": "^7.29.0",
-    "datatables.net": "^2.3.7"
+  "peerDependencies": {
+    "react": ">=19",
+    "react-dom": ">=19"
   },
   "overrides": {
-    "semver": "^7.5.4",
-    "braces": "^3.0.3",
-    "micromatch": "^4.0.8",
-    "ws": "^7.5.10",
-    "postcss": "^8.4.31",
-    "@babel/traverse": "^7.23.2",
     "@babel/runtime": "^7.26.10",
-    "json5": "^2.2.3",
+    "@babel/traverse": "^7.23.2",
+    "braces": "^3.0.3",
     "cross-spawn": "^7.0.6",
-    "lodash": "^4.17.23"
+    "json5": "^2.2.3",
+    "lodash": "^4.17.23",
+    "micromatch": "^4.0.8",
+    "postcss": "^8.4.31",
+    "semver": "^7.5.4",
+    "ws": "^7.5.10"
   }
 }

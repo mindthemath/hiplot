@@ -2,20 +2,17 @@
   "name": "hiplot-demo",
   "version": "1.0.0",
   "homepage": "./",
-  "dependencies": {
-    "hiplot": "^0.1.14",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-scripts": "5.0.1"
-  },
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider start",
     "build": "react-scripts --openssl-legacy-provider build",
     "test": "react-scripts --openssl-legacy-provider test",
     "eject": "react-scripts eject"
   },
-  "eslintConfig": {
-    "extends": "react-app"
+  "dependencies": {
+    "hiplot": "^0.1.14",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-scripts": "5.0.1"
   },
   "browserslist": {
     "production": [
@@ -28,5 +25,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "eslintConfig": {
+    "extends": "react-app"
   }
 }

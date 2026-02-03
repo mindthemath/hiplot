@@ -16,6 +16,7 @@ HiPlot is a lightweight interactive visualization tool to help AI researchers di
 ### [Try a demo now with sweep data](https://mindthemath.github.io/hiplot/_static/demo/ml1.csv.html) or [upload your CSV](https://mindthemath.github.io/hiplot/_static/hiplot_upload.html) or [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mindthemath/hiplot/blob/main/examples/HiPlotColabExample.ipynb)
 
 There are several modes to HiPlot:
+
 - As a web-server (if your data is a CSV for instance)
 - In a jupyter notebook (to visualize python data), or in [Streamlit apps](https://mindthemath.github.io/hiplot/tuto_streamlit.html)
 - In CLI to render standalone HTML
@@ -60,16 +61,16 @@ hip.Experiment.from_iterable(data).display()
 ```
 
 ### [See the live result](https://mindthemath.github.io/hiplot/_static/demo/demo_basic_usage.html)
+
 ![Result](https://raw.githubusercontent.com/mindthemath/hiplot/main/assets/notebook.png)
 
 ## Links
 
-* Repository: https://github.com/mindthemath/hiplot
-* Documentation: https://mindthemath.github.io/hiplot/
-* PyPI package: https://pypi.org/project/hiplot-mm/
-* Examples: https://github.com/mindthemath/hiplot/tree/main/examples
-* Original blog post: https://ai.facebook.com/blog/hiplot-high-dimensional-interactive-plots-made-easy/
-
+- Repository: https://github.com/mindthemath/hiplot
+- Documentation: https://mindthemath.github.io/hiplot/
+- PyPI package: https://pypi.org/project/hiplot-mm/
+- Examples: https://github.com/mindthemath/hiplot/tree/main/examples
+- Original blog post: https://ai.facebook.com/blog/hiplot-high-dimensional-interactive-plots-made-easy/
 
 ## Development
 
@@ -91,15 +92,16 @@ uv build
 ```
 
 **Output directories:**
+
 - `npm-dist/` - NPM package artifacts
 - `dist/` - Python wheel and sdist
 - `hiplot/static/built/` - JS bundle included in Python package
 
 **Run the dev server:**
+
 ```bash
 uv run --extra server hiplot --port 8765
 ```
-
 
 ## Citing
 
@@ -115,13 +117,15 @@ uv run --extra server hiplot --port 8765
 ```
 
 ## Credits
+
 Inspired by and based on code from [Kai Chang](http://bl.ocks.org/syntagmatic/3150059), [Mike Bostock](http://bl.ocks.org/1341021) and [Jason Davies](http://bl.ocks.org/1341281).
 
-External contributors (*please add your name when you submit your first pull request*):
+External contributors (_please add your name when you submit your first pull request_):
+
 - [louismartin](https://github.com/louismartin)
 - [GoldenCorgi](https://github.com/GoldenCorgi)
 - [callistachang](https://github.com/callistachang)
 
-
 ## License
+
 HiPlot is [MIT](LICENSE) licensed, as found in the [LICENSE](LICENSE) file.

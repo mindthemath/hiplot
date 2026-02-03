@@ -87,8 +87,7 @@ export default defineConfig(({ mode }) => {
   const isDebug = mode === "development";
   const entryName = process.env.HIPLOT_WEB_NAME ?? "hiplot";
   const entryPath =
-    process.env.HIPLOT_WEB_ENTRY ??
-    path.resolve(__dirname, "src", "hiplot_web.tsx");
+    process.env.HIPLOT_WEB_ENTRY ?? path.resolve(__dirname, "src", "hiplot_web.tsx");
   return {
     plugins: [react(), cssInjectedByJsPlugin(), copyWebBundlesPlugin(entryName)],
     resolve: {

@@ -29,9 +29,7 @@ test("datatable renders with rows", async ({ page }) => {
   await loadDemo(page);
   await expect(page.locator("table.sample-rows-table")).toBeVisible();
   const rowLocator = page.locator("table.sample-rows-table tbody tr");
-  await expect
-    .poll(async () => rowLocator.count(), { timeout: 20000 })
-    .toBeGreaterThan(0);
+  await expect.poll(async () => rowLocator.count(), { timeout: 20000 }).toBeGreaterThan(0);
 });
 
 test("respects hip.dark query parameter", async ({ page }) => {
@@ -135,9 +133,7 @@ test("hide and restore axis via context menu", async ({ page }) => {
   const restoreButton = page.locator('button[title="Restore hidden columns in parallel plot"]');
   if (await restoreButton.count()) {
     await restoreButton.first().click();
-    await expect
-      .poll(async () => await page.locator("svg g.dimension").count())
-      .toBe(countBefore);
+    await expect.poll(async () => await page.locator("svg g.dimension").count()).toBe(countBefore);
   }
 });
 

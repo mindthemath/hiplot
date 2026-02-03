@@ -16,26 +16,26 @@
  * limitations under the License.
  */
 
-import hoistNonReactStatics from "hoist-non-react-statics"
-import React, { ReactNode } from "react"
-import { RenderData, Streamlit } from "./streamlit"
+import hoistNonReactStatics from "hoist-non-react-statics";
+import React, { ReactNode } from "react";
+import { RenderData, Streamlit } from "./streamlit";
 
 /**
  * Props passed to custom Streamlit components.
  */
 export interface ComponentProps {
   /** Named dictionary of arguments passed from Python. */
-  args: any
+  args: any;
 
   /** The component's width. */
-  width: number
+  width: number;
 
   /**
    * True if the component should be disabled.
    * All components get disabled while the app is being re-run,
    * and become re-enabled when the re-run has finished.
    */
-  disabled: boolean
+  disabled: boolean;
 }
 
 /**
@@ -46,19 +46,16 @@ export interface ComponentProps {
  * `componentDidMount` and `componentDidUpdate` functions in your own class,
  * so that your plugin properly resizes.
  */
-export class StreamlitComponentBase<S = {}> extends React.PureComponent<
-  ComponentProps,
-  S
-> {
+export class StreamlitComponentBase<S = {}> extends React.PureComponent<ComponentProps, S> {
   public componentDidMount(): void {
     // After we're rendered for the first time, tell Streamlit that our height
     // has changed.
-    Streamlit.setFrameHeight()
+    Streamlit.setFrameHeight();
   }
 
   public componentDidUpdate(prevProps: ComponentProps, prevState: S): void {
     // After we're updated, tell Streamlit that our height may have changed.
-    Streamlit.setFrameHeight()
+    Streamlit.setFrameHeight();
   }
 }
 
@@ -68,49 +65,38 @@ export class StreamlitComponentBase<S = {}> extends React.PureComponent<
  * Bootstraps the communication interface between Streamlit and the component.
  */
 export function withStreamlitConnection(
-  WrappedComponent: React.ComponentType<ComponentProps>
+  WrappedComponent: React.ComponentType<ComponentProps>,
 ): React.ComponentType {
   interface WrapperProps {}
 
   interface WrapperState {
-    renderData?: RenderData
-    componentError?: Error
+    renderData?: RenderData;
+    componentError?: Error;
   }
 
-  class ComponentWrapper extends React.PureComponent<
-    WrapperProps,
-    WrapperState
-  > {
+  class ComponentWrapper extends React.PureComponent<WrapperProps, WrapperState> {
     public constructor(props: WrapperProps) {
-      super(props)
+      super(props);
       this.state = {
         renderData: undefined,
         componentError: undefined,
-      }
+      };
     }
 
-    public static getDerivedStateFromError = (
-      error: Error
-    ): Partial<WrapperState> => {
-      return { componentError: error }
-    }
+    public static getDerivedStateFromError = (error: Error): Partial<WrapperState> => {
+      return { componentError: error };
+    };
 
     public componentDidMount = (): void => {
       // Set up event listeners, and signal to Streamlit that we're ready.
       // We won't render the component until we receive the first RENDER_EVENT.
-      Streamlit.events.addEventListener(
-        Streamlit.RENDER_EVENT,
-        this.onRenderEvent
-      )
-      Streamlit.setComponentReady()
-    }
+      Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, this.onRenderEvent);
+      Streamlit.setComponentReady();
+    };
 
     public componentWillUnmount = (): void => {
-      Streamlit.events.removeEventListener(
-        Streamlit.RENDER_EVENT,
-        this.onRenderEvent
-      )
-    }
+      Streamlit.events.removeEventListener(Streamlit.RENDER_EVENT, this.onRenderEvent);
+    };
 
     /**
      * Streamlit is telling this component to redraw.
@@ -119,9 +105,9 @@ export function withStreamlitConnection(
      */
     private onRenderEvent = (event: Event): void => {
       // Update our state with the newest render data
-      const renderEvent = event as CustomEvent<RenderData>
-      this.setState({ renderData: renderEvent.detail })
-    }
+      const renderEvent = event as CustomEvent<RenderData>;
+      this.setState({ renderData: renderEvent.detail });
+    };
 
     public render = (): ReactNode => {
       // If our wrapped component threw an error, display it.
@@ -131,12 +117,12 @@ export function withStreamlitConnection(
             <h1>Component Error</h1>
             <span>{this.state.componentError.message}</span>
           </div>
-        )
+        );
       }
 
       // Don't render until we've gotten our first RENDER_EVENT from Streamlit.
       if (this.state.renderData == null) {
-        return null
+        return null;
       }
 
       return (
@@ -145,9 +131,9 @@ export function withStreamlitConnection(
           disabled={this.state.renderData.disabled}
           args={this.state.renderData.args}
         />
-      )
-    }
+      );
+    };
   }
 
-  return hoistNonReactStatics(ComponentWrapper, WrappedComponent)
+  return hoistNonReactStatics(ComponentWrapper, WrappedComponent);
 }

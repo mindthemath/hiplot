@@ -5,18 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { ReactNode } from "react"
-import {
-  withStreamlitConnection,
-  StreamlitComponentBase,
-  Streamlit,
-} from "./streamlit"
+import React, { ReactNode } from "react";
+import { withStreamlitConnection, StreamlitComponentBase, Streamlit } from "./streamlit";
 import { HiPlot } from "./hiplot";
 import JSON5 from "json5";
 
 import ReactDOMClient from "react-dom/client";
 import { ComponentProps } from "./streamlit/StreamlitReact";
-
 
 interface State {
   selected_uids: Array<string>;
@@ -24,7 +19,7 @@ interface State {
   brush_extents: Array<any>;
   experiment: any;
   experimentJson: string;
-};
+}
 
 class ReactTemplate extends StreamlitComponentBase<State> {
   constructor(props: ComponentProps) {
@@ -41,61 +36,57 @@ class ReactTemplate extends StreamlitComponentBase<State> {
     // Arguments that are passed to the plugin in Python are accessible
     // via `this.props.args`. Here, we access the "name" arg.
     var onChangeHandlers = {
-      'selected_uids': this.onChange.bind(this),
-      'filtered_uids': this.onChange.bind(this),
-      'brush_extents': this.onChange.bind(this),
-      'height_changed': () => Streamlit.setFrameHeight(),
+      selected_uids: this.onChange.bind(this),
+      filtered_uids: this.onChange.bind(this),
+      brush_extents: this.onChange.bind(this),
+      height_changed: () => Streamlit.setFrameHeight(),
     };
     return <HiPlot experiment={this.state.experiment} onChange={onChangeHandlers} />;
-  }
+  };
 
   public onChange = (type: string, data: any): void => {
     // @ts-ignore
-    this.setState({[type]: data});
+    this.setState({ [type]: data });
     Streamlit.setFrameHeight();
-  }
+  };
 
   public componentDidUpdate(prevProps, prevState: State): void {
     const ret: Array<string> = this.props.args["ret"];
     var changed = false;
-    const py_ret = ret.map(function(r) {
-      if (this.state[r] != prevState[r]) {
-        console.log(r, "changed");
-        changed = true;
-      }
-      return this.state[r];
-    }.bind(this));
+    const py_ret = ret.map(
+      function (r) {
+        if (this.state[r] != prevState[r]) {
+          console.log(r, "changed");
+          changed = true;
+        }
+        return this.state[r];
+      }.bind(this),
+    );
     if (changed || JSON.stringify(this.props.args.ret) != JSON.stringify(prevProps.args.ret)) {
       console.log("hiplot update return", py_ret, {
-        'prevProps.args.ret': prevProps.args.ret,
-        'this.props.args.ret': this.props.args.ret,
-        'changed': changed
+        "prevProps.args.ret": prevProps.args.ret,
+        "this.props.args.ret": this.props.args.ret,
+        changed: changed,
       });
       Streamlit.setComponentValue(py_ret);
     }
-    const newExp = this.props.args['experiment'];
+    const newExp = this.props.args["experiment"];
     if (newExp != this.state.experimentJson) {
       this.setState({
         experiment: JSON5.parse(newExp),
-        experimentJson: newExp
+        experimentJson: newExp,
       });
     }
     Streamlit.setFrameHeight();
   }
 
-
   // Streamlit.setComponentValue( ... python return value )
 }
 
-const componentWrapped = withStreamlitConnection(ReactTemplate)
-
+const componentWrapped = withStreamlitConnection(ReactTemplate);
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
   const root = ReactDOMClient.createRoot(rootElement);
-  root.render(
-    <React.StrictMode>
-      {React.createElement(componentWrapped)}
-    </React.StrictMode>,
-  );
+  root.render(<React.StrictMode>{React.createElement(componentWrapped)}</React.StrictMode>);
 }
