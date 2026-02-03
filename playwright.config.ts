@@ -12,7 +12,8 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   webServer: {
-    command: "make dev",
+    command:
+      "bash scripts/ensure-bundle.sh && uv run --extra server hiplot --port 8765 --host 0.0.0.0",
     url: "http://127.0.0.1:8765",
     timeout: 60_000,
     reuseExistingServer: !process.env.CI,
