@@ -5,13 +5,13 @@ install:
 clean:
 	rm -rf node_modules .venv
 
-build:
+build: fmt-check
 	bun run build
 
 pkg: build
 	uv build
 
-test:
+test: build
 	bun run test:js
 
 lint:
