@@ -10,7 +10,7 @@ on:
 jobs:
   build-js:
     name: Build JavaScript
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -35,7 +35,7 @@ jobs:
   typecheck-pytest:
     name: ${{ format('Type Check & Tests (Python {0})', matrix.python-version) }}
     needs: build-js
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ['3.9', '3.11', '3.12']
@@ -74,7 +74,7 @@ jobs:
   package-verify:
     name: Verify Package Build
     needs: build-js
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -118,7 +118,7 @@ jobs:
   windows-test:
     name: Windows Tests
     needs: build-js
-    runs-on: blacksmith-2vcpu-windows-2025
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
