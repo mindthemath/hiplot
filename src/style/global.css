@@ -1,0 +1,142 @@
+/*
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/* Import Bootstrap and theme files */
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
+@import "./bs-dark.css";
+@import "./bs-light.css";
+
+/* Dark theme wrapper */
+.hip_thm--dark {
+    font-size: 16px;
+    position: relative;
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+}
+
+.hip_thm--dark :link,
+.hip_thm--dark :visited {
+    text-decoration: none;
+}
+
+/* Light theme wrapper */
+.hip_thm--light {
+    font-size: 16px;
+    position: relative;
+}
+
+.hip_thm--light :link,
+.hip_thm--light :visited {
+    text-decoration: none;
+}
+
+/* DataTables styling for both themes */
+.hip_thm--dark .dataTables_wrapper,
+.hip_thm--light .dataTables_wrapper {
+    margin-top: 16px;
+}
+
+.hip_thm--dark .dataTables_wrapper > .row:first-child,
+.hip_thm--light .dataTables_wrapper > .row:first-child {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.hip_thm--dark .dataTables_wrapper > .row:first-child > div,
+.hip_thm--light .dataTables_wrapper > .row:first-child > div {
+    flex: 0 0 auto !important;
+    max-width: none !important;
+    width: auto !important;
+}
+
+@media (max-width: 576px) {
+    .hip_thm--dark .dataTables_wrapper > .row:first-child,
+    .hip_thm--light .dataTables_wrapper > .row:first-child {
+        flex-wrap: wrap;
+    }
+}
+
+.hip_thm--dark .dataTables_wrapper .dataTables_length,
+.hip_thm--light .dataTables_wrapper .dataTables_length {
+    white-space: nowrap;
+    font-weight: normal;
+}
+
+.hip_thm--dark .dataTables_wrapper .dataTables_length label,
+.hip_thm--light .dataTables_wrapper .dataTables_length label {
+    font-weight: normal;
+}
+
+.hip_thm--dark .dataTables_wrapper .dataTables_length select,
+.hip_thm--light .dataTables_wrapper .dataTables_length select {
+    width: auto;
+    min-width: 50px;
+}
+
+.hip_thm--dark .dataTables_wrapper .dataTables_filter,
+.hip_thm--light .dataTables_wrapper .dataTables_filter {
+    font-weight: normal;
+    text-align: right;
+}
+
+.hip_thm--dark .dataTables_wrapper .dataTables_filter label,
+.hip_thm--light .dataTables_wrapper .dataTables_filter label {
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+@media (max-width: 576px) {
+    .hip_thm--dark .dataTables_wrapper .dataTables_filter,
+    .hip_thm--light .dataTables_wrapper .dataTables_filter {
+        width: 100%;
+        text-align: left;
+        margin-top: 8px;
+    }
+}
+
+.hip_thm--dark .dt-buttons,
+.hip_thm--light .dt-buttons {
+    margin-left: 10px;
+}
+
+.hip_thm--dark .table-hover tbody tr:hover,
+.hip_thm--light .table-hover tbody tr:hover {
+    color: #fff;
+    background-color: rgba(147, 138, 138, 0.26);
+}
+
+.hip_thm--dark button:disabled,
+.hip_thm--light button:disabled {
+    cursor: unset;
+}
+
+/* Unset some jupyterlab theme overrides */
+.hip_thm--dark tbody tr:nth-child(even),
+.hip_thm--light tbody tr:nth-child(even) {
+    background: unset;
+}
+
+.hip_thm--dark table,
+.hip_thm--dark td,
+.hip_thm--dark label,
+.hip_thm--dark select,
+.hip_thm--dark input,
+.hip_thm--light table,
+.hip_thm--light td,
+.hip_thm--light label,
+.hip_thm--light select,
+.hip_thm--light input {
+    color: unset;
+    table-layout: auto;
+    font-size: unset;
+}

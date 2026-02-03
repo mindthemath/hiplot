@@ -8,7 +8,7 @@
 
 import * as d3 from "d3";
 import { ParamDef } from "../infertypes";
-import style from "../hiplot.scss";
+import style from "../hiplot.css";
 import { ContextMenu } from "../contextmenu";
 import { IS_MOBILE } from "./browsercompat";
 

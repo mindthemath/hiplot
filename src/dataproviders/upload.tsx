@@ -8,7 +8,7 @@
 import {DataProviderProps} from "../plugin";
 import React from "react";
 import Dropzone, {FileRejection, DropEvent} from 'react-dropzone';
-import style from "./upload.scss";
+import style from "./upload.css";
 import * as d3 from "d3";
 import { HiPlotExperiment, Experiment } from "../types";
 

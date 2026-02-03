@@ -1,0 +1,200 @@
+/*
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/* Darkly theme colors via CSS custom properties */
+.hip_thm--dark {
+  /* Color system */
+  --bs-blue: #375a7f;
+  --bs-indigo: #6610f2;
+  --bs-purple: #6f42c1;
+  --bs-pink: #e83e8c;
+  --bs-red: #E74C3C;
+  --bs-orange: #fd7e14;
+  --bs-yellow: #F39C12;
+  --bs-green: #00bc8c;
+  --bs-teal: #20c997;
+  --bs-cyan: #3498DB;
+  --bs-white: #fff;
+  --bs-gray: #888;
+  --bs-gray-dark: #303030;
+
+  --bs-gray-100: #f8f9fa;
+  --bs-gray-200: #ebebeb;
+  --bs-gray-300: #dee2e6;
+  --bs-gray-400: #ced4da;
+  --bs-gray-500: #adb5bd;
+  --bs-gray-600: #888;
+  --bs-gray-700: #444;
+  --bs-gray-800: #303030;
+  --bs-gray-900: #222;
+
+  --bs-primary: #375a7f;
+  --bs-secondary: #444;
+  --bs-success: #00bc8c;
+  --bs-info: #3498DB;
+  --bs-warning: #F39C12;
+  --bs-danger: #E74C3C;
+  --bs-light: #adb5bd;
+  --bs-dark: #303030;
+
+  --bs-primary-rgb: 55, 90, 127;
+  --bs-secondary-rgb: 68, 68, 68;
+  --bs-success-rgb: 0, 188, 140;
+  --bs-info-rgb: 52, 152, 219;
+  --bs-warning-rgb: 243, 156, 18;
+  --bs-danger-rgb: 231, 76, 60;
+  --bs-light-rgb: 173, 181, 189;
+  --bs-dark-rgb: 48, 48, 48;
+
+  --bs-body-color: #fff;
+  --bs-body-color-rgb: 255, 255, 255;
+  --bs-body-bg: #222;
+  --bs-body-bg-rgb: 34, 34, 34;
+
+  --bs-link-color: #00bc8c;
+  --bs-link-hover-color: #00efb2;
+
+  --bs-border-color: #444;
+
+  --bs-heading-color: #fff;
+
+  color-scheme: dark;
+}
+
+/* Web font */
+@import url("https://fonts.googleapis.com/css?family=Lato:400,700,400italic&display=swap");
+
+/* Component overrides for dark theme */
+.hip_thm--dark .table {
+  --bs-table-color: var(--bs-body-color);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--bs-border-color);
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.075);
+}
+
+.hip_thm--dark .card {
+  --bs-card-bg: #303030;
+  --bs-card-cap-bg: #444;
+  --bs-card-border-color: #444;
+}
+
+.hip_thm--dark .modal {
+  --bs-modal-bg: #303030;
+  --bs-modal-border-color: #444;
+}
+
+.hip_thm--dark .dropdown-menu {
+  --bs-dropdown-bg: #222;
+  --bs-dropdown-border-color: #444;
+  --bs-dropdown-link-color: #fff;
+  --bs-dropdown-link-hover-color: #fff;
+  --bs-dropdown-link-hover-bg: var(--bs-primary);
+  --bs-dropdown-divider-bg: #444;
+}
+
+.hip_thm--dark .list-group {
+  --bs-list-group-bg: #303030;
+  --bs-list-group-border-color: #444;
+  --bs-list-group-action-hover-bg: #444;
+  --bs-list-group-action-hover-color: #fff;
+}
+
+.hip_thm--dark .nav-tabs {
+  --bs-nav-tabs-border-color: #444;
+  --bs-nav-tabs-link-active-color: #fff;
+  --bs-nav-tabs-link-active-border-color: #444 #444 transparent;
+}
+
+.hip_thm--dark .nav-link {
+  color: rgba(255, 255, 255, 0.6);
+}
+.hip_thm--dark .nav-link:hover,
+.hip_thm--dark .nav-link:focus {
+  color: #fff;
+}
+
+.hip_thm--dark .nav-link.active {
+  color: #fff;
+}
+
+.hip_thm--dark .pagination {
+  --bs-pagination-color: #fff;
+  --bs-pagination-bg: var(--bs-success);
+  --bs-pagination-border-color: transparent;
+  --bs-pagination-hover-color: #fff;
+  --bs-pagination-hover-bg: #00d9a0;
+  --bs-pagination-hover-border-color: transparent;
+  --bs-pagination-disabled-color: #fff;
+  --bs-pagination-disabled-bg: #008966;
+  --bs-pagination-disabled-border-color: transparent;
+}
+
+.hip_thm--dark .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.hip_thm--dark .form-control,
+.hip_thm--dark .form-select {
+  --bs-body-bg: #303030;
+  --bs-body-color: #fff;
+  background-color: #303030;
+  color: #fff;
+  border-color: #222;
+}
+.hip_thm--dark .form-control:focus,
+.hip_thm--dark .form-select:focus {
+  background-color: #303030;
+  color: #fff;
+  border-color: var(--bs-primary);
+}
+
+.hip_thm--dark .input-group-text {
+  background-color: #444;
+  color: #adb5bd;
+  border-color: #222;
+}
+
+.hip_thm--dark .alert {
+  border: none;
+}
+.hip_thm--dark .alert a,
+.hip_thm--dark .alert .alert-link {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.hip_thm--dark .breadcrumb {
+  --bs-breadcrumb-bg: #444;
+}
+.hip_thm--dark .breadcrumb a {
+  color: #fff;
+}
+
+.hip_thm--dark .progress {
+  --bs-progress-bg: #444;
+}
+
+.hip_thm--dark .toast {
+  --bs-toast-bg: #444;
+  --bs-toast-header-bg: #303030;
+}
+
+.hip_thm--dark .popover {
+  --bs-popover-bg: #303030;
+  --bs-popover-header-bg: #444;
+  --bs-popover-border-color: #444;
+}
+
+/* Typography */
+.hip_thm--dark .blockquote-footer {
+  color: #888;
+}
+
+.text-muted {
+  color: #888 !important;
+}

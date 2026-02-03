@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import style from "./resizable.scss";
+import style from "./resizable.css";
 import $ from "jquery";
 import React from "react";
 import _ from "underscore";

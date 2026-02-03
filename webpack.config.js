@@ -78,8 +78,8 @@ LICENSE file in the root directory of this source tree."),
               }]
           },
           {
-            test: /\.s(a|c)ss$/,
-            exclude: /global.(s(a|c)ss)$/,
+            test: /\.css$/,
+            exclude: /global\.css$/,
             use: [
               { loader: 'style-loader'},
               {
@@ -87,36 +87,24 @@ LICENSE file in the root directory of this source tree."),
                 options: {
                   modules: is_debug ? {localIdentName: '[local]_[contenthash:base64:5]'} : true
                 }
-              },
-              {
-                loader: 'sass-loader',
-                options: {
-                  sourceMap: true
-                }
               }
             ]
           },
           {
-            test: /global.(s(a|c)ss)$/,
+            test: /global\.css$/,
             use: [
               'style-loader',
               "css-loader",
               {
                 loader: 'postcss-loader',
                 options: {
-                  // We can be emded anywhere, with arbitrary `font-size` for `body` element
+                  // We can be embedded anywhere, with arbitrary `font-size` for `body` element
                   // So we better don't use `rem` in CSS and set sizes in pixel instead.
                   postcssOptions: {
                     plugins: [remToPx({
                       propList: ['font', 'font-size', 'line-height', 'letter-spacing', 'padding*', 'border*'],
                     })],
                   },
-                }
-              },
-              {
-                loader: 'sass-loader',
-                options: {
-                  sourceMap: true
                 }
               }
             ]
@@ -194,6 +182,7 @@ env => {
   });
 
   return {
+    mode: (env && env.debug) ? 'development' : 'production',
     entry: {
       'hiplot': `./src/hiplot_web.tsx`,
       'hiplot_test': `./src/hiplot_test.tsx`,
@@ -206,6 +195,9 @@ env => {
         libraryTarget: 'var',
         environment: webpackOutputEnvironment,
     },
+    performance: {
+      hints: false, // Disable bundle size warnings
+    },
     ...exportConfig(env, {
       web: true,
       installs: installs,
@@ -213,6 +205,7 @@ env => {
 }},
 // Node config - for npm library
 env => { return {
+    mode: (env && env.debug) ? 'development' : 'production',
     entry: {
       'hiplot': `./src/hiplot.tsx`,
     },
@@ -230,6 +223,9 @@ env => { return {
         commonjs: "react",
         amd: "react"
       },
+    },
+    performance: {
+      hints: false, // Disable bundle size warnings
     },
     ...exportConfig(env),
     optimization: {

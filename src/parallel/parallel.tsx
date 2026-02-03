@@ -15,7 +15,8 @@ import _ from 'underscore';
 
 import { Datapoint, ParamType } from "../types";
 import { create_d3_scale, scale_pixels_range, ParamDef } from "../infertypes";
-import style from "../hiplot.scss";
+import style from "../hiplot.css";
+import pstyle from "./parallel.css";
 import { HiPlotPluginData } from "../plugin";
 import { ResizableH } from "../lib/resizable";
 import { Filter, FilterType, apply_filters } from "../filters";
@@ -130,7 +131,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       return extents;
     }
     const self = this;
-    this.dimensions_dom.selectAll("." + style.brush).each(function(this: SVGGElement, dim: string) {
+    this.dimensions_dom.selectAll("." + pstyle.brush).each(function(this: SVGGElement, dim: string) {
       extents[dim] = self.normalizeBrushSelection(d3.brushSelection(this));
     });
     return extents;
@@ -305,7 +306,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
   render() {
     return (
     <ResizableH initialHeight={this.state.height} onResize={this.onResize.bind(this)}>
-    <div ref={this.root_ref} className={`${style["parallel-plot-chart"]} pplot-root`} style={{"height": this.state.height}}>
+    <div ref={this.root_ref} className={`${pstyle["parallel-plot-chart"]} pplot-root`} style={{"height": this.state.height}}>
           <canvas ref={this.foreground_ref} className={style["background-canvas"]}></canvas>
           <canvas ref={this.highlighted_ref} className={style["highlight-canvas"]}></canvas>
           <svg ref={this.svg_ref} width={this.state.width} height={this.state.height}>
@@ -318,7 +319,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
     this.props.sendMessage("brush_extents", function(this: ParallelPlot) {
       const yscales = this.yscale;
       var colToScale = {};
-      this.dimensions_dom.selectAll("." + style.brush).each(function(this: SVGGElement, dim: string) {
+      this.dimensions_dom.selectAll("." + pstyle.brush).each(function(this: SVGGElement, dim: string) {
         const sel: d3.BrushSelection = d3.brushSelection(this);
         if (sel === null) {
           return;
@@ -418,7 +419,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
         })
         .on("drag", function(event, d: string) {
           const eventdx = event.dx;
-          const brushEl = d3.select(this).select("." + style.brush);
+          const brushEl = d3.select(this).select("." + pstyle.brush);
           me.setState(function(prevState, _) {
             return {
               dragging: {
@@ -485,7 +486,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
 
       // Add an axis and title.
       me.dimensions_dom.append("svg:g")
-          .attr("class", style.axis)
+          .attr("class", pstyle.axis)
           .attr("transform", "translate(0,0)")
           .each(function(d) {
             console.assert(me.yscale[d], d, me.yscale, this);
@@ -502,7 +503,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
           .classed("label-name", true)
           .classed(style.label, true)
           .classed(style.axisLabelText, true)
-          .classed(style.pplotLabel, true)
+          .classed(pstyle.pplotLabel, true)
           .each(function(dim) {
             d3.select(this).append("title")
               .text(IS_MOBILE ? "Long-press for options" : "Right click for options");
@@ -561,7 +562,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
 
       // Add and store a brush for each axis.
       me.dimensions_dom.append("svg:g")
-          .classed(style.brush, true)
+          .classed(pstyle.brush, true)
           .classed("pplot-brush", true)
           .each(function(d) { d3.select(this).call(me.d3brush); })
         .selectAll("rect")
@@ -596,7 +597,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             var extent = extents[dimension];
             d3.select(this)
               .selectAll('text')
-              .classed(style.tickSelected, true)
+              .classed(pstyle.tickSelected, true)
               .style('display', function() {
                 if (d3.select(this).classed(style.label)) {
                   return null;
@@ -607,7 +608,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
           } else {
             d3.select(this)
               .selectAll('text')
-              .classed(style.tickSelected, false)
+              .classed(pstyle.tickSelected, false)
               .style('display', null);
           }
           d3.select(this)
@@ -723,11 +724,11 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
           return "translate(" + me.xscale(d) + ")";
       })
       // update brush placement
-      svg.selectAll("." + style.brush)
+      svg.selectAll("." + pstyle.brush)
         .each(function(d) { d3.select(this).call(me.d3brush); })
 
       // update axis placement
-      div.selectAll("." + style.axis)
+      div.selectAll("." + pstyle.axis)
         .each(function(d: string) {
           // @ts-ignore
           d3.select(this).call(me.get_axis(d));
@@ -819,21 +820,21 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
     var me: ParallelPlot = this;
     // update brushes
     if (d) {
-      var brush_el = d3.select(this.svg_ref.current).selectAll("." + style.brush)
+      var brush_el = d3.select(this.svg_ref.current).selectAll("." + pstyle.brush)
           .filter(function(key) { return key == d; });
       this.d3brush.move(brush_el, extent);
     } else {
       // all ticks
-      d3.select(this.svg_ref.current).selectAll("." + style.brush)
+      d3.select(this.svg_ref.current).selectAll("." + pstyle.brush)
         .each(function(d) { d3.select(this).call(me.d3brush); })
     }
 
     // show ticks
-    div.selectAll("." + style.axis + " g").style("display", null);
+    div.selectAll("." + pstyle.axis + " g").style("display", null);
     div.selectAll(".background").style("visibility", null);
 
     // update axes
-    div.selectAll("." + style.axis)
+    div.selectAll("." + pstyle.axis)
       .each(function(d: string,i) {
         // hide lines for better performance
         d3.select(this).selectAll('line').style("display", "none");
@@ -904,7 +905,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
   brush_clear_all(): void {
     // Reset brushes - but only trigger call to "brush" once
     this.d3brush.on("brush", null).on("end", null);
-    this.d3brush.move(this.dimensions_dom.selectAll("." + style.brush), null);
+    this.d3brush.move(this.dimensions_dom.selectAll("." + pstyle.brush), null);
     this.d3brush.on("brush", this.onBrushChange).on("end", this.onBrushChange);
     this.onBrushChange();
   }

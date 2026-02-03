@@ -5,7 +5,8 @@
       "mcp__plugin_playwright_playwright__browser_drag",
       "Bash(bun run build:*)",
       "Bash(pip uninstall:*)",
-      "Bash(bunx playwright test:*)"
+      "Bash(bunx playwright test:*)",
+      "Bash(./build.sh:*)"
     ]
   }
 }

@@ -8,28 +8,14 @@
 import $ from "jquery";
 import React from "react";
 
-//@ts-ignore
-import dt from "datatables.net";
-//@ts-ignore
-import dtBs4 from "datatables.net-bs4";
-//@ts-ignore
-import dtReorder from "datatables.net-colreorder";
-//@ts-ignore
-import dtReorderBs4 from "datatables.net-colreorder-bs4";
-//@ts-ignore
-import dtButtons from "datatables.net-buttons";
-//@ts-ignore
-import dtButtonsBs4 from "datatables.net-buttons-bs4";
-
-dtBs4(window, $);
-dtReorder(window, $);
-dtReorderBs4(window, $);
-dtButtons(window, $);
-dtButtonsBs4(window, $);
+// DataTables 2.x - imports automatically register with jQuery
+import "datatables.net-bs5";
+import "datatables.net-colreorder-bs5";
+import "datatables.net-buttons-bs5";
 
 
 import { Datapoint } from "./types";
-import style from "./hiplot.scss";
+import style from "./hiplot.css";
 import { HiPlotPluginData } from "./plugin";
 import _ from "underscore";
 import { FilterType } from "./filters";
@@ -135,7 +121,7 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
         this.dt = dom.DataTable({
             columns: columns,
             data: [],
-            order: order_by,
+            order: order_by as any,
             deferRender: true, // Create HTML elements only when displayed
             headerCallback: function headerCallback(thead: HTMLTableRowElement, data: Array<Array<any>>, start: number, end: number, display) {
                 Array.from(thead.cells).forEach(function(th: HTMLElement, i) {

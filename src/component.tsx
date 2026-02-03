@@ -28,7 +28,7 @@ import LogoSVG from "../hiplot/static/logo.svg";
 //@ts-ignore
 import LogoSVGW from "../hiplot/static/logo-w.svg";
 //@ts-ignore
-import style from "./hiplot.scss";
+import style from "./hiplot.css";
 import { ContextMenu } from "./contextmenu";
 import { HiPlotDistributionPlugin } from "./distribution/plugin";
 import { Filter, FilterType, apply_filters, apply_filter } from "./filters";
