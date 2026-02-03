@@ -12,7 +12,10 @@ function packageNameFull(isDebug: boolean): string {
 export default defineConfig(({ mode }) => {
   const isDebug = mode === "development";
   return {
-    plugins: [react(), cssInjectedByJsPlugin()],
+  plugins: [react(), cssInjectedByJsPlugin()],
+  resolve: {
+    dedupe: ["jquery"],
+  },
     define: {
       HIPLOT_PACKAGE_NAME_FULL: JSON.stringify(packageNameFull(isDebug)),
       define: "undefined",

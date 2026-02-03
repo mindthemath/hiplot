@@ -1,7 +1,16 @@
 import { test, expect } from "@playwright/test";
 
 async function loadDemo(page) {
+  if (process.env.PW_LOG) {
+    page.on("console", (msg) => {
+      console.log(`[console:${msg.type()}] ${msg.text()}`);
+    });
+    page.on("pageerror", (err) => {
+      console.log(`[pageerror] ${err.message}`);
+    });
+  }
   await page.goto("/");
+  await page.waitForFunction(() => (window as any).hiplot?.render, { timeout: 15000 });
   await expect(page.locator("#hiplot_element_id")).toBeVisible();
   await expect(page.locator(".hip_thm--light, .hip_thm--dark")).toBeVisible();
   const input = page.locator('textarea[placeholder="Experiments to load"]');
@@ -14,6 +23,15 @@ async function loadDemo(page) {
 
 test("renders HiPlot on the default page", async ({ page }) => {
   await loadDemo(page);
+});
+
+test("datatable renders with rows", async ({ page }) => {
+  await loadDemo(page);
+  await expect(page.locator("table.sample-rows-table")).toBeVisible();
+  const rowLocator = page.locator("table.sample-rows-table tbody tr");
+  await expect
+    .poll(async () => rowLocator.count(), { timeout: 20000 })
+    .toBeGreaterThan(0);
 });
 
 test("respects hip.dark query parameter", async ({ page }) => {

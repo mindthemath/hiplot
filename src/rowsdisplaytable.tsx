@@ -7,11 +7,33 @@
 
 import $ from "jquery";
 import React from "react";
-
-// DataTables 2.x - imports automatically register with jQuery
+import DataTable from "datatables.net";
 import "datatables.net-bs5";
-import "datatables.net-colreorder-bs5";
-import "datatables.net-buttons-bs5";
+
+// Ensure jQuery is on window for DataTables modules
+if (typeof window !== "undefined") {
+    (window as any).$ = $;
+    (window as any).jQuery = $;
+    DataTable.use($);
+}
+
+let dataTablesExtensionsPromise: Promise<void> | null = null;
+
+function ensureDataTablesExtensions(): Promise<void> {
+    if (dataTablesExtensionsPromise) {
+        return dataTablesExtensionsPromise;
+    }
+    if (!($.fn as any).DataTable) {
+        ($.fn as any).DataTable = DataTable;
+        ($.fn as any).dataTable = DataTable;
+    }
+    dataTablesExtensionsPromise = import("datatables.net-buttons")
+        .then(() => import("datatables.net-buttons-bs5"))
+        .then(() => import("datatables.net-colreorder"))
+        .then(() => import("datatables.net-colreorder-bs5"))
+        .then(() => undefined);
+    return dataTablesExtensionsPromise;
+}
 
 
 import { Datapoint } from "./types";
@@ -60,12 +82,13 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
         this.state = {};
     }
     componentDidMount() {
-        this.mountDt();
+        void this.mountDt();
     }
-    mountDt() {
+    async mountDt() {
         if (!this.props.params_def["uid"]) {
             return;
         }
+        await ensureDataTablesExtensions();
         const dom = $(this.table_ref.current);
         this.ordered_cols = ['uid'];
         const me = this;

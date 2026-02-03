@@ -64,6 +64,9 @@ export default defineConfig(({ mode }) => {
     path.resolve(__dirname, "src", "hiplot_web.tsx");
   return {
     plugins: [react(), cssInjectedByJsPlugin(), copyWebBundlesPlugin(entryName)],
+    resolve: {
+      dedupe: ["jquery"],
+    },
     define: {
       HIPLOT_PACKAGE_NAME_FULL: JSON.stringify(packageNameFull(isDebug)),
       define: "undefined",

@@ -33,14 +33,14 @@ export function build_props(extra?: any): HiPlotProps {
     if (extra !== undefined) {
         Object.assign(props, extra);
     }
-    if (extra.dataProviderName !== undefined) {
+    if (extra && extra.dataProviderName !== undefined) {
         props.dataProvider = {
             'webserver': WebserverDataProvider,
             'upload': UploadDataProvider,
             'none': StaticDataProvider,
         }[extra.dataProviderName];
     }
-    if (extra.persistentStateUrlPrefix !== undefined) {
+    if (extra && extra.persistentStateUrlPrefix !== undefined) {
         props.persistentState = new PersistentStateInURL(extra.persistentStateUrlPrefix);
     }
     return props;
