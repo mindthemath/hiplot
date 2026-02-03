@@ -15,6 +15,9 @@ import { UploadDataProvider } from "./dataproviders/upload";
 
 
 export function build_props(extra?: any): HiPlotProps {
+    const searchParams = new URLSearchParams(location.search);
+    const darkParam = searchParams.get("hiplot.dark") ?? searchParams.get("HIPLOT.dark");
+    const darkValue = darkParam === null ? null : JSON.parse(darkParam);
     var props = {
         experiment: null,
         persistentState: new PersistentStateInURL("hip"),
@@ -22,7 +25,7 @@ export function build_props(extra?: any): HiPlotProps {
         comm: null,
         asserts: false,
         dataProvider: WebserverDataProvider,
-        dark: false,
+        dark: darkValue,
         onChange: null,
     };
     if (extra !== undefined) {
