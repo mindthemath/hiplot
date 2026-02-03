@@ -87,12 +87,11 @@ export class ContextMenu extends React.Component<ContextMenuProps, ContextMenuSt
       (this.state.visible && !prevState.visible) || this.state.column != prevState.column;
     if (needsUpdate) {
       cm.innerHTML = "";
-      var me = this;
-      this.trigger_callbacks.forEach(function (trigger) {
-        trigger.cb(me.state.column, cm);
+      this.trigger_callbacks.forEach((trigger) => {
+        trigger.cb(this.state.column, cm);
       });
-      this.trigger_callbacks_last.forEach(function (trigger) {
-        trigger.cb(me.state.column, cm);
+      this.trigger_callbacks_last.forEach((trigger) => {
+        trigger.cb(this.state.column, cm);
       });
       // After content is added, check if menu overflows viewport and reposition if needed
       requestAnimationFrame(() => {
