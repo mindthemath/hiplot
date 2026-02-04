@@ -40,6 +40,20 @@ test("respects hip.dark query parameter", async ({ page }) => {
   await expect(page.locator(".hip_thm--light")).toBeVisible();
 });
 
+test("respects hip.dark=auto and tracks prefers-color-scheme", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto("/?hip.dark=auto");
+  await expect(page.locator(".hip_thm--dark")).toBeVisible();
+
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect(page.locator(".hip_thm--light")).toBeVisible();
+});
+
+test("ignores invalid hip.dark values", async ({ page }) => {
+  await page.goto("/?hip.dark=banana");
+  await expect(page.locator(".hip_thm--light")).toBeVisible();
+});
+
 test("context menu opens on axis label right-click", async ({ page }) => {
   await loadDemo(page);
   const label = page.locator(".pplot-label").first();

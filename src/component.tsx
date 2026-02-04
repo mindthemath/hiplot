@@ -95,6 +95,8 @@ const makeCancelable = (promise: LoadURIPromise): CancelablePromise => {
 };
 
 // BEGIN_HIPLOT_PROPS
+export type HiPlotDarkMode = boolean | "auto";
+
 export interface HiPlotProps {
   // Experiment to be displayed. Can be created with `hip.Experiment.from_iterable`
   experiment: HiPlotExperiment | null;
@@ -105,8 +107,8 @@ export interface HiPlotProps {
   persistentState?: PersistentState;
   // Callbacks when selection changes, filtering, or brush extents change
   onChange: { [k: string]: (type: string, data: any) => void };
-  // Enable dark-mode
-  dark: boolean;
+  // Enable dark-mode. Use "auto" to follow system / JupyterLab theme.
+  dark: HiPlotDarkMode;
   // Adds extra assertions (disabled by default)
   asserts: boolean;
   /* A class that can be used to dynamically fetch experiments
@@ -135,6 +137,7 @@ interface HiPlotState extends IDatasets {
   // Data that persists upon page reload, sharing link etc...
   persistentState: PersistentState;
   dark: boolean;
+  darkModeSetting: HiPlotDarkMode;
   dataProvider: DataProviderClass;
 
   // Track hidden columns count for header button
@@ -144,10 +147,42 @@ interface HiPlotState extends IDatasets {
 function detectIsDarkTheme(): boolean {
   // Hack: detect dark/light theme in Jupyter Lab
   const jupyterLabAttrLightTheme = "data-jp-theme-light";
-  if (document.body.hasAttribute(jupyterLabAttrLightTheme)) {
+  if (typeof document !== "undefined" && document.body?.hasAttribute(jupyterLabAttrLightTheme)) {
     return document.body.getAttribute(jupyterLabAttrLightTheme) == "false";
   }
-  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  if (typeof window !== "undefined" && window.matchMedia) {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  return false;
+}
+
+export function normalizeDarkModeSetting(
+  value: unknown,
+  fallback: HiPlotDarkMode = "auto",
+): HiPlotDarkMode {
+  if (value === "auto") {
+    return "auto";
+  }
+  if (value === true || value === false) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "auto" || normalized === "system") {
+      return "auto";
+    }
+    if (["true", "1", "yes", "on", "dark"].includes(normalized)) {
+      return true;
+    }
+    if (["false", "0", "no", "off", "light"].includes(normalized)) {
+      return false;
+    }
+  }
+  return fallback;
+}
+
+function resolveDarkModeSetting(setting: HiPlotDarkMode): boolean {
+  return setting === "auto" ? detectIsDarkTheme() : setting;
 }
 
 export enum DefaultPlugins {
@@ -181,9 +216,13 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
   plugins_window_state: { [plugin: string]: any } = {};
 
   plugins_ref: { [plugin: string]: React.RefObject<PluginClass> } = {}; // For debugging/tests
+  mediaQueryList: MediaQueryList | null = null;
+  mediaQueryListener: ((event: MediaQueryListEvent) => void) | null = null;
+  jupyterThemeObserver: MutationObserver | null = null;
 
   constructor(props: HiPlotProps) {
     super(props);
+    const darkModeSetting = normalizeDarkModeSetting(this.props.dark, false);
     this.state = {
       experiment: null,
       colormap: null,
@@ -200,7 +239,8 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
       params_def: {},
       params_def_unfiltered: {},
       colorby: null,
-      dark: this.props.dark === null ? detectIsDarkTheme() : this.props.dark,
+      dark: resolveDarkModeSetting(darkModeSetting),
+      darkModeSetting,
       persistentState:
         props.persistentState !== undefined && props.persistentState !== null
           ? props.persistentState
@@ -223,6 +263,67 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
     dataProvider: null,
     onChange: null,
   };
+  applyDarkModeSetting(nextSettingRaw: unknown): void {
+    const nextSetting = normalizeDarkModeSetting(nextSettingRaw, this.state.darkModeSetting);
+    if (nextSetting !== this.state.darkModeSetting) {
+      if (nextSetting === "auto") {
+        this.startAutoThemeListeners();
+      } else {
+        this.stopAutoThemeListeners();
+      }
+    }
+    const nextDark = resolveDarkModeSetting(nextSetting);
+    if (nextSetting !== this.state.darkModeSetting || nextDark !== this.state.dark) {
+      this.setState({
+        darkModeSetting: nextSetting,
+        dark: nextDark,
+      });
+    }
+  }
+  startAutoThemeListeners(): void {
+    if (this.mediaQueryList === null && typeof window !== "undefined" && window.matchMedia) {
+      this.mediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
+      this.mediaQueryListener = (event: MediaQueryListEvent) => {
+        if (this.state.darkModeSetting === "auto") {
+          this.setState({ dark: event.matches });
+        }
+      };
+      if (this.mediaQueryList.addEventListener) {
+        this.mediaQueryList.addEventListener("change", this.mediaQueryListener);
+      } else if ((this.mediaQueryList as any).addListener) {
+        (this.mediaQueryList as any).addListener(this.mediaQueryListener);
+      }
+    }
+    if (this.jupyterThemeObserver === null && typeof document !== "undefined" && document.body) {
+      this.jupyterThemeObserver = new MutationObserver(() => {
+        if (this.state.darkModeSetting === "auto") {
+          const nextDark = detectIsDarkTheme();
+          if (nextDark !== this.state.dark) {
+            this.setState({ dark: nextDark });
+          }
+        }
+      });
+      this.jupyterThemeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ["data-jp-theme-light"],
+      });
+    }
+  }
+  stopAutoThemeListeners(): void {
+    if (this.mediaQueryList && this.mediaQueryListener) {
+      if (this.mediaQueryList.removeEventListener) {
+        this.mediaQueryList.removeEventListener("change", this.mediaQueryListener);
+      } else if ((this.mediaQueryList as any).removeListener) {
+        (this.mediaQueryList as any).removeListener(this.mediaQueryListener);
+      }
+    }
+    this.mediaQueryList = null;
+    this.mediaQueryListener = null;
+    if (this.jupyterThemeObserver) {
+      this.jupyterThemeObserver.disconnect();
+      this.jupyterThemeObserver = null;
+    }
+  }
   static getDerivedStateFromError(error: Error) {
     // Update state so the next render will show the fallback UI.
     return {
@@ -381,6 +482,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
     });
   }
   componentWillUnmount() {
+    this.stopAutoThemeListeners();
     if (this.contextMenuRef.current) {
       this.contextMenuRef.current.removeCallbacks(this);
     }
@@ -392,6 +494,9 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
   }
   componentDidMount() {
     setupBrowserCompat(this.rootRef.current);
+    if (this.state.darkModeSetting === "auto") {
+      this.startAutoThemeListeners();
+    }
 
     // Setup contextmenu when we right-click a parameter
     this.contextMenuRef.current.addCallback(this.columnContextMenu.bind(this), this);
@@ -409,6 +514,9 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
     }
   }
   componentDidUpdate(prevProps: HiPlotProps, prevState: HiPlotState): void {
+    if (prevProps.dark !== this.props.dark) {
+      this.applyDarkModeSetting(this.props.dark);
+    }
     if (prevState.rows_filtered_filters != this.state.rows_filtered_filters) {
       this.state.persistentState.set(PSTATE_FILTERS, this.state.rows_filtered_filters);
     }
