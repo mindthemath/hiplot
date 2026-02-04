@@ -607,7 +607,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
         .classed(style.label, true)
         .classed(style.axisLabelText, true)
         .classed(pstyle.pplotLabel, true)
-        .each(function (dim) {
+        .each(function (_dim) {
           d3.select(this)
             .append("title")
             .text(IS_MOBILE ? "Long-press for options" : "Right click for options");
@@ -669,7 +669,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
         .append("svg:g")
         .classed(pstyle.brush, true)
         .classed("pplot-brush", true)
-        .each(function (d) {
+        .each(function (_d) {
           d3.select(this).call(me.d3brush);
         })
         .selectAll("rect")
@@ -837,7 +837,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
         return "translate(" + me.xscale(d) + ")";
       });
       // update brush placement
-      svg.selectAll("." + pstyle.brush).each(function (d) {
+      svg.selectAll("." + pstyle.brush).each(function (_d) {
         d3.select(this).call(me.d3brush);
       });
 
@@ -1041,7 +1041,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
   remove_axis(d: string): void {
     var pd = this.props.params_def[d];
     if (pd !== undefined) {
-      this.setState(function (prevState, props) {
+      this.setState(function (prevState, _props) {
         var newHide = new Set(prevState.hide);
         newHide.add(d);
         return {
