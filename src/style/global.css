@@ -5,12 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-/* Import Bootstrap and theme files */
+/* Font import - external, not scoped */
 @import url("https://fonts.googleapis.com/css?family=Lato:400,700,400italic&display=swap");
-@import "bootstrap/dist/css/bootstrap.min.css";
-@import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
-@import "./bs-dark.css";
-@import "./bs-light.css";
+
+/* Note: Bootstrap and DataTables CSS are imported via JS in component.tsx
+   so they can be properly scoped by PostCSS */
 
 /* Dark theme wrapper */
 .hip_thm--dark {

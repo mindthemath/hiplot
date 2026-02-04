@@ -1,8 +1,45 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import fs from "fs";
 import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
+import postcss from "postcss";
+import prefixSelector from "postcss-prefix-selector";
+
+// Vite plugin that scopes vendor CSS (Bootstrap, DataTables) under hiplot theme classes
+// so styles don't leak into parent applications
+function scopeVendorCssVitePlugin(): Plugin {
+  const vendorPatterns = [/node_modules[/\\]bootstrap/, /node_modules[/\\]datatables\.net/];
+
+  const processor = postcss([
+    prefixSelector({
+      prefix: ":is(.hip_thm--dark, .hip_thm--light)",
+      transform: function (prefix, selector, prefixedSelector) {
+        // Replace root-level selectors with our theme prefix
+        if (selector === ":root" || selector === "html" || selector === "body") {
+          return prefix;
+        }
+        // Handle universal selector - scope it
+        if (selector === "*" || selector.startsWith("*,") || selector.startsWith("*, ")) {
+          return selector.replace(/^\*/, prefix + " *");
+        }
+        return prefixedSelector;
+      },
+    }),
+  ]);
+
+  return {
+    name: "scope-vendor-css",
+    async transform(code, id) {
+      // Only process CSS files from vendor packages
+      if (!id.endsWith(".css") || !vendorPatterns.some((p) => p.test(id))) {
+        return null;
+      }
+      const result = await processor.process(code, { from: id });
+      return { code: result.css, map: result.map?.toString() };
+    },
+  };
+}
 
 type RemToPxOptions = {
   propList: string[];
@@ -89,7 +126,7 @@ export default defineConfig(({ mode }) => {
   const entryPath =
     process.env.HIPLOT_WEB_ENTRY ?? path.resolve(__dirname, "src", "hiplot_web.tsx");
   return {
-    plugins: [react(), cssInjectedByJsPlugin(), copyWebBundlesPlugin(entryName)],
+    plugins: [scopeVendorCssVitePlugin(), react(), cssInjectedByJsPlugin(), copyWebBundlesPlugin(entryName)],
     resolve: {
       dedupe: ["jquery"],
     },
