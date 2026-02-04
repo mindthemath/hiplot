@@ -71,7 +71,8 @@ github_doc_root = 'https://github.com/mindthemath/hiplot'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-release = os.environ.get("CIRCLE_TAG", subprocess.check_output(["git", "describe", "--tags", "--abbrev=0", "main"]).decode('utf-8'))
+import hiplot.pkginfo
+release = hiplot.pkginfo.__version__
 
 # The short X.Y version.
 version = '.'.join(release.split('.')[:2])
