@@ -132,12 +132,12 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
     if (!this.dimensions_dom) {
       return extents;
     }
-    const self = this;
+    const normalizeBrushSelection = this.normalizeBrushSelection.bind(this);
     this.dimensions_dom.selectAll("." + pstyle.brush).each(function (
       this: SVGGElement,
       dim: string,
     ) {
-      extents[dim] = self.normalizeBrushSelection(d3.brushSelection(this));
+      extents[dim] = normalizeBrushSelection(d3.brushSelection(this));
     });
     return extents;
   }

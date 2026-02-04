@@ -438,26 +438,25 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
       this.state.loadPromise != prevState.loadPromise
     ) {
       const prom = this.state.loadPromise.promise;
-      const me = this;
       prom
-        .then(function (data: { error?: string; experiment?: HiPlotExperiment }) {
+        .then((data: { error?: string; experiment?: HiPlotExperiment }) => {
           if (data.error !== undefined) {
             console.log("Experiment loading failed", data);
-            me.setState({
+            this.setState({
               loadStatus: HiPlotLoadStatus.Error,
               experiment: null,
               error: data.error,
             });
             return;
           }
-          me._loadExperiment(data.experiment);
+          this._loadExperiment(data.experiment);
         })
         .catch((error) => {
           if (error.isCanceled) {
             return;
           }
           console.log("Error", error);
-          me.setState({
+          this.setState({
             loadStatus: HiPlotLoadStatus.Error,
             experiment: null,
             error: "HTTP error, check server logs / javascript console",
