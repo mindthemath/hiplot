@@ -463,6 +463,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
   }.bind(this);
 
   initParallelPlot(this: ParallelPlot) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const me = this;
 
     var div = (this.div = d3.select(me.root_ref.current));
@@ -551,6 +552,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
               if (me.state.dragging.pos < 12 || me.state.dragging.pos > me.w - 12) {
                 me.remove_axis(d);
               } else {
+                // eslint-disable-next-line @typescript-eslint/no-this-alias
                 const element = this;
                 me.setState(
                   { order: Array.from(me.state.dimensions), dragging: null },

@@ -142,6 +142,7 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
     }
   }
   mountPlotXY(this: PlotXY): PlotXYInternal {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     var me = this;
 
     me.plotXYcontextMenuRef.current.removeCallbacks(this);

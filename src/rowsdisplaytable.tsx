@@ -88,6 +88,7 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
     await ensureDataTablesExtensions();
     const dom = $(this.table_ref.current);
     this.ordered_cols = ["uid"];
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const me = this;
     $.each(this.props.params_def, function (k: string, _def) {
       if (k == "uid") {
