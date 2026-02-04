@@ -25,6 +25,9 @@ jobs:
       - name: Build production bundle
         run: bun run build
 
+      - name: Check formatting
+        run: make fmt-check
+
       - name: Install Playwright browsers
         run: bunx playwright install --with-deps
 
