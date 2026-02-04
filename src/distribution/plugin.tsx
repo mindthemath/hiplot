@@ -71,16 +71,15 @@ export class HiPlotDistributionPlugin extends React.Component<
 
   componentDidMount() {
     if (this.props.context_menu_ref && this.props.context_menu_ref.current) {
-      const me = this;
-      this.props.context_menu_ref.current.addCallback(function (column, cm) {
+      this.props.context_menu_ref.current.addCallback((column, cm) => {
         var contextmenu = $(cm);
         contextmenu.append($('<div class="dropdown-divider"></div>'));
         var option = $('<a class="dropdown-item" href="#">').text("View distribution");
-        if (me.state.axis == column) {
+        if (this.state.axis == column) {
           option.addClass("disabled").css("pointer-events", "none");
         }
-        option.click(function (event) {
-          me.setState({ axis: column });
+        option.click((event) => {
+          this.setState({ axis: column });
           event.preventDefault();
         });
         contextmenu.append(option);
