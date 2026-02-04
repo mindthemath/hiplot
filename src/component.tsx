@@ -8,6 +8,12 @@
 import $ from "jquery";
 import * as _ from "underscore";
 import React from "react";
+
+// Vendor CSS imports - PostCSS will scope these under .hip_thm--dark/.hip_thm--light
+import "bootstrap/dist/css/bootstrap.min.css";
+import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
+import "./style/bs-dark.css";
+import "./style/bs-light.css";
 import "./style/global.css";
 
 import {
