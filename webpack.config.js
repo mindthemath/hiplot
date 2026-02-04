@@ -8,7 +8,7 @@
 const path = require("path");
 const fs = require("fs");
 const LicenseWebpackPlugin = require("license-webpack-plugin").LicenseWebpackPlugin;
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const _BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 var remToPx = require("postcss-rem-to-pixel");
 const webpack = require("webpack");
 
@@ -21,12 +21,12 @@ class WhenDoneCopyToHiplotStaticDir {
   apply(compiler) {
     compiler.hooks.afterEmit.tap(
       "WhenDoneCopyToHiplotStaticDir",
-      (stats /* stats is passed as argument when done hook is tapped.  */) => {
+      (_stats /* stats is passed as argument when done hook is tapped.  */) => {
         for (let dest in this.installs) {
           const origin = path.resolve(distPath, this.installs[dest]);
           try {
             fs.mkdirSync(path.dirname(dest), { recursive: true });
-          } catch (err) {
+          } catch {
             /* `recursive` option is node >= 10.0. Otherwise will throw if the directory already exists */
           }
           fs.copyFileSync(origin, dest);

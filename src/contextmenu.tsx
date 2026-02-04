@@ -96,7 +96,7 @@ export class ContextMenu extends React.Component<ContextMenuProps, ContextMenuSt
       // After content is added, check if menu overflows viewport and reposition if needed
       requestAnimationFrame(() => {
         const rect = cm.getBoundingClientRect();
-        const parent = cm.parentElement.getBoundingClientRect();
+        const _parent = cm.parentElement.getBoundingClientRect();
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 

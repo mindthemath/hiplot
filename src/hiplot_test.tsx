@@ -198,7 +198,7 @@ export class HiPlotTester extends React.Component<{ hiplotProps: HiPlotProps }, 
     const exp = this.hiplot.current.state.experiment;
     console.assert(exp);
     this.hiplot.current.loadWithPromise(
-      new Promise(function (rs, rj) {
+      new Promise(function (rs, _rj) {
         rs({
           experiment: exp,
         });

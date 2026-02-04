@@ -39,7 +39,7 @@ export class PersistentStateInURL {
     searchParams.set(name, JSON.stringify(new_value));
     try {
       history.replaceState({}, "title", "?" + searchParams.toString());
-    } catch (e) {
+    } catch {
       this.params[name] = new_value;
     }
   }

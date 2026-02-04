@@ -16,7 +16,7 @@ interface TutorialStepProps {
   rootRef: React.RefObject<HTMLElement>;
 }
 
-class StepHiPlotInfo extends React.Component<TutorialStepProps, {}> {
+class _StepHiPlotInfo extends React.Component<TutorialStepProps, {}> {
   render() {
     // @ts-ignore
     let pkgInfo = HIPLOT_PACKAGE_NAME_FULL;
@@ -234,7 +234,7 @@ export class HiPlotTutorial extends React.Component<Props, State> {
       this.props.onTutorialDone();
       return;
     }
-    this.setState(function (prevState, prevProps) {
+    this.setState(function (prevState, _prevProps) {
       return {
         stepNum: Math.min(prevState.stepNum + 1, this.steps.length - 1),
       };
@@ -245,7 +245,7 @@ export class HiPlotTutorial extends React.Component<Props, State> {
       this.props.onTutorialDone();
       return;
     }
-    this.setState(function (prevState, prevProps) {
+    this.setState(function (prevState, _prevProps) {
       return {
         stepNum: Math.max(prevState.stepNum - 1, 0),
       };

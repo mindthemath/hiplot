@@ -345,7 +345,7 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
     }
     on_move();
 
-    function hover(svg, path) {
+    function hover(svg, _path) {
       var dot = me.svg.append("g").attr("display", "none");
 
       dot.append("circle").attr("r", 2.5);

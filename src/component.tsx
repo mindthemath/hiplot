@@ -202,7 +202,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
       dataProvider: this.props.dataProvider ? this.props.dataProvider : StaticDataProvider,
       restorableColumnsCount: 0,
     };
-    Object.keys(props.plugins).forEach((name, index) => {
+    Object.keys(props.plugins).forEach((name, _index) => {
       this.plugins_window_state[name] = {};
       this.plugins_ref[name] = React.createRef<PluginClass>();
     });
@@ -346,7 +346,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
     if (params_def[colorby] === undefined) {
       colorby = get_default_color();
     }
-    this.setState(function (state, props) {
+    this.setState(function (_state, _props) {
       return {
         experiment: experiment,
         colormap: experiment.colormap,
@@ -395,7 +395,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
     if (this.props.experiment) {
       this.loadWithPromise(
         new Promise(
-          function (resolve, reject) {
+          function (resolve, _reject) {
             resolve({ experiment: this.props.experiment });
           }.bind(this),
         ),
@@ -419,7 +419,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
       ) {
         this.loadWithPromise(
           new Promise(
-            function (resolve, reject) {
+            function (resolve, _reject) {
               resolve({ experiment: this.props.experiment });
             }.bind(this),
           ),
@@ -485,7 +485,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
         option.click(
           function (this: HiPlot, event) {
             contextmenu.css("display", "none");
-            this.setState(function (state: Readonly<HiPlotState>, props) {
+            this.setState(function (state: Readonly<HiPlotState>, _props) {
               return {
                 params_def: {
                   ...state.params_def,
@@ -584,7 +584,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
      * When we hit `Restore` button
      */
     this.setState(
-      function (this: HiPlot, state: Readonly<HiPlotState>, props): Partial<HiPlotState> {
+      function (this: HiPlot, state: Readonly<HiPlotState>, _props): Partial<HiPlotState> {
         const all_rows = state.rows_all_unfiltered;
         const new_pd = this.createNewParamsDef(all_rows);
         return {
@@ -602,7 +602,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
      * When we hit Keep (keep=true), or Exclude (keep=false) buttons
      */
     this.setState(
-      function (this: HiPlot, state: Readonly<HiPlotState>, props): Partial<HiPlotState> {
+      function (this: HiPlot, state: Readonly<HiPlotState>, _props): Partial<HiPlotState> {
         const new_filtered = keep
           ? state.rows_selected
           : _.difference(state.rows_filtered, state.rows_selected);

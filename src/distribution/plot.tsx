@@ -248,10 +248,10 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
       .merge(u) // get the already existing elements as well
       .transition() // and apply changes to all of them
       .duration(animate ? this.props.animateMs : 0)
-      .attr(`${dataCoord}1`, (d, i) => dataScale(hist.bins[binsOrdering[i]].x0) + 1)
-      .attr(`${densityCoord}1`, (d, i) => densityScaleFromLength(d))
-      .attr(`${dataCoord}2`, (d, i) => dataScale(hist.bins[binsOrdering[i]].x1))
-      .attr(`${densityCoord}2`, (d, i) => densityScaleFromLength(d));
+      .attr(`${dataCoord}1`, (d, _i) => dataScale(hist.bins[binsOrdering[_i]].x0) + 1)
+      .attr(`${densityCoord}1`, (d, _i) => densityScaleFromLength(d))
+      .attr(`${dataCoord}2`, (d, _i) => dataScale(hist.bins[binsOrdering[_i]].x1))
+      .attr(`${densityCoord}2`, (d, _i) => densityScaleFromLength(d));
 
     u.exit().remove();
   }
@@ -273,14 +273,14 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
       .merge(u) // get the already existing elements as well
       .attr(
         "data-value-sample",
-        function (d, i) {
+        function (d, _i) {
           return d.length ? d[0][this.props.axis] : "empty";
         }.bind(this),
       )
-      .on("mouseover", function (d, i) {
+      .on("mouseover", function (_d, _i) {
         d3.select(this).transition().duration(150).attr("opacity", ".5");
       })
-      .on("mouseout", function (d, i) {
+      .on("mouseout", function (_d, _i) {
         d3.select(this).transition().duration(150).attr("opacity", "1");
       })
       .transition() // and apply changes to all of them
@@ -327,7 +327,7 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
     this.drawAllHistograms(false);
   }
 
-  componentDidUpdate(prevProps: DistributionPlotData, prevState: {}) {
+  componentDidUpdate(prevProps: DistributionPlotData, _prevState: {}) {
     if (
       prevProps.axis != this.props.axis ||
       prevProps.param_def != this.props.param_def ||

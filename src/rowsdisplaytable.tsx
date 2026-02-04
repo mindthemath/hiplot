@@ -89,7 +89,7 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
     const dom = $(this.table_ref.current);
     this.ordered_cols = ["uid"];
     const me = this;
-    $.each(this.props.params_def, function (k: string, def) {
+    $.each(this.props.params_def, function (k: string, _def) {
       if (k == "uid") {
         return;
       }
@@ -133,7 +133,7 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
       );
       return [col_idx, col_otype[1]];
     });
-    columns[0]["render"] = function (data, type, row, meta) {
+    columns[0]["render"] = function (data, type, row, _meta) {
       if (!me.dt) {
         return "";
       }
@@ -148,12 +148,12 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
       deferRender: true, // Create HTML elements only when displayed
       headerCallback: function headerCallback(
         thead: HTMLTableRowElement,
-        data: Array<Array<any>>,
-        start: number,
-        end: number,
-        display,
+        _data: Array<Array<any>>,
+        _start: number,
+        _end: number,
+        _display,
       ) {
-        Array.from(thead.cells).forEach(function (th: HTMLElement, i) {
+        Array.from(thead.cells).forEach(function (th: HTMLElement, _i) {
           const col = th.innerText;
           if (col != "" && me.dt === null && me.props.context_menu_ref !== undefined) {
             th.addEventListener("contextmenu", (e) => {

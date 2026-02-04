@@ -39,10 +39,10 @@ export class UploadDataProvider extends React.Component<DataProviderProps, State
     // Try to load last loaded file stored in clientDB?
   }
 
-  onDropFiles(acceptedFiles: File[], fileRejections: FileRejection[], event: DropEvent): void {
+  onDropFiles(acceptedFiles: File[], fileRejections: FileRejection[], _event: DropEvent): void {
     this.props.onLoadExperiment(
       new Promise(
-        function (resolve, reject) {
+        function (resolve, _reject) {
           if (fileRejections.length) {
             resolve({
               error: `Unexpected file (is it a CSV file?): ${fileRejections[0].file.name} - ${fileRejections[0].errors[0].message}`,

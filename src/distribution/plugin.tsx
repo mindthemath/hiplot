@@ -95,7 +95,7 @@ export class HiPlotDistributionPlugin extends React.Component<
     }
     if (this.state.histData.all != this.props.rows_filtered) {
       this.setState(
-        function (s: HiPlotDistributionPluginState, p) {
+        function (s: HiPlotDistributionPluginState, _p) {
           return {
             histData: {
               ...s.histData,
@@ -107,7 +107,7 @@ export class HiPlotDistributionPlugin extends React.Component<
       );
     } else if (this.state.histData.selected != this.props.rows_selected) {
       this.setState(
-        function (s: HiPlotDistributionPluginState, p) {
+        function (s: HiPlotDistributionPluginState, _p) {
           return {
             histData: {
               ...s.histData,
