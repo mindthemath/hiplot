@@ -118,22 +118,21 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
   };
   componentDidMount() {
     if (this.props.context_menu_ref && this.props.context_menu_ref.current) {
-      const me = this;
-      this.props.context_menu_ref.current.addCallback(function (column, cm) {
-        var contextmenu = $(cm);
+      this.props.context_menu_ref.current.addCallback((column, cm) => {
+        const contextmenu = $(cm);
         contextmenu.append($('<div class="dropdown-divider"></div>'));
-        contextmenu.append($(`<h6 class="dropdown-header">${me.props.name}</h6>`));
-        ["axis_x", "axis_y"].forEach(function (dat, index) {
-          var label = "Set as " + ["X", "Y"][index] + " axis";
-          var option = $('<a class="dropdown-item" href="#">').text(label);
-          if (me.state[dat] == column) {
+        contextmenu.append($(`<h6 class="dropdown-header">${this.props.name}</h6>`));
+        ["axis_x", "axis_y"].forEach((dat, index) => {
+          const label = "Set as " + ["X", "Y"][index] + " axis";
+          const option = $('<a class="dropdown-item" href="#">').text(label);
+          if (this.state[dat] == column) {
             option.addClass("disabled").css("pointer-events", "none");
           }
-          option.click(function (event) {
+          option.click((event) => {
             if (index == 0) {
-              me.setState({ axis_x: column });
+              this.setState({ axis_x: column });
             } else {
-              me.setState({ axis_y: column });
+              this.setState({ axis_y: column });
             }
             event.preventDefault();
           });
