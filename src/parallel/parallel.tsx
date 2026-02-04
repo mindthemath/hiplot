@@ -933,9 +933,8 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       .scalePoint()
       .range([40, this.w - 40])
       .domain(this.state.dimensions);
-    var me = this;
-    this.state.dimensions.forEach(function (d: string) {
-      me.setScaleRange(d);
+    this.state.dimensions.forEach((d: string) => {
+      this.setScaleRange(d);
     });
     this.highlighted.lineWidth = 4;
   }
@@ -943,7 +942,6 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
   // transition ticks for reordering, rescaling and inverting
   update_ticks = function (d?: string, extent?) {
     var div = d3.select(this.root_ref.current);
-    var me: ParallelPlot = this;
     // update brushes
     if (d) {
       var brush_el = d3
@@ -957,8 +955,8 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       // all ticks
       d3.select(this.svg_ref.current)
         .selectAll("." + pstyle.brush)
-        .each(function (d) {
-          d3.select(this).call(me.d3brush);
+        .each((d, i, nodes) => {
+          d3.select(nodes[i]).call(this.d3brush);
         });
     }
 
@@ -967,30 +965,30 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
     div.selectAll(".background").style("visibility", null);
 
     // update axes
-    div.selectAll("." + pstyle.axis).each(function (d: string, i) {
+    div.selectAll("." + pstyle.axis).each((d: string, i, nodes) => {
+      const node = nodes[i];
       // hide lines for better performance
-      d3.select(this).selectAll("line").style("display", "none");
+      d3.select(node).selectAll("line").style("display", "none");
 
       // transition axis numbers
-      d3.select(this).transition().duration(720).call(me.get_axis(d));
+      d3.select(node).transition().duration(720).call(this.get_axis(d));
 
       // bring lines back
-      d3.select(this).selectAll("line").transition().delay(800).style("display", null);
+      d3.select(node).selectAll("line").transition().delay(800).style("display", null);
 
-      d3.select(this)
+      d3.select(node)
         .selectAll("text")
         .style("font-weight", null)
         .style("font-size", null)
         .style("display", null);
     });
-    me.setState(function (prevState) {
+    this.setState(function (prevState) {
       return { brush_count: prevState.brush_count + 1 };
     });
   }.bind(this);
 
   // render a set of polylines on a canvas
   paths = function (selected: Array<Datapoint>, ctx: CanvasRenderingContext2D, count: number) {
-    var me: ParallelPlot = this;
     var n = selected.length,
       i = 0,
       opacity = d3.min([2 / Math.pow(n, 0.3), 1]),
@@ -1001,29 +999,29 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
     ctx.clearRect(0, 0, this.w + 1, this.h + 1);
 
     // Adjusts rendering speed
-    function optimize(timer) {
+    const optimize = (timer) => {
       var delta = new Date().getTime() - timer;
-      me.render_speed = Math.max(Math.ceil((me.render_speed * 30) / delta), 8);
-      me.render_speed = Math.min(me.render_speed, 300);
+      this.render_speed = Math.max(Math.ceil((this.render_speed * 30) / delta), 8);
+      this.render_speed = Math.min(this.render_speed, 300);
       return new Date().getTime();
-    }
+    };
 
     // render a batch of polylines
-    function render_range(selection: Array<Datapoint>, i: number, max: number, opacity: number) {
+    const render_range = (selection: Array<Datapoint>, i: number, max: number, opacity: number) => {
       var s = selection.slice(i, max);
-      s.forEach(function (d) {
-        me.path(d, ctx, me.props.get_color_for_row(d, opacity));
+      s.forEach((d) => {
+        this.path(d, ctx, this.props.get_color_for_row(d, opacity));
       });
-    }
+    };
 
     // render all lines until finished or a new brush event
-    function animloop() {
-      if (i >= n || count < me.state.brush_count) return true;
-      var max = d3.min([i + me.render_speed, n]);
+    const animloop = () => {
+      if (i >= n || count < this.state.brush_count) return true;
+      var max = d3.min([i + this.render_speed, n]);
       render_range(shuffled_data, i, max, opacity);
       i = max;
       timer = optimize(timer); // adjusts render_speed
-    }
+    };
     if (this.animloop) {
       this.animloop.stop();
     }
