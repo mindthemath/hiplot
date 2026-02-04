@@ -124,10 +124,14 @@
   overflow-x: auto;
 }
 
-.hip_thm--dark .table-hover tbody tr:hover,
+.hip_thm--dark .table-hover tbody tr:hover {
+  color: inherit;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
 .hip_thm--light .table-hover tbody tr:hover {
-  color: #fff;
-  background-color: rgba(147, 138, 138, 0.26);
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.075);
 }
 
 .hip_thm--dark button:disabled,
@@ -135,10 +139,13 @@
   cursor: unset;
 }
 
-/* Unset some jupyterlab theme overrides */
-.hip_thm--dark tbody tr:nth-child(even),
-.hip_thm--light tbody tr:nth-child(even) {
-  background: unset;
+/* Table striping - using Bootstrap 5 CSS variables */
+.hip_thm--dark .table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.hip_thm--light .table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .hip_thm--dark table,

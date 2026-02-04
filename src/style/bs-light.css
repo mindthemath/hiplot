@@ -9,3 +9,10 @@
 .hip_thm--light table {
   color: inherit;
 }
+
+.hip_thm--light .table {
+  --bs-table-striped-bg: rgba(0, 0, 0, 0.05);
+  --bs-table-striped-color: inherit;
+  --bs-table-hover-bg: rgba(0, 0, 0, 0.075);
+  --bs-table-hover-color: inherit;
+}
