@@ -245,7 +245,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
 
   constructor(props: HiPlotProps) {
     super(props);
-    const darkModeSetting = normalizeDarkModeSetting(this.props.dark, false);
+    const darkModeSetting = normalizeDarkModeSetting(this.props.dark, "auto");
     this.state = {
       experiment: null,
       colormap: null,
@@ -279,7 +279,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
   static defaultProps = {
     loadURI: null,
     comm: null,
-    dark: false,
+    dark: "auto",
     asserts: false,
     plugins: defaultPlugins,
     experiment: null,

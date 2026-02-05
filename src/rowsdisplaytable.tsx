@@ -191,7 +191,7 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
         node.classList.remove("d-none");
         node.classList.remove("btn-secondary");
         const searchResults = this.dt.rows({ filter: "applied" });
-        if (this.dt.search() == "" || searchResults.nodes().length == 0) {
+        if (this.dt.search() == "" || searchResults.count() == 0) {
           node.classList.add("d-none");
         }
       }.bind(this),
@@ -209,7 +209,10 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
         const individualUidColIdx = me.dt.colReorder.order().indexOf(uidColIndex);
 
         dom.find(`.table-primary`).removeClass("table-primary");
-        $(row.nodes()).addClass("table-primary");
+        const rowNode = row.node();
+        if (rowNode) {
+          $(rowNode).addClass("table-primary");
+        }
         me.props.setHighlighted([me.props.dp_lookup[row.data()[individualUidColIdx]]]);
       })
       .on("mouseout", "td", function () {
@@ -217,7 +220,10 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
           return;
         }
         const rowIdx = me.dt.cell(this).index().row;
-        $(me.dt.row(rowIdx).nodes()).removeClass("table-primary");
+        const rowNode = me.dt.row(rowIdx).node();
+        if (rowNode) {
+          $(rowNode).removeClass("table-primary");
+        }
         me.props.setHighlighted([]);
       });
 
