@@ -145,6 +145,10 @@ interface HiPlotState extends IDatasets {
 }
 
 function detectIsDarkTheme(): boolean {
+  const htmlThemeOverride = getHtmlThemeOverride();
+  if (htmlThemeOverride !== null) {
+    return htmlThemeOverride;
+  }
   // Hack: detect dark/light theme in Jupyter Lab
   const jupyterLabAttrLightTheme = "data-jp-theme-light";
   if (typeof document !== "undefined" && document.body?.hasAttribute(jupyterLabAttrLightTheme)) {
@@ -154,6 +158,24 @@ function detectIsDarkTheme(): boolean {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   }
   return false;
+}
+
+function getHtmlThemeOverride(): boolean | null {
+  if (typeof document === "undefined") {
+    return null;
+  }
+  const html = document.documentElement;
+  if (!html) {
+    return null;
+  }
+  const theme = html.getAttribute("data-theme");
+  if (theme === "dark") {
+    return true;
+  }
+  if (theme === "light") {
+    return false;
+  }
+  return null;
 }
 
 export function normalizeDarkModeSetting(
@@ -219,6 +241,7 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
   mediaQueryList: MediaQueryList | null = null;
   mediaQueryListener: ((event: MediaQueryListEvent) => void) | null = null;
   jupyterThemeObserver: MutationObserver | null = null;
+  htmlThemeObserver: MutationObserver | null = null;
 
   constructor(props: HiPlotProps) {
     super(props);
@@ -308,6 +331,24 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
         attributeFilter: ["data-jp-theme-light"],
       });
     }
+    if (
+      this.htmlThemeObserver === null &&
+      typeof document !== "undefined" &&
+      document.documentElement
+    ) {
+      this.htmlThemeObserver = new MutationObserver(() => {
+        if (this.state.darkModeSetting === "auto") {
+          const nextDark = detectIsDarkTheme();
+          if (nextDark !== this.state.dark) {
+            this.setState({ dark: nextDark });
+          }
+        }
+      });
+      this.htmlThemeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"],
+      });
+    }
   }
   stopAutoThemeListeners(): void {
     if (this.mediaQueryList && this.mediaQueryListener) {
@@ -322,6 +363,10 @@ export class HiPlot extends React.Component<HiPlotProps, HiPlotState> {
     if (this.jupyterThemeObserver) {
       this.jupyterThemeObserver.disconnect();
       this.jupyterThemeObserver = null;
+    }
+    if (this.htmlThemeObserver) {
+      this.htmlThemeObserver.disconnect();
+      this.htmlThemeObserver = null;
     }
   }
   static getDerivedStateFromError(error: Error) {
