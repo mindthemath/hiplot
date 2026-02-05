@@ -53,7 +53,7 @@ export class StreamlitComponentBase<S = {}> extends React.PureComponent<Componen
     Streamlit.setFrameHeight();
   }
 
-  public componentDidUpdate(prevProps: ComponentProps, prevState: S): void {
+  public componentDidUpdate(_prevProps: ComponentProps, _prevState: S): void {
     // After we're updated, tell Streamlit that our height may have changed.
     Streamlit.setFrameHeight();
   }

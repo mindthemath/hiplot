@@ -6,7 +6,7 @@
  */
 
 import ReactDOMClient from "react-dom/client";
-import { HiPlot, defaultPlugins, HiPlotProps } from "./component";
+import { HiPlot, defaultPlugins, HiPlotProps, normalizeDarkModeSetting } from "./component";
 import React from "react";
 import { PersistentStateInURL } from "./lib/savedstate";
 import { WebserverDataProvider } from "./dataproviders/webserver";
@@ -19,8 +19,7 @@ export function build_props(extra?: any): HiPlotProps {
     searchParams.get("hip.dark") ??
     searchParams.get("hiplot.dark") ??
     searchParams.get("HIPLOT.dark");
-  const darkValue =
-    darkParam === null ? false : darkParam === "auto" ? null : JSON.parse(darkParam);
+  const darkValue = normalizeDarkModeSetting(darkParam, false);
   var props = {
     experiment: null,
     persistentState: new PersistentStateInURL("hip"),

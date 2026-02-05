@@ -32,14 +32,18 @@ export class PersistentStateInURL {
     if (value === null) {
       return default_value;
     }
-    return JSON.parse(value);
+    try {
+      return JSON.parse(value);
+    } catch {
+      return default_value;
+    }
   }
   _set(name: string, new_value: any): void {
     const searchParams = new URLSearchParams(location.search);
     searchParams.set(name, JSON.stringify(new_value));
     try {
       history.replaceState({}, "title", "?" + searchParams.toString());
-    } catch (e) {
+    } catch {
       this.params[name] = new_value;
     }
   }

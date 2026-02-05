@@ -106,7 +106,7 @@ export class HeaderBar extends React.Component<HeaderBarProps, HeaderBarState> {
     this.recomputeMetrics();
     this.recomputeSelectedWeightedSum();
   }
-  componentDidUpdate(prevProps: HeaderBarProps, prevState: HeaderBarState): void {
+  componentDidUpdate(prevProps: HeaderBarProps, _prevState: HeaderBarState): void {
     this.recomputeMetrics();
     if (
       prevProps.weightColumn != this.props.weightColumn ||
@@ -117,7 +117,7 @@ export class HeaderBar extends React.Component<HeaderBarProps, HeaderBarState> {
     }
   }
   onToggleTutorial() {
-    this.setState(function (prevState, prevProps) {
+    this.setState(function (prevState, _prevProps) {
       return {
         hasTutorial: !prevState.hasTutorial,
       };

@@ -23,7 +23,7 @@ function HiPlotWithData() {
 }
 // END_DOC_BASIC_EXAMPLE
 
-function Basic() {
+function _Basic() {
   // CI_BUILD
   const experiment = hip.Experiment.from_iterable([
     { opt: "sgd", lr: 0.01, dropout: 0.1 },
@@ -35,7 +35,7 @@ function Basic() {
 }
 
 // BEGIN_DOC_CUSTOM_EXAMPLE
-function Custom() {
+function _Custom() {
   // CI_BUILD
   // Create an experiment, and store it in the state
   // Otherwise, HiPlot detects that the experiment changed

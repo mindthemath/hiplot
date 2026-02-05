@@ -88,8 +88,9 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
     await ensureDataTablesExtensions();
     const dom = $(this.table_ref.current);
     this.ordered_cols = ["uid"];
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const me = this;
-    $.each(this.props.params_def, function (k: string, def) {
+    $.each(this.props.params_def, function (k: string, _def) {
       if (k == "uid") {
         return;
       }
@@ -133,7 +134,7 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
       );
       return [col_idx, col_otype[1]];
     });
-    columns[0]["render"] = function (data, type, row, meta) {
+    columns[0]["render"] = function (data, type, row, _meta) {
       if (!me.dt) {
         return "";
       }
@@ -148,12 +149,12 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
       deferRender: true, // Create HTML elements only when displayed
       headerCallback: function headerCallback(
         thead: HTMLTableRowElement,
-        data: Array<Array<any>>,
-        start: number,
-        end: number,
-        display,
+        _data: Array<Array<any>>,
+        _start: number,
+        _end: number,
+        _display,
       ) {
-        Array.from(thead.cells).forEach(function (th: HTMLElement, i) {
+        Array.from(thead.cells).forEach(function (th: HTMLElement, _i) {
           const col = th.innerText;
           if (col != "" && me.dt === null && me.props.context_menu_ref !== undefined) {
             th.addEventListener("contextmenu", (e) => {
@@ -190,7 +191,7 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
         node.classList.remove("d-none");
         node.classList.remove("btn-secondary");
         const searchResults = this.dt.rows({ filter: "applied" });
-        if (this.dt.search() == "" || searchResults.nodes().length == 0) {
+        if (this.dt.search() == "" || searchResults.count() == 0) {
           node.classList.add("d-none");
         }
       }.bind(this),
@@ -208,7 +209,10 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
         const individualUidColIdx = me.dt.colReorder.order().indexOf(uidColIndex);
 
         dom.find(`.table-primary`).removeClass("table-primary");
-        $(row.nodes()).addClass("table-primary");
+        const rowNode = row.node();
+        if (rowNode) {
+          $(rowNode).addClass("table-primary");
+        }
         me.props.setHighlighted([me.props.dp_lookup[row.data()[individualUidColIdx]]]);
       })
       .on("mouseout", "td", function () {
@@ -216,7 +220,10 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
           return;
         }
         const rowIdx = me.dt.cell(this).index().row;
-        $(me.dt.row(rowIdx).nodes()).removeClass("table-primary");
+        const rowNode = me.dt.row(rowIdx).node();
+        if (rowNode) {
+          $(rowNode).removeClass("table-primary");
+        }
         me.props.setHighlighted([]);
       });
 

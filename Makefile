@@ -5,13 +5,13 @@ install:
 clean:
 	rm -rf node_modules .venv
 
-build:
+build: fmt-check
 	bun run build
 
 pkg: build
 	uv build
 
-test:
+test: build
 	bun run test:js
 
 lint:
@@ -31,4 +31,5 @@ check:
 	uv run ty check
 
 dev:
-	uv run hiplot --port 8765 --host 0.0.0.0
+	uv run --extra server hiplot --port 8765 --host 0.0.0.0
+

@@ -94,7 +94,7 @@ export class ResizableH extends React.Component<ResizableHProps, ResizableHState
       });
     }
   }.bind(this);
-  onMouseUp = function (e: MouseEvent) {
+  onMouseUp = function (_e: MouseEvent) {
     if (this.m_pos == null) {
       return;
     }

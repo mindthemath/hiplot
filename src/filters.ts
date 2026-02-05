@@ -28,7 +28,7 @@ const FILTERS = {
   [FilterType.Not]: filter_not,
   [FilterType.Search]: filter_search,
   [FilterType.None]: function () {
-    return (dp) => false;
+    return (_dp) => false;
   },
 };
 
