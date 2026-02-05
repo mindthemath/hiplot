@@ -506,6 +506,9 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             const brushEl = d3.select(this).select("." + pstyle.brush);
             me.setState(
               function (prevState, _) {
+                if (!prevState.dragging) {
+                  return {};
+                }
                 return {
                   dragging: {
                     col: d,
@@ -517,6 +520,9 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
               },
               function () {
                 // Feedback for axis deletion if dropped
+                if (!me.state.dragging) {
+                  return;
+                }
                 if (me.state.dragging.pos < 12 || me.state.dragging.pos > me.w - 12) {
                   brushEl.style("fill", "red");
                 } else {
@@ -541,6 +547,10 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             });
           })
           .on("end", function (event, d: string) {
+            if (!me.state.dragging) {
+              d3.select(me.foreground_ref.current).style("opacity", null);
+              return;
+            }
             if (!me.state.dragging.dragging) {
               // no movement, invert axis
               if (!IS_MOBILE) {

@@ -95,6 +95,45 @@ test("dragging an axis changes its position", async ({ page }) => {
     .toBeTruthy();
 });
 
+test("rapidly dragging axes back and forth does not crash", async ({ page }) => {
+  const errors: Error[] = [];
+  page.on("pageerror", (err) => errors.push(err));
+
+  await loadDemo(page);
+  const dims = page.locator("svg g.dimension");
+  const dimCount = await dims.count();
+  expect(dimCount).toBeGreaterThan(2);
+
+  // Pick a middle axis label to drag
+  const midIdx = Math.floor(dimCount / 2);
+  const label = dims.nth(midIdx).locator(".pplot-label").first();
+  const box = await label.boundingBox();
+  expect(box).toBeTruthy();
+
+  const startX = box!.x + box!.width / 2;
+  const startY = box!.y + box!.height / 2;
+
+  // Perform several rapid back-and-forth drags.
+  // Use minimal steps to create fastest possible event dispatch,
+  // maximizing chances of React 19 batching drag/end setState calls.
+  for (let round = 0; round < 5; round++) {
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    // Rapid zigzag across multiple columns
+    for (let i = 0; i < 4; i++) {
+      await page.mouse.move(startX + 350, startY, { steps: 2 });
+      await page.mouse.move(startX - 250, startY, { steps: 2 });
+    }
+    await page.mouse.up();
+    // No pause between rounds - start next drag immediately
+  }
+
+  // Give React time to flush any deferred state updates and callbacks
+  await page.waitForTimeout(500);
+
+  expect(errors).toEqual([]);
+});
+
 test("brushing an axis updates selection count", async ({ page }) => {
   await loadDemo(page);
   const countLine = page.locator('div[style*="monospace"]').first();
