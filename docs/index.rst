@@ -34,6 +34,7 @@ HiPlot documentation
    tuto_notebook
    tuto_streamlit
    tuto_javascript
+   distribution_plot
    py_reference
    plugins_reference
    contributing

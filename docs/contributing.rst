@@ -1,7 +1,7 @@
 .. _contributing:
 
 Building HiPlot from source
-==========================
+===========================
 
 Python developer setup
 --------------------------
@@ -45,6 +45,5 @@ Building documentation
 
 .. code-block:: bash
 
-    pip install -r requirements/dev.txt
-    cd docs
-    make html
+    uv sync --all-extras
+    uv run --extra docs sphinx-build -b html docs docs/_build/html
