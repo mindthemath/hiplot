@@ -507,7 +507,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
             me.setState(
               function (prevState, _) {
                 if (!prevState.dragging) {
-                  return {};
+                  return null;
                 }
                 return {
                   dragging: {

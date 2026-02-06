@@ -10,7 +10,7 @@ import * as d3 from "d3";
 import { ParallelPlot } from "./parallel/parallel";
 import { HiPlotProps, HiPlot } from "./hiplot";
 import React from "react";
-import ReactDOM from "react-dom";
+import ReactDOMClient from "react-dom/client";
 import { PlotXY } from "./plotxy";
 import { build_props } from "./hiplot_web";
 
@@ -320,10 +320,16 @@ function test_plotxy(this: HiPlotTester): Array<Test> {
 export function render(element: HTMLElement, extra?: object) {
   var props: HiPlotProps = build_props(extra);
   Object.assign(props, { asserts: true });
-  return ReactDOM.render(
+  const rootKey = "__hiplot_test_root";
+  const existingRoot = (element as any)[rootKey] as ReactDOMClient.Root | undefined;
+  const root = existingRoot ?? ReactDOMClient.createRoot(element);
+  if (!existingRoot) {
+    (element as any)[rootKey] = root;
+  }
+  root.render(
     <React.StrictMode>
       <HiPlotTester hiplotProps={props} />
     </React.StrictMode>,
-    element,
   );
+  return root;
 }
