@@ -92,7 +92,7 @@ class ValueDef(_DictSerializable):
     :ivar type: See :attr:`hiplot.ValueType` for possible values
     :ivar colors: Categorical scales only: mapping from value to HTML color (either :code:`rgb(R, G, B)` or :code:`#RRGGBB`)
     :ivar colormap: Numerical scales only: `D3 scale <https://github.com/d3/d3-scale-chromatic>`_ to use
-        (default scale is `interpolateTurbo <https://github.com/d3/d3-scale-chromatic#interpolateTurbo>`_).
+        (default scale is `interpolateTurbo <https://d3js.org/d3-scale-chromatic/sequential#interpolateTurbo>`_).
         For example :code:`"interpolateSinebow"`.
         To inverse the colormap, append `#inverse` to the name (eg :code:`"interpolateSinebow#inverse"`)
     :ivar label_css: Space-separated bootstrap CSS classes to apply on the label when supported

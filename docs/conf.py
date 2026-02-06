@@ -116,6 +116,11 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# External sites that frequently block automated link check user agents.
+linkcheck_ignore = [
+    r'https://www\.npmjs\.com/package/hiplot-mm',
+]
+
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
 html_sidebars = {

@@ -81,7 +81,7 @@ Within the activated environment, use the following command to run HiPlot server
 >>> hiplot
 
 
-Then open your web browser in http://127.0.0.1:5005/.
+Then open your web browser at :code:`http://127.0.0.1:5005/`.
 In the web interface, you can enter an experiment URI - you can enter the path to a CSV file, or just type in :code:`demo`, or :code:`demo_line_xy` to see some basic examples.
 
 .. note::
@@ -100,7 +100,7 @@ HiPlot webserver can do way more:
 Option 3: Create data-apps using Streamlit |streamlit_logo|
 ------------------------------------------------------------
 
-`Streamlit <https://www.streamlit.io/>`_ allows data scientists and machine learning engineers to create beautiful, performant apps in pure Python.
+`Streamlit <https://streamlit.io/>`_ allows data scientists and machine learning engineers to create beautiful, performant apps in pure Python.
 
 This is the best way to create custom interfaces with HiPlot. For instance, you can perform dynamic actions
 based on selected rows inside HiPlot (like plotting or displaying further information), and still have a sharable/deployable interface.
