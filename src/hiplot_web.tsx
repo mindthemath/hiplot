@@ -6,6 +6,7 @@
  */
 
 import ReactDOMClient from "react-dom/client";
+import { flushSync } from "react-dom";
 import { HiPlot, defaultPlugins, HiPlotProps, normalizeDarkModeSetting } from "./component";
 import React from "react";
 import { PersistentStateInURL } from "./lib/savedstate";
@@ -19,7 +20,7 @@ export function build_props(extra?: any): HiPlotProps {
     searchParams.get("hip.dark") ??
     searchParams.get("hiplot.dark") ??
     searchParams.get("HIPLOT.dark");
-  const darkValue = normalizeDarkModeSetting(darkParam, false);
+  const darkValue = normalizeDarkModeSetting(darkParam, "auto");
   var props = {
     experiment: null,
     persistentState: new PersistentStateInURL("hip"),
@@ -48,17 +49,24 @@ export function build_props(extra?: any): HiPlotProps {
 
 export function render(element: HTMLElement, extra?: any) {
   const rootKey = "__hiplot_root";
+  const instanceRefKey = "__hiplot_instance_ref";
   const existingRoot = (element as any)[rootKey] as ReactDOMClient.Root | undefined;
   const root = existingRoot ?? ReactDOMClient.createRoot(element);
+  const instanceRef =
+    ((element as any)[instanceRefKey] as React.RefObject<HiPlot> | undefined) ??
+    React.createRef<HiPlot>();
   if (!existingRoot) {
     (element as any)[rootKey] = root;
+    (element as any)[instanceRefKey] = instanceRef;
   }
-  root.render(
-    <React.StrictMode>
-      <HiPlot {...build_props(extra)} />
-    </React.StrictMode>,
-  );
-  return root;
+  flushSync(() => {
+    root.render(
+      <React.StrictMode>
+        <HiPlot ref={instanceRef} {...build_props(extra)} />
+      </React.StrictMode>,
+    );
+  });
+  return instanceRef.current ?? root;
 }
 
 // Expose global for non-module consumers (legacy HTML templates).

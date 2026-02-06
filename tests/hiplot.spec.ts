@@ -54,6 +54,21 @@ test("ignores invalid hip.dark values", async ({ page }) => {
   await expect(page.locator(".hip_thm--light")).toBeVisible();
 });
 
+test("defaults to auto dark mode when query param is absent", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto("/");
+  await expect(page.locator(".hip_thm--dark")).toBeVisible();
+});
+
+test("window.hiplot.render returns a HiPlot instance-compatible object", async ({ page }) => {
+  await page.goto("/");
+  const hasGetPlugin = await page.evaluate(() => {
+    const instance = (window as any).hiplot_last_instance;
+    return !!instance && typeof instance.getPlugin === "function";
+  });
+  expect(hasGetPlugin).toBeTruthy();
+});
+
 test("context menu opens on axis label right-click", async ({ page }) => {
   await loadDemo(page);
   const label = page.locator(".pplot-label").first();
