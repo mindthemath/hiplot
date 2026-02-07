@@ -6,6 +6,7 @@ on:
     tags: ["*"]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   build-js:
@@ -50,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.11", "3.12", "3.14"]
+        python-version: ["3.8", "3.10", "3.12", "3.14"]
     steps:
       - uses: actions/checkout@v4
 
