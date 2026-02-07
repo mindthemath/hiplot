@@ -14,7 +14,7 @@ import { HiPlotPluginData } from "./plugin";
 import React from "react";
 import { ResizableH } from "./lib/resizable";
 import _ from "underscore";
-import { Datapoint } from "./types";
+import { Datapoint, ParamType } from "./types";
 import { foCreateAxisLabel, foDynamicSizeFitContent } from "./lib/svghelpers";
 import { ContextMenu } from "./contextmenu";
 
@@ -187,6 +187,36 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
       scale.range(range);
       return scale;
     }
+    function getTickFormatter(param: string, scale: any): ((d: any) => string) | null {
+      const paramDef = me.props.params_def[param];
+      if (!paramDef) {
+        return null;
+      }
+      if (paramDef.ticks_format) {
+        return d3.format(paramDef.ticks_format);
+      }
+      const isNumericLike =
+        paramDef.type === ParamType.NUMERIC ||
+        paramDef.type === ParamType.NUMERICLOG ||
+        paramDef.type === ParamType.NUMERICPERCENTILE ||
+        paramDef.type === ParamType.TIMESTAMP;
+      if (!isNumericLike || typeof scale.domain !== "function") {
+        return null;
+      }
+      const domain = scale.domain();
+      if (!Array.isArray(domain)) {
+        return null;
+      }
+      const maxAbsDomain = d3.max(
+        domain
+          .map((v: any) => Math.abs(Number(v)))
+          .filter((v: number) => Number.isFinite(v)),
+      );
+      if (maxAbsDomain === undefined || maxAbsDomain < 1e6) {
+        return null;
+      }
+      return d3.format(".3~e");
+    }
     function redraw_axis() {
       me.svg.selectAll(".axis_render").remove();
       me.svg.selectAll(".brush").remove();
@@ -212,6 +242,8 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
         me.state.height - margin.bottom - insideGraphMargin,
         margin.top + insideGraphMargin,
       ]);
+      const xTickFormatter = getTickFormatter(me.state.axis_x, x_scale);
+      const yTickFormatter = getTickFormatter(me.state.axis_y, y_scale);
       zoom_brush = d3
         .brush()
         .extent([
@@ -227,6 +259,7 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
             d3
               .axisLeft(y_scale)
               .ticks(1 + me.state.height / 40)
+              .tickFormat(yTickFormatter as any)
               .tickSizeInner(margin.left + margin.right - me.state.width),
           )
           .call((g) => g.select(".domain").remove())
@@ -259,6 +292,7 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
             d3
               .axisBottom(x_scale)
               .ticks(1 + me.state.width / 80)
+              .tickFormat(xTickFormatter as any)
               .tickSizeInner(margin.bottom + margin.top - me.state.height),
           )
           .call((g) =>
