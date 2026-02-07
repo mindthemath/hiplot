@@ -208,9 +208,7 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
         return null;
       }
       const maxAbsDomain = d3.max(
-        domain
-          .map((v: any) => Math.abs(Number(v)))
-          .filter((v: number) => Number.isFinite(v)),
+        domain.map((v: any) => Math.abs(Number(v))).filter((v: number) => Number.isFinite(v)),
       );
       if (maxAbsDomain === undefined || maxAbsDomain < 1e6) {
         return null;
