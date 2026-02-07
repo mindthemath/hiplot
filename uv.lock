@@ -1300,7 +1300,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/f4/7d/aed8cd5e4ca52bb85
 
 [[package]]
 name = "hiplot-mm"
-version = "0.0.4rc8"
+version = "0.0.4rc9"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
