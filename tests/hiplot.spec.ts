@@ -242,7 +242,9 @@ test("distribution switches axes on menu selection", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("distribution categorical bars stay aligned with labels after keep/filter", async ({ page }) => {
+test("distribution categorical bars stay aligned with labels after keep/filter", async ({
+  page,
+}) => {
   await loadDemo(page, "demo_distribution_colors_deterministic");
   const labels = page.locator(".pplot-label");
   await expect(labels.first()).toBeVisible();
@@ -303,7 +305,10 @@ test("distribution categorical bars stay aligned with labels after keep/filter",
           return { ok: false, reason: "no-non-empty-bars" };
         }
         if (!nonEmpty.every((b) => b.sample === "green")) {
-          return { ok: false, reason: `non-green-samples:${nonEmpty.map((b) => b.sample).join(",")}` };
+          return {
+            ok: false,
+            reason: `non-green-samples:${nonEmpty.map((b) => b.sample).join(",")}`,
+          };
         }
         return { ok: true, reason: "green" };
       });
