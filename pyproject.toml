@@ -80,7 +80,7 @@ hiplot = [
 ]
 
 [tool.ty.src]
-exclude = [".circleci/", "examples/"]
+exclude = [".circleci/", "docs/", "examples/"]
 
 [tool.uv]
 default-groups = ["dev"]
