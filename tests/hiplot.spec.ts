@@ -315,3 +315,45 @@ test("distribution categorical bars stay aligned with labels after keep/filter",
     })
     .toEqual({ ok: true, reason: "green" });
 });
+
+test("plotxy y-axis tick labels are not clipped for large numeric ranges", async ({ page }) => {
+  await page.goto("/");
+  await page.waitForFunction(() => (window as any).hiplot?.render, { timeout: 15000 });
+  const input = page.locator('textarea[placeholder="Experiments to load"]');
+  await expect(input).toBeVisible();
+  await input.fill("demo_plotxy_large_numeric");
+  await input.press("Enter");
+  await expect(page.locator("text=Loading HiPlot...")).toHaveCount(0);
+
+  await expect
+    .poll(async () => {
+      return await page.evaluate(() => {
+        const svg = Array.from(document.querySelectorAll("svg")).find((candidate) =>
+          candidate.querySelector(".axis_render"),
+        ) as SVGSVGElement | undefined;
+        if (!svg) {
+          return { ok: false, reason: "missing-xy-svg" };
+        }
+        const svgRect = svg.getBoundingClientRect();
+        const yAxisGroup = Array.from(svg.querySelectorAll<SVGGElement>(".axis_render")).find(
+          (g) => {
+            const t = g.getAttribute("transform") || "";
+            return /^translate\(([-\d.]+),0\)$/.test(t) && !t.startsWith("translate(0,");
+          },
+        );
+        if (!yAxisGroup) {
+          return { ok: false, reason: "missing-y-axis-group" };
+        }
+        const tickTexts = Array.from(yAxisGroup.querySelectorAll<SVGTextElement>(".tick text"));
+        if (!tickTexts.length) {
+          return { ok: false, reason: "missing-y-ticks" };
+        }
+        const minLeft = Math.min(...tickTexts.map((t) => t.getBoundingClientRect().left));
+        return {
+          ok: minLeft >= svgRect.left - 0.5,
+          reason: `minLeft:${minLeft.toFixed(2)} svgLeft:${svgRect.left.toFixed(2)}`,
+        };
+      });
+    })
+    .toEqual({ ok: true, reason: expect.stringContaining("minLeft:") });
+});

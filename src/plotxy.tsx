@@ -173,7 +173,7 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
     var highlights = this.canvas_highlighted_ref.current.getContext("2d");
     highlights.globalCompositeOperation = "destination-over";
 
-    const margin = { top: 40, right: 20, bottom: 70, left: 60 };
+    const margin = { top: 40, right: 20, bottom: 70, left: 75 };
     var x_scale, y_scale, yAxis, xAxis;
     var x_scale_orig: d3.AxisScale<d3.AxisDomain>, y_scale_orig: d3.AxisScale<d3.AxisDomain>;
 

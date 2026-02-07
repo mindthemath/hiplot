@@ -105,6 +105,7 @@ def demo(n: int = 100) -> hip.Experiment:
         return {
             "exp_metric": 10 ** random.uniform(-5, 0),
             "pct_success": random.uniform(10, 90),
+            "large_numeric": random.uniform(50000.0, 150000.0),
             "chkpt": uuid.uuid4().hex[:6],
             "time": tm + random.uniform(-0.2, 0.2),
             "force_numericlog": random.uniform(1, 100),
@@ -170,6 +171,15 @@ def demo_customize() -> hip.Experiment:
         'dots_opacity': 0.3,
     })
     # EXPERIMENT_SETTINGS_SNIPPET2_END
+    return exp
+
+
+def demo_plotxy_large_numeric() -> hip.Experiment:
+    exp = demo()
+    exp.display_data(hip.Displays.XY).update({
+        "axis_x": "time",
+        "axis_y": "large_numeric",
+    })
     return exp
 
 
@@ -385,6 +395,7 @@ README_DEMOS: t.Dict[str, t.Callable[[], hip.Experiment]] = {
     "demo_axis_style": demo_axis_style,
     "demo_categorical": demo_categorical,
     "demo_customize": demo_customize,
+    "demo_plotxy_large_numeric": demo_plotxy_large_numeric,
     "demo_long_names": demo_long_names,
     "demo_force_constant_pplot": demo_force_constant_pplot,
     "demo_color_interpolate_inverse": demo_color_interpolate_inverse,
