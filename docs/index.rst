@@ -38,6 +38,8 @@ HiPlot documentation
    tuto_notebook
    tuto_streamlit
    tuto_javascript
+   parallel_plot
+   scatter_plot
    distribution_plot
    py_reference
    plugins_reference

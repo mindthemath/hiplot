@@ -1,6 +1,6 @@
 install:
 	bun install
-	uv sync --all-extras
+	uv sync
 
 clean:
 	rm -rf node_modules .venv
@@ -32,4 +32,7 @@ check:
 
 dev:
 	uv run --extra server hiplot --port 8765 --host 0.0.0.0
+
+docs: build
+	uv run --no-default-groups --group docs sphinx-build -b html docs docs/_build/html
 

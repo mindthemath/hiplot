@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hiplot-mm"
-version = "0.0.4rc7"
+version = "0.0.4rc8"
 description = "High dimensional Interactive Plotting tool"
 readme = "README.md"
 license = "MIT"
@@ -39,22 +39,14 @@ notebook = ["ipython>=7.0.1", "ipykernel"]
 # Streamlit support (experiment.display_st())
 streamlit = ["streamlit>=0.63"]
 
-# Documentation dependencies
-docs = ["sphinx==5.2.0", "guzzle_sphinx_theme==0.7.11", "m2r2>=0.3.4"]
-
 # All optional dependencies
 all = ["hiplot-mm[server,notebook,streamlit]"]
 
-# Development dependencies
+[dependency-groups]
 dev = [
   "pytest",
   "ty",
   "ipykernel",
-  "wheel",
-  # "selenium",
-  "mistune==0.8.4",
-  "twine",
-  "pre-commit",
   "pandas",
   "streamlit>=0.63",
   "beautifulsoup4",
@@ -63,6 +55,7 @@ dev = [
   "flask-compress",
   "ipython>=7.0.1",
 ]
+docs = ["sphinx==5.2.0", "guzzle_sphinx_theme==0.7.11", "m2r2>=0.3.4"]
 
 [project.scripts]
 hiplot = "hiplot.server:run_server_main"
@@ -88,3 +81,6 @@ hiplot = [
 
 [tool.ty.src]
 exclude = [".circleci/", "examples/"]
+
+[tool.uv]
+default-groups = ["dev"]

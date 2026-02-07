@@ -77,9 +77,11 @@ hip.Experiment.from_iterable(data).display()
 To build from source:
 
 ```bash
-# Install dependencies
+# Install frontend dependencies
 bun install
-uv sync --all-extras
+
+# Install default contributor dependencies (dev/test)
+uv sync
 
 # Build JavaScript bundles
 bun run build
@@ -89,6 +91,16 @@ uv build
 
 # Or use the all-in-one build script
 ./build.sh
+```
+
+Common contributor tasks:
+
+```bash
+# Run Python tests
+uv run pytest
+
+# Build docs (docs deps resolved on-demand)
+uv run --no-default-groups --group docs sphinx-build -b html docs docs/_build/html
 ```
 
 **Output directories:**
