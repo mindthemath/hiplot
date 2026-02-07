@@ -175,7 +175,9 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
       return d3.max(hist.bins, (d) => d.length / total);
     });
     var densityScale = d3.scaleLinear().domain([0, maxDensityHistogram]);
-    let displayBinOrder = allHist.all.bins.map((_, i) => i);
+    // Map from original bin index -> displayed slot index.
+    // In horizontal categorical mode we reorder categories by selected density.
+    const displayIndexByOriginal = allHist.all.bins.map((_, i) => i);
     if (this.isVertical()) {
       densityScale = densityScale.range([this.figureHeight(), 0]);
       d3.select(this.axisLeft.current)
@@ -194,7 +196,7 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
         .duration(animate ? this.props.animateMs : 0)
         .call(d3.axisBottom(densityScale).ticks(1 + this.props.width / 50));
       // Compute reordering of the bins - we want to display higher densities first.
-      const ordered1 = Array.from(displayBinOrder)
+      const ordered1 = Array.from(displayIndexByOriginal)
         .map(function (value, index) {
           return { index: value, count: allHist.selected.bins[value].length, original: index };
         })
@@ -207,7 +209,9 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
         .map(function (entry) {
           return entry.index;
         });
-      displayBinOrder = ordered1;
+      ordered1.forEach(function (value, idx) {
+        displayIndexByOriginal[value] = idx;
+      });
       // Update ticks/axis as well
       var domain: string[] = this.dataScale.domain();
       var domainsOrdered = domain.map(function (v, idx) {
@@ -222,7 +226,7 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
     // Draw all the histograms
     Object.values(allHist).forEach(
       function (v) {
-        v.draw_fn(v, densityScale, animate, displayBinOrder);
+        v.draw_fn(v, densityScale, animate, displayIndexByOriginal);
       }.bind(this),
     );
   }
@@ -231,14 +235,13 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
     hist: BinsDrawData,
     densityScale: d3.ScaleLinear<number, number>,
     animate: boolean,
-    displayBinOrder: number[],
+    displayIndexByOriginal: number[],
   ) {
-    const binsInDisplayOrder = displayBinOrder.map((idx) => hist.bins[idx]);
-    const total = d3.sum(binsInDisplayOrder, (d) => d.length);
+    const total = d3.sum(hist.bins, (d) => d.length);
     const densityScaleFromLength = (d) => densityScale(total ? d.length / total : 0);
     const dataScale = d3.scaleLinear().range(this.dataScale.range());
 
-    var u = d3.select(hist.g).selectAll<SVGLineElement, any>("line").data(binsInDisplayOrder);
+    var u = d3.select(hist.g).selectAll<SVGLineElement, any>("line").data(hist.bins);
 
     const dataCoord = this.isVertical() ? "x" : "y";
     const densityCoord = this.isVertical() ? "y" : "x";
@@ -247,9 +250,9 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
       .merge(u) // get the already existing elements as well
       .transition() // and apply changes to all of them
       .duration(animate ? this.props.animateMs : 0)
-      .attr(`${dataCoord}1`, (d, _i) => dataScale(d.x0) + 1)
+      .attr(`${dataCoord}1`, (d, i) => dataScale(hist.bins[displayIndexByOriginal[i]].x0) + 1)
       .attr(`${densityCoord}1`, (d, _i) => densityScaleFromLength(d))
-      .attr(`${dataCoord}2`, (d, _i) => dataScale(d.x1))
+      .attr(`${dataCoord}2`, (d, i) => dataScale(hist.bins[displayIndexByOriginal[i]].x1))
       .attr(`${densityCoord}2`, (d, _i) => densityScaleFromLength(d));
 
     u.exit().remove();
@@ -259,13 +262,12 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
     hist: BinsDrawData,
     densityScale: d3.ScaleLinear<number, number>,
     animate: boolean,
-    displayBinOrder: number[],
+    displayIndexByOriginal: number[],
   ) {
-    const binsInDisplayOrder = displayBinOrder.map((idx) => hist.bins[idx]);
-    const total = d3.sum(binsInDisplayOrder, (d) => d.length);
+    const total = d3.sum(hist.bins, (d) => d.length);
     const densityScaleFromLength = (d) => densityScale(total ? d.length / total : 0);
     const dataScale = d3.scaleLinear().range(this.dataScale.range());
-    var u = d3.select(hist.g).selectAll<SVGRectElement, any>("rect").data(binsInDisplayOrder);
+    var u = d3.select(hist.g).selectAll<SVGRectElement, any>("rect").data(hist.bins);
 
     var ut = u
       .enter()
@@ -303,16 +305,19 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
     } else {
       ut
         //.attr("y", 1)
-        .attr("transform", function (d, _i) {
-          return "translate(0," + dataScale(d.x1) + ")";
+        .attr("transform", function (_d, i) {
+          return "translate(0," + dataScale(hist.bins[displayIndexByOriginal[i]].x1) + ")";
         })
         .attr("width", function (d) {
           return densityScaleFromLength(d);
         })
         .attr(
           "height",
-          function (d, _i) {
-            const delta = Math.abs(dataScale(d.x1) - dataScale(d.x0));
+          function (_d, i) {
+            const delta = Math.abs(
+              dataScale(hist.bins[displayIndexByOriginal[i]].x1) -
+                dataScale(hist.bins[displayIndexByOriginal[i]].x0),
+            );
             return delta > 2 ? delta - 1 : delta;
           }.bind(this),
         );

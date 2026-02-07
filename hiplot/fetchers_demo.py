@@ -195,6 +195,22 @@ def demo_distribution(**kwargs: t.Any) -> hip.Experiment:
     return xp
 
 
+def demo_distribution_colors_deterministic() -> hip.Experiment:
+    data = (
+        [{"c": "red", "x": i} for i in range(4)]
+        + [{"c": "black", "x": i} for i in range(4, 10)]
+        + [{"c": "green", "x": i} for i in range(10, 22)]
+    )
+    xp = hip.Experiment.from_iterable(data)
+    xp.parameters_definition["c"].colors = {
+        "red": "rgb(255, 0, 0)",
+        "green": "rgb(0, 255, 0)",
+        "black": "rgb(0, 0, 0)",
+    }
+    xp.display_data(hip.Displays.DISTRIBUTION).update({"axis": "c"})
+    return xp
+
+
 def demo_bool() -> hip.Experiment:
     return hip.Experiment.from_iterable([
         {"bool": True},
@@ -361,6 +377,7 @@ README_DEMOS: t.Dict[str, t.Callable[[], hip.Experiment]] = {
     "demo_distribution_cat": lambda: demo_distribution(axis="cat"),
     "demo_distribution_num": lambda: demo_distribution(axis="numeric"),
     "demo_distribution_num_100bins": lambda: demo_distribution(axis="numeric", nbins=100),
+    "demo_distribution_colors_deterministic": demo_distribution_colors_deterministic,
     "demo_bool": demo_bool,
     "demo_color_interpolate": demo_color_interpolate,
     "demo_color_scheme_ylrd": demo_color_scheme_ylrd,

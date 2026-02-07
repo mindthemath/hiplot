@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-async function loadDemo(page) {
+async function loadDemo(page, uri = "demo") {
   if (process.env.PW_LOG) {
     page.on("console", (msg) => {
       console.log(`[console:${msg.type()}] ${msg.text()}`);
@@ -15,7 +15,7 @@ async function loadDemo(page) {
   await expect(page.locator(".hip_thm--light, .hip_thm--dark")).toBeVisible();
   const input = page.locator('textarea[placeholder="Experiments to load"]');
   await expect(input).toBeVisible();
-  await input.fill("demo");
+  await input.fill(uri);
   await input.press("Enter");
   await page.waitForSelector("svg g.dimension", { state: "attached", timeout: 15000 });
   await expect(page.locator("text=Loading HiPlot...")).toHaveCount(0);
@@ -240,4 +240,73 @@ test("distribution switches axes on menu selection", async ({ page }) => {
   await expect(
     page.locator(`[data-testid="distribution-plot"][data-axis="${axis2}"]`),
   ).toBeVisible();
+});
+
+test("distribution categorical bars stay aligned with labels after keep/filter", async ({ page }) => {
+  await loadDemo(page, "demo_distribution_colors_deterministic");
+  const labels = page.locator(".pplot-label");
+  await expect(labels.first()).toBeVisible();
+  const labelTexts = await labels.evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const textParts = Array.from(node.childNodes)
+        .filter((child) => child.nodeType === Node.TEXT_NODE)
+        .map((child) => (child.textContent || "").trim())
+        .filter((text) => text.length > 0);
+      return textParts.join(" ").trim();
+    }),
+  );
+  const cAxisIndex = labelTexts.findIndex((text) => text === "c");
+  expect(cAxisIndex).toBeGreaterThanOrEqual(0);
+
+  await expect(page.locator('[data-testid="distribution-plot"][data-axis="c"]')).toBeVisible();
+
+  const cDimension = page.locator("svg g.dimension").nth(cAxisIndex);
+  const cOverlay = cDimension.locator(".pplot-brush rect.overlay").first();
+  const greenTick = cDimension.locator(".tick text", { hasText: "green" }).first();
+  const overlayBox = await cOverlay.boundingBox();
+  const greenTickBox = await greenTick.boundingBox();
+  expect(overlayBox).toBeTruthy();
+  expect(greenTickBox).toBeTruthy();
+  const x = overlayBox!.x + overlayBox!.width / 2;
+  const y1 = greenTickBox!.y + 1;
+  const y2 = greenTickBox!.y + greenTickBox!.height - 1;
+  await page.mouse.move(x, y1);
+  await page.mouse.down();
+  await page.mouse.move(x, y2, { steps: 8 });
+  await page.mouse.up();
+
+  const keepButton = page.locator('button:has-text("Keep")').first();
+  await expect(keepButton).toBeEnabled();
+  await keepButton.click();
+  await page.waitForTimeout(900);
+
+  await expect
+    .poll(async () => {
+      return await page.evaluate(() => {
+        const root = document.querySelector(
+          '[data-testid="distribution-plot"][data-axis="c"]',
+        ) as HTMLElement | null;
+        if (!root) {
+          return { ok: false, reason: "missing-distribution-root" };
+        }
+        const bars = Array.from(
+          root.querySelectorAll('[data-testid="distribution-hist-all"] rect'),
+        ).map((rect) => {
+          const bb = (rect as SVGGraphicsElement).getBBox();
+          return {
+            area: bb.width * bb.height,
+            sample: (rect.getAttribute("data-value-sample") || "").trim(),
+          };
+        });
+        const nonEmpty = bars.filter((b) => Number.isFinite(b.area) && b.area > 1);
+        if (nonEmpty.length === 0) {
+          return { ok: false, reason: "no-non-empty-bars" };
+        }
+        if (!nonEmpty.every((b) => b.sample === "green")) {
+          return { ok: false, reason: `non-green-samples:${nonEmpty.map((b) => b.sample).join(",")}` };
+        }
+        return { ok: true, reason: "green" };
+      });
+    })
+    .toEqual({ ok: true, reason: "green" });
 });
