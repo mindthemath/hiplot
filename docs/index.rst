@@ -2,7 +2,11 @@
 
 .. mdinclude:: ../README.md
    :start-line: 6
-   :end-line: 8
+   :end-line: 14
+
+.. note::
+   HiPlot is now maintained as a community fork at `mindthemath/hiplot <https://github.com/mindthemath/hiplot>`_,
+   after the original `facebookresearch/hiplot <https://github.com/facebookresearch/hiplot>`_ repository was archived.
 
 HiPlot demonstration
 ====================
@@ -17,7 +21,7 @@ Given about 7000 experimental datapoints, we want to understand which parameters
 
 .. raw:: html
 
-    <iframe src="./_static/demo/ml1.csv.html?hip.color_by=%22valid+ppl%22&amp;hip.PARALLEL_PLOT.height=300" height="1000px" style="width: 865px; margin-left: -20px"></iframe>
+    <iframe src="./_static/demo/ml1.csv.html?hip.color_by=%22valid+ppl%22&amp;hip.PARALLEL_PLOT.height=300" height="1000px" style="width: 100%; border: 0;"></iframe>
 
 
 HiPlot documentation
@@ -34,6 +38,9 @@ HiPlot documentation
    tuto_notebook
    tuto_streamlit
    tuto_javascript
+   parallel_plot
+   scatter_plot
+   distribution_plot
    py_reference
    plugins_reference
    contributing

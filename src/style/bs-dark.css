@@ -91,6 +91,7 @@
   --bs-dropdown-bg: #222;
   --bs-dropdown-border-color: #444;
   --bs-dropdown-link-color: #fff;
+  --bs-dropdown-link-disabled-color: #9fa6ad;
   --bs-dropdown-link-hover-color: #fff;
   --bs-dropdown-link-hover-bg: var(--bs-primary);
   --bs-dropdown-divider-bg: #444;

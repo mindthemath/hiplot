@@ -60,7 +60,7 @@ export class HiPlotDistributionPlugin extends React.Component<
       initialHeight: initialHeight,
       height: initialHeight,
       width: 0,
-      histData: { selected: [], all: props.rows_filtered },
+      histData: { selected: props.rows_selected, all: props.rows_filtered },
       axis: axis !== undefined ? axis : null, // Convert undefined into null
     };
   }

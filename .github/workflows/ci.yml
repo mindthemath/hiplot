@@ -6,6 +6,7 @@ on:
     tags: ["*"]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   build-js:
@@ -50,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.11", "3.12", "3.14"]
+        python-version: ["3.9", "3.12", "3.14"]
     steps:
       - uses: actions/checkout@v4
 
@@ -67,7 +68,7 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync
 
       - name: Run ty
         run: make check
@@ -147,7 +148,7 @@ jobs:
         run: uv python install 3.12
 
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync
 
       - name: Run pytest
         run: uv run pytest hiplot

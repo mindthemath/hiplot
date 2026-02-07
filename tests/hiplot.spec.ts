@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-async function loadDemo(page) {
+async function loadDemo(page, uri = "demo") {
   if (process.env.PW_LOG) {
     page.on("console", (msg) => {
       console.log(`[console:${msg.type()}] ${msg.text()}`);
@@ -15,7 +15,7 @@ async function loadDemo(page) {
   await expect(page.locator(".hip_thm--light, .hip_thm--dark")).toBeVisible();
   const input = page.locator('textarea[placeholder="Experiments to load"]');
   await expect(input).toBeVisible();
-  await input.fill("demo");
+  await input.fill(uri);
   await input.press("Enter");
   await page.waitForSelector("svg g.dimension", { state: "attached", timeout: 15000 });
   await expect(page.locator("text=Loading HiPlot...")).toHaveCount(0);
@@ -52,6 +52,21 @@ test("respects hip.dark=auto and tracks prefers-color-scheme", async ({ page }) 
 test("ignores invalid hip.dark values", async ({ page }) => {
   await page.goto("/?hip.dark=banana");
   await expect(page.locator(".hip_thm--light")).toBeVisible();
+});
+
+test("defaults to auto dark mode when query param is absent", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto("/");
+  await expect(page.locator(".hip_thm--dark")).toBeVisible();
+});
+
+test("window.hiplot.render returns a HiPlot instance-compatible object", async ({ page }) => {
+  await page.goto("/");
+  const hasGetPlugin = await page.evaluate(() => {
+    const instance = (window as any).hiplot_last_instance;
+    return !!instance && typeof instance.getPlugin === "function";
+  });
+  expect(hasGetPlugin).toBeTruthy();
 });
 
 test("context menu opens on axis label right-click", async ({ page }) => {
@@ -225,4 +240,120 @@ test("distribution switches axes on menu selection", async ({ page }) => {
   await expect(
     page.locator(`[data-testid="distribution-plot"][data-axis="${axis2}"]`),
   ).toBeVisible();
+});
+
+test("distribution categorical bars stay aligned with labels after keep/filter", async ({
+  page,
+}) => {
+  await loadDemo(page, "demo_distribution_colors_deterministic");
+  const labels = page.locator(".pplot-label");
+  await expect(labels.first()).toBeVisible();
+  const labelTexts = await labels.evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const textParts = Array.from(node.childNodes)
+        .filter((child) => child.nodeType === Node.TEXT_NODE)
+        .map((child) => (child.textContent || "").trim())
+        .filter((text) => text.length > 0);
+      return textParts.join(" ").trim();
+    }),
+  );
+  const cAxisIndex = labelTexts.findIndex((text) => text === "c");
+  expect(cAxisIndex).toBeGreaterThanOrEqual(0);
+
+  await expect(page.locator('[data-testid="distribution-plot"][data-axis="c"]')).toBeVisible();
+
+  const cDimension = page.locator("svg g.dimension").nth(cAxisIndex);
+  const cOverlay = cDimension.locator(".pplot-brush rect.overlay").first();
+  const greenTick = cDimension.locator(".tick text", { hasText: "green" }).first();
+  const overlayBox = await cOverlay.boundingBox();
+  const greenTickBox = await greenTick.boundingBox();
+  expect(overlayBox).toBeTruthy();
+  expect(greenTickBox).toBeTruthy();
+  const x = overlayBox!.x + overlayBox!.width / 2;
+  const y1 = greenTickBox!.y + 1;
+  const y2 = greenTickBox!.y + greenTickBox!.height - 1;
+  await page.mouse.move(x, y1);
+  await page.mouse.down();
+  await page.mouse.move(x, y2, { steps: 8 });
+  await page.mouse.up();
+
+  const keepButton = page.locator('button:has-text("Keep")').first();
+  await expect(keepButton).toBeEnabled();
+  await keepButton.click();
+  await page.waitForTimeout(900);
+
+  await expect
+    .poll(async () => {
+      return await page.evaluate(() => {
+        const root = document.querySelector(
+          '[data-testid="distribution-plot"][data-axis="c"]',
+        ) as HTMLElement | null;
+        if (!root) {
+          return { ok: false, reason: "missing-distribution-root" };
+        }
+        const bars = Array.from(
+          root.querySelectorAll('[data-testid="distribution-hist-all"] rect'),
+        ).map((rect) => {
+          const bb = (rect as SVGGraphicsElement).getBBox();
+          return {
+            area: bb.width * bb.height,
+            sample: (rect.getAttribute("data-value-sample") || "").trim(),
+          };
+        });
+        const nonEmpty = bars.filter((b) => Number.isFinite(b.area) && b.area > 1);
+        if (nonEmpty.length === 0) {
+          return { ok: false, reason: "no-non-empty-bars" };
+        }
+        if (!nonEmpty.every((b) => b.sample === "green")) {
+          return {
+            ok: false,
+            reason: `non-green-samples:${nonEmpty.map((b) => b.sample).join(",")}`,
+          };
+        }
+        return { ok: true, reason: "green" };
+      });
+    })
+    .toEqual({ ok: true, reason: "green" });
+});
+
+test("plotxy y-axis tick labels are not clipped for large numeric ranges", async ({ page }) => {
+  await page.goto("/");
+  await page.waitForFunction(() => (window as any).hiplot?.render, { timeout: 15000 });
+  const input = page.locator('textarea[placeholder="Experiments to load"]');
+  await expect(input).toBeVisible();
+  await input.fill("demo_plotxy_large_numeric");
+  await input.press("Enter");
+  await expect(page.locator("text=Loading HiPlot...")).toHaveCount(0);
+
+  await expect
+    .poll(async () => {
+      return await page.evaluate(() => {
+        const svg = Array.from(document.querySelectorAll("svg")).find((candidate) =>
+          candidate.querySelector(".axis_render"),
+        ) as SVGSVGElement | undefined;
+        if (!svg) {
+          return { ok: false, reason: "missing-xy-svg" };
+        }
+        const svgRect = svg.getBoundingClientRect();
+        const yAxisGroup = Array.from(svg.querySelectorAll<SVGGElement>(".axis_render")).find(
+          (g) => {
+            const t = g.getAttribute("transform") || "";
+            return /^translate\(([-\d.]+),0\)$/.test(t) && !t.startsWith("translate(0,");
+          },
+        );
+        if (!yAxisGroup) {
+          return { ok: false, reason: "missing-y-axis-group" };
+        }
+        const tickTexts = Array.from(yAxisGroup.querySelectorAll<SVGTextElement>(".tick text"));
+        if (!tickTexts.length) {
+          return { ok: false, reason: "missing-y-ticks" };
+        }
+        const minLeft = Math.min(...tickTexts.map((t) => t.getBoundingClientRect().left));
+        return {
+          ok: minLeft >= svgRect.left - 0.5,
+          reason: `minLeft:${minLeft.toFixed(2)} svgLeft:${svgRect.left.toFixed(2)}`,
+        };
+      });
+    })
+    .toEqual({ ok: true, reason: expect.stringContaining("minLeft:") });
 });

@@ -1,7 +1,21 @@
 .. _contributing:
 
 Building HiPlot from source
-==========================
+===========================
+
+Quick commands
+--------------
+
+.. code-block:: bash
+
+    # Install default contributor dependencies (dev/test)
+    uv sync
+
+    # Run Python tests
+    uv run pytest
+
+    # Build docs (docs deps are resolved on-demand)
+    uv run --no-default-groups --group docs sphinx-build -b html docs docs/_build/html
 
 Python developer setup
 --------------------------
@@ -45,6 +59,4 @@ Building documentation
 
 .. code-block:: bash
 
-    pip install -r requirements/dev.txt
-    cd docs
-    make html
+    uv run --no-default-groups --group docs sphinx-build -b html docs docs/_build/html

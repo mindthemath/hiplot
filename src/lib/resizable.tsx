@@ -15,6 +15,7 @@ interface ResizableHProps {
   onResize: (height: number, width: number) => void;
   borderSize: number;
   minHeight: number;
+  children?: React.ReactNode;
 
   onRemove?: () => void;
 }

@@ -70,7 +70,13 @@ export class UploadDataProvider extends React.Component<DataProviderProps, State
   }
   render() {
     return (
-      <Dropzone accept={["text/csv", "text/plain"]} onDrop={this.onDropFiles.bind(this)}>
+      <Dropzone
+        accept={{
+          "text/csv": [".csv"],
+          "text/plain": [".csv", ".txt"],
+        }}
+        onDrop={this.onDropFiles.bind(this)}
+      >
         {({ getRootProps, getInputProps }) => (
           <section className={style.dropzoneContainer}>
             <div {...getRootProps()} className={style.dropzone}>

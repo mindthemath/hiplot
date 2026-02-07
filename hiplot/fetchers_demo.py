@@ -105,6 +105,7 @@ def demo(n: int = 100) -> hip.Experiment:
         return {
             "exp_metric": 10 ** random.uniform(-5, 0),
             "pct_success": random.uniform(10, 90),
+            "large_numeric": random.uniform(50000.0, 150000.0),
             "chkpt": uuid.uuid4().hex[:6],
             "time": tm + random.uniform(-0.2, 0.2),
             "force_numericlog": random.uniform(1, 100),
@@ -173,6 +174,15 @@ def demo_customize() -> hip.Experiment:
     return exp
 
 
+def demo_plotxy_large_numeric() -> hip.Experiment:
+    exp = demo()
+    exp.display_data(hip.Displays.XY).update({
+        "axis_x": "time",
+        "axis_y": "large_numeric",
+    })
+    return exp
+
+
 def demo_force_scale() -> hip.Experiment:
     xp = hip.Experiment()
     for _ in range(100):
@@ -192,6 +202,22 @@ def demo_distribution(**kwargs: t.Any) -> hip.Experiment:
         'numeric': random.uniform(0.0, 1.0),
     } for i in range(1000)])
     xp.display_data(hip.Displays.DISTRIBUTION).update(kwargs)
+    return xp
+
+
+def demo_distribution_colors_deterministic() -> hip.Experiment:
+    data = (
+        [{"c": "red", "x": i} for i in range(4)]
+        + [{"c": "black", "x": i} for i in range(4, 10)]
+        + [{"c": "green", "x": i} for i in range(10, 22)]
+    )
+    xp = hip.Experiment.from_iterable(data)
+    xp.parameters_definition["c"].colors = {
+        "red": "rgb(255, 0, 0)",
+        "green": "rgb(0, 255, 0)",
+        "black": "rgb(0, 0, 0)",
+    }
+    xp.display_data(hip.Displays.DISTRIBUTION).update({"axis": "c"})
     return xp
 
 
@@ -361,6 +387,7 @@ README_DEMOS: t.Dict[str, t.Callable[[], hip.Experiment]] = {
     "demo_distribution_cat": lambda: demo_distribution(axis="cat"),
     "demo_distribution_num": lambda: demo_distribution(axis="numeric"),
     "demo_distribution_num_100bins": lambda: demo_distribution(axis="numeric", nbins=100),
+    "demo_distribution_colors_deterministic": demo_distribution_colors_deterministic,
     "demo_bool": demo_bool,
     "demo_color_interpolate": demo_color_interpolate,
     "demo_color_scheme_ylrd": demo_color_scheme_ylrd,
@@ -368,6 +395,7 @@ README_DEMOS: t.Dict[str, t.Callable[[], hip.Experiment]] = {
     "demo_axis_style": demo_axis_style,
     "demo_categorical": demo_categorical,
     "demo_customize": demo_customize,
+    "demo_plotxy_large_numeric": demo_plotxy_large_numeric,
     "demo_long_names": demo_long_names,
     "demo_force_constant_pplot": demo_force_constant_pplot,
     "demo_color_interpolate_inverse": demo_color_interpolate_inverse,

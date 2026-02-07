@@ -20,6 +20,20 @@ def test_fetcher_demo() -> None:
         load_demo("something_else")
 
 
+def test_fetcher_demo_is_deterministic() -> None:
+    def counts_by_color(xp: exp.Experiment) -> dict:
+        counts = {}
+        for dp in xp.datapoints:
+            c = dp.values.get("c")
+            counts[c] = counts.get(c, 0) + 1
+        return counts
+
+    xp1 = load_demo("demo")
+    xp2 = load_demo("demo")
+    assert len(xp1.datapoints) == len(xp2.datapoints)
+    assert counts_by_color(xp1) == counts_by_color(xp2)
+
+
 def test_fetcher_csv() -> None:
     xp = load_csv(str(Path(Path(__file__).parent.parent, ".circleci", "nutrients.csv")))
     xp.validate()

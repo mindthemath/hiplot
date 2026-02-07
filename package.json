@@ -28,7 +28,7 @@
     "vite:build:lib": "vite build -c vite.lib.config.mts",
     "test:js": "bunx playwright test",
     "vite:dev": "vite -c vite.web.config.mts",
-    "prepublish-ts": "tsc"
+    "prepublish-ts": "tsc --module es2020"
   },
   "dependencies": {
     "@babel/helpers": "^7.28.6",
