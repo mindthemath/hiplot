@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "hiplot-mm"
@@ -84,27 +84,30 @@ Homepage = "https://github.com/mindthemath/hiplot"
 Documentation = "https://facebookresearch.github.io/hiplot/"
 Repository = "https://github.com/mindthemath/hiplot"
 
-[tool.setuptools.packages.find]
+[tool.hatch.build]
+# Force-include the built JS bundles (gitignored but needed at runtime)
+[tool.hatch.build.force-include]
+"hiplot/static/built" = "hiplot/static/built"
+
+[tool.hatch.build.targets.wheel]
+packages = ["hiplot"]
+exclude = [
+    "hiplot/tests/",
+    "hiplot/static/*.svg",
+    "hiplot/static/logo.png",
+]
+
+[tool.hatch.build.targets.sdist]
 include = [
-    "hiplot*",
+    "hiplot/**",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "pyproject.toml",
 ]
 exclude = [
-    "hiplot.tests*",
-]
-
-[tool.setuptools.package-data]
-hiplot = [
-    "py.typed",
-    "static/icon.png",
-    "static/built/*",
-    "static/built/streamlit_component/*",
-    "templates/*",
-]
-
-[tool.setuptools.exclude-package-data]
-hiplot = [
-    "static/*.svg",
-    "static/logo.png",
+    "hiplot/tests/",
+    "examples/",
 ]
 
 [tool.ty.src]
