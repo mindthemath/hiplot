@@ -105,7 +105,6 @@ ENV/
 # mypy
 .mypy_cache/
 
-.circleci/demo_pages/
 
 # Build objects
 hiplot/static/built/*.map

@@ -6,8 +6,8 @@ import unittest.mock
 from html.parser import HTMLParser
 import typing as tp
 from bs4 import BeautifulSoup
-from .fetchers_demo import README_DEMOS
-from .render import get_index_html_template
+from ..fetchers_demo import README_DEMOS
+from ..render import get_index_html_template
 
 
 @unittest.mock.patch('hiplot.experiment._is_running_ipython', new=lambda: True)

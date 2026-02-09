@@ -1,7 +1,6 @@
 include LICENSE README.md
 include pyproject.toml
-include requirements/*.txt
-include hiplot/static/*
+include hiplot/static/icon.png
 include hiplot/static/built/*
 include hiplot/static/built/streamlit_component/*
 include hiplot/templates/*

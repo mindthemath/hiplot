@@ -7,9 +7,9 @@ import json
 import tempfile
 import shutil
 import pytest
-from . import experiment as exp
-from .fetchers import load_demo, load_csv, load_json, MultipleFetcher, get_fetchers, load_xps_with_fetchers
-from .fetchers_demo import README_DEMOS
+from .. import experiment as exp
+from ..fetchers import load_demo, load_csv, load_json, MultipleFetcher, get_fetchers, load_xps_with_fetchers
+from ..fetchers_demo import README_DEMOS
 
 
 def test_fetcher_demo() -> None:
@@ -35,7 +35,7 @@ def test_fetcher_demo_is_deterministic() -> None:
 
 
 def test_fetcher_csv() -> None:
-    xp = load_csv(str(Path(Path(__file__).parent.parent, ".circleci", "nutrients.csv")))
+    xp = load_csv(str(Path(Path(__file__).parent, "nutrients.csv")))
     xp.validate()
     assert xp.datapoints
     assert len(xp.datapoints) == 7637

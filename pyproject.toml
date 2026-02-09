@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "hiplot-mm"
-version = "0.0.4rc10"
+version = "0.0.4rc11"
 description = "High dimensional Interactive Plotting tool"
 readme = "README.md"
 license = "MIT"
@@ -88,19 +88,27 @@ Repository = "https://github.com/mindthemath/hiplot"
 include = [
     "hiplot*",
 ]
+exclude = [
+    "hiplot.tests*",
+]
 
 [tool.setuptools.package-data]
 hiplot = [
     "py.typed",
-    "static/*",
+    "static/icon.png",
     "static/built/*",
     "static/built/streamlit_component/*",
     "templates/*",
 ]
 
+[tool.setuptools.exclude-package-data]
+hiplot = [
+    "static/*.svg",
+    "static/logo.png",
+]
+
 [tool.ty.src]
 exclude = [
-    ".circleci/",
     "docs/",
     "examples/",
 ]
