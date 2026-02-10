@@ -974,10 +974,6 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
         });
     }
 
-    // show ticks
-    div.selectAll("." + pstyle.axis + " g").style("display", null);
-    div.selectAll(".background").style("visibility", null);
-
     // update axes
     div.selectAll("." + pstyle.axis).each((d: string, i, nodes) => {
       const node = nodes[i];
@@ -990,11 +986,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       // bring lines back
       d3.select(node).selectAll("line").transition().delay(800).style("display", null);
 
-      d3.select(node)
-        .selectAll("text")
-        .style("font-weight", null)
-        .style("font-size", null)
-        .style("display", null);
+      d3.select(node).selectAll("text").style("font-weight", null).style("font-size", null);
     });
     this.setState(function (prevState) {
       return { brush_count: prevState.brush_count + 1 };

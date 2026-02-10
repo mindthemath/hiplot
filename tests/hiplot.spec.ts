@@ -357,3 +357,137 @@ test("plotxy y-axis tick labels are not clipped for large numeric ranges", async
     })
     .toEqual({ ok: true, reason: expect.stringContaining("minLeft:") });
 });
+
+test("inverted axis orientation is preserved across keep/restore on another axis", async ({
+  page,
+}) => {
+  await loadDemo(page);
+  const result = await page.evaluate(async () => {
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const hiplot = (window as any).hiplot_last_instance;
+    const pplot = hiplot?.plugins_ref?.PARALLEL_PLOT?.current;
+    if (!hiplot || !pplot) {
+      return { error: "missing-hiplot-or-pplot" };
+    }
+    const dims = Array.from(pplot.state.dimensions);
+    if (dims.length < 2) {
+      return { error: "not-enough-dimensions" };
+    }
+    const invertDim = dims[0];
+    const filterDim = dims[1];
+    const wasInverted = pplot.state.invert.has(invertDim);
+    const expectedRangeAfterToggle = !wasInverted ? [0, pplot.h] : [pplot.h, 0];
+
+    const invertExtent = pplot.toggleInvertAxis(invertDim);
+    const rangeImmediatelyAfterToggle = pplot.yscale[invertDim].range().slice();
+    pplot.update_ticks(invertDim, invertExtent);
+    await sleep(150);
+    const rangeAfterInvert = pplot.yscale[invertDim].range().slice();
+
+    const brushEl = pplot.dimensions_dom
+      .filter((d: string) => d === filterDim)
+      .select(".pplot-brush");
+    pplot.d3brush.move(brushEl, [60, Math.min(260, pplot.h - 20)]);
+    await sleep(250);
+
+    const selectedCount = hiplot.state.rows_selected.length;
+    const filteredCount = hiplot.state.rows_filtered.length;
+    if (!(selectedCount > 0 && selectedCount < filteredCount)) {
+      return {
+        error: `invalid-selection-size:${selectedCount}/${filteredCount}`,
+        rangeAfterInvert,
+      };
+    }
+
+    hiplot.filterRows(true);
+    await sleep(250);
+    hiplot.restoreAllRows();
+    await sleep(300);
+    const rangeAfterRestore = pplot.yscale[invertDim].range().slice();
+    return {
+      invertDim,
+      filterDim,
+      expectedRangeAfterToggle,
+      rangeImmediatelyAfterToggle,
+      rangeAfterInvert,
+      rangeAfterRestore,
+    };
+  });
+  expect(result.error).toBeUndefined();
+  expect(result.rangeImmediatelyAfterToggle).toEqual(result.expectedRangeAfterToggle);
+  expect(result.rangeAfterInvert).toEqual(result.expectedRangeAfterToggle);
+  expect(result.rangeAfterRestore).toEqual(result.rangeAfterInvert);
+});
+
+test("inverting another axis does not temporarily unhide ticks on an actively filtered axis", async ({
+  page,
+}) => {
+  await loadDemo(page);
+  const result = await page.evaluate(async () => {
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const hiplot = (window as any).hiplot_last_instance;
+    const pplot = hiplot?.plugins_ref?.PARALLEL_PLOT?.current;
+    if (!hiplot || !pplot) {
+      return { error: "missing-hiplot-or-pplot" };
+    }
+    const dims = Array.from(pplot.state.dimensions);
+    if (dims.length < 2) {
+      return { error: "not-enough-dimensions" };
+    }
+    const filteredDim = dims[0];
+    const actionDim = dims[1];
+
+    const brushEl = pplot.dimensions_dom
+      .filter((d: string) => d === filteredDim)
+      .select(".pplot-brush");
+    pplot.d3brush.move(brushEl, [60, Math.min(260, pplot.h - 20)]);
+    await sleep(250);
+
+    const dimNode = pplot.dimensions_dom
+      .filter((d: string) => d === filteredDim)
+      .node() as SVGGElement;
+    if (!dimNode) {
+      return { error: "missing-filtered-dimension-node" };
+    }
+
+    const isAxisTick = (el: SVGTextElement) =>
+      !el.classList.contains("pplot-label") && !el.classList.contains("label-name");
+    const hiddenBefore = Array.from(dimNode.querySelectorAll("text")).filter((el) => {
+      const textEl = el as SVGTextElement;
+      return isAxisTick(textEl) && getComputedStyle(textEl).display === "none";
+    }) as SVGTextElement[];
+    if (hiddenBefore.length === 0) {
+      return { error: "no-hidden-ticks-after-brush" };
+    }
+
+    let flashed = false;
+    const watched = new Set(hiddenBefore);
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        const target = mutation.target as SVGTextElement;
+        if (watched.has(target) && getComputedStyle(target).display !== "none") {
+          flashed = true;
+          break;
+        }
+      }
+    });
+    observer.observe(dimNode, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "class"],
+    });
+
+    const invertExtent = pplot.toggleInvertAxis(actionDim);
+    pplot.update_ticks(actionDim, invertExtent);
+    await sleep(300);
+    observer.disconnect();
+
+    return {
+      flashed,
+      hiddenBeforeCount: hiddenBefore.length,
+    };
+  });
+  expect(result.error).toBeUndefined();
+  expect(result.hiddenBeforeCount).toBeGreaterThan(0);
+  expect(result.flashed).toBe(false);
+});
