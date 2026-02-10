@@ -149,7 +149,9 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
     const extent = currentExtent ? [this.h - currentExtent[1], this.h - currentExtent[0]] : null;
     const div = d3.select(this.root_ref.current);
 
-    if (this.state.invert.has(d)) {
+    const willBeInverted = !this.state.invert.has(d);
+
+    if (!willBeInverted) {
       this.setState(function (prevState) {
         var newInvert = new Set(prevState.invert);
         newInvert.delete(d);
@@ -157,7 +159,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
           invert: newInvert,
         };
       });
-      this.setScaleRange(d);
+      this.setScaleRange(d, willBeInverted);
       div
         .selectAll("." + style.label)
         .filter(function (p) {
@@ -172,7 +174,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
           invert: newInvert,
         };
       });
-      this.setScaleRange(d);
+      this.setScaleRange(d, willBeInverted);
       div
         .selectAll("." + style.label)
         .filter(function (p) {
@@ -885,9 +887,9 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
     };
   }
 
-  setScaleRange(k: string) {
+  setScaleRange(k: string, inverted: boolean = this.state.invert.has(k)) {
     var range = [this.h, 0];
-    if (this.state.invert.has(k)) {
+    if (inverted) {
       range = [0, this.h];
     }
     this.yscale[k].range(range);
