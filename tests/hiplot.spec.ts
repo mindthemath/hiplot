@@ -559,3 +559,34 @@ test("table keeps correct column-value mapping after column reorder and brush up
   expect(result.numericCount).toBeGreaterThan(0);
   expect(result.uidLikeHexCount).toBe(0);
 });
+
+test("plotxy timestamp axis labels are not scientific notation", async ({ page }) => {
+  await loadDemo(page);
+  const result = await page.evaluate(async () => {
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const hiplot = (window as any).hiplot_last_instance;
+    const plotxy = hiplot?.plugins_ref?.XY?.current;
+    if (!plotxy || !plotxy.plot) {
+      return { error: "missing-plotxy" };
+    }
+    plotxy.setState({ axis_x: "timestamp" });
+    await sleep(250);
+    const axisGroups = Array.from(document.querySelectorAll("svg .axis_render"));
+    const xAxis = axisGroups[0];
+    if (!xAxis) {
+      return { error: "missing-x-axis-group" };
+    }
+    const labels = Array.from(xAxis.querySelectorAll(".tick text")).map((el) =>
+      (el.textContent || "").trim(),
+    );
+    const nonEmpty = labels.filter((l) => l.length > 0);
+    if (nonEmpty.length === 0) {
+      return { error: "no-tick-labels" };
+    }
+    const sciCount = nonEmpty.filter((l) => /e[+-]?\d+/i.test(l)).length;
+    return { nonEmptyCount: nonEmpty.length, sciCount, labels: nonEmpty.slice(0, 12) };
+  });
+  expect(result.error).toBeUndefined();
+  expect(result.nonEmptyCount).toBeGreaterThan(0);
+  expect(result.sciCount).toBe(0);
+});

@@ -192,14 +192,16 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
       if (!paramDef) {
         return null;
       }
+      if (paramDef.type === ParamType.TIMESTAMP) {
+        return null;
+      }
       if (paramDef.ticks_format) {
         return d3.format(paramDef.ticks_format);
       }
       const isNumericLike =
         paramDef.type === ParamType.NUMERIC ||
         paramDef.type === ParamType.NUMERICLOG ||
-        paramDef.type === ParamType.NUMERICPERCENTILE ||
-        paramDef.type === ParamType.TIMESTAMP;
+        paramDef.type === ParamType.NUMERICPERCENTILE;
       if (!isNumericLike || typeof scale.domain !== "function") {
         return null;
       }
