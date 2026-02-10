@@ -33,7 +33,7 @@ Basic example
 
 .. raw:: html
 
-    <iframe src="./_static/examples_javascript/Basic/index.html" height="700px" width="100%"></iframe>
+    <iframe src="./_static/examples_javascript/Basic/index.html?hip.theme=light" height="700px" width="100%"></iframe>
 
 
 Customizing HiPlot react component
@@ -69,4 +69,4 @@ An advanced example
 
 .. raw:: html
 
-    <iframe src="./_static/examples_javascript/Custom/index.html?hip.PARALLEL_PLOT.height=250" height="400px" width="100%"></iframe>
+    <iframe src="./_static/examples_javascript/Custom/index.html?hip.PARALLEL_PLOT.height=250&amp;hip.theme=light" height="400px" width="100%"></iframe>
