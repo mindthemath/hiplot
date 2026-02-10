@@ -69,6 +69,24 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
 
   setSelected_debounced = _.debounce(this.setSelected, 150);
 
+  private getUidFromRowData(rowData: Array<any>): string {
+    const uidIdx = this.ordered_cols.indexOf("uid");
+    if (uidIdx >= 0) {
+      const direct = rowData[uidIdx];
+      if (this.props.dp_lookup[direct] !== undefined) {
+        return direct;
+      }
+      if (this.dt && this.dt.colReorder) {
+        const reorderedUidIdx = this.dt.colReorder.order().indexOf(uidIdx);
+        const remapped = rowData[reorderedUidIdx];
+        if (this.props.dp_lookup[remapped] !== undefined) {
+          return remapped;
+        }
+      }
+    }
+    return rowData[uidIdx];
+  }
+
   static defaultProps = {
     hide: [],
     order_by: [["uid", "asc"]],
@@ -110,7 +128,6 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
       });
     }
     me.ordered_cols.unshift("");
-    const uidColIndex = me.ordered_cols.indexOf("uid");
 
     dom.empty();
     var columns: Array<{ [k: string]: any }> = this.ordered_cols.map(function (x) {
@@ -138,8 +155,8 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
       if (!me.dt) {
         return "";
       }
-      const individualUidColIdx = me.dt.colReorder.order().indexOf(uidColIndex);
-      const color = me.props.get_color_for_row(me.props.dp_lookup[row[individualUidColIdx]], 1.0);
+      const uid = me.getUidFromRowData(row);
+      const color = me.props.get_color_for_row(me.props.dp_lookup[uid], 1.0);
       return `<span class="${style.colorBlock}" style="background-color: ${color}" />`;
     };
     this.dt = dom.DataTable({
@@ -206,14 +223,13 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
         }
         const rowIdx = me.dt.cell(this).index().row;
         const row = me.dt.row(rowIdx);
-        const individualUidColIdx = me.dt.colReorder.order().indexOf(uidColIndex);
 
         dom.find(`.table-primary`).removeClass("table-primary");
         const rowNode = row.node();
         if (rowNode) {
           $(rowNode).addClass("table-primary");
         }
-        me.props.setHighlighted([me.props.dp_lookup[row.data()[individualUidColIdx]]]);
+        me.props.setHighlighted([me.props.dp_lookup[me.getUidFromRowData(row.data())]]);
       })
       .on("mouseout", "td", function () {
         if (!me.dt || me.empty) {
@@ -302,15 +318,11 @@ export class RowsDisplayTable extends React.Component<TablePluginProps, RowsDisp
       return;
     }
     const ordered_cols = this.ordered_cols;
-    const ock = dt.colReorder.transpose(
-      Array.from(Array(ordered_cols.length).keys()),
-      "toOriginal",
-    );
 
     dt.clear();
     dt.rows.add(
       selected.map(function (row) {
-        return ock.map((x) => (x == "" ? "" : row[ordered_cols[x]]));
+        return ordered_cols.map((col) => (col == "" ? "" : row[col]));
       }),
     );
     if (dt.search() == "") {

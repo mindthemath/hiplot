@@ -192,14 +192,16 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
       if (!paramDef) {
         return null;
       }
+      if (paramDef.type === ParamType.TIMESTAMP) {
+        return null;
+      }
       if (paramDef.ticks_format) {
         return d3.format(paramDef.ticks_format);
       }
       const isNumericLike =
         paramDef.type === ParamType.NUMERIC ||
         paramDef.type === ParamType.NUMERICLOG ||
-        paramDef.type === ParamType.NUMERICPERCENTILE ||
-        paramDef.type === ParamType.TIMESTAMP;
+        paramDef.type === ParamType.NUMERICPERCENTILE;
       if (!isNumericLike || typeof scale.domain !== "function") {
         return null;
       }
@@ -214,6 +216,28 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
         return null;
       }
       return d3.format(".3~e");
+    }
+    function getTickValues(param: string, scale: any, approxTickCount: number): any[] | null {
+      const paramDef = me.props.params_def[param];
+      if (
+        !paramDef ||
+        paramDef.type !== ParamType.NUMERICLOG ||
+        typeof scale.ticks !== "function"
+      ) {
+        return null;
+      }
+      const ticks = scale.ticks(approxTickCount);
+      if (!Array.isArray(ticks)) {
+        return null;
+      }
+      const majorTicks = ticks.filter((tick: number) => {
+        if (!Number.isFinite(tick) || tick <= 0) {
+          return false;
+        }
+        const lg = Math.log10(tick);
+        return Math.abs(lg - Math.round(lg)) < 1e-10;
+      });
+      return majorTicks.length > 1 ? majorTicks : null;
     }
     function redraw_axis() {
       me.svg.selectAll(".axis_render").remove();
@@ -242,6 +266,10 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
       ]);
       const xTickFormatter = getTickFormatter(me.state.axis_x, x_scale);
       const yTickFormatter = getTickFormatter(me.state.axis_y, y_scale);
+      const yTickCount = 1 + me.state.height / 40;
+      const xTickCount = 1 + me.state.width / 80;
+      const xTickValues = getTickValues(me.state.axis_x, x_scale, xTickCount);
+      const yTickValues = getTickValues(me.state.axis_y, y_scale, yTickCount);
       zoom_brush = d3
         .brush()
         .extent([
@@ -256,7 +284,8 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
           .call(
             d3
               .axisLeft(y_scale)
-              .ticks(1 + me.state.height / 40)
+              .ticks(yTickCount)
+              .tickValues(yTickValues as any)
               .tickFormat(yTickFormatter as any)
               .tickSizeInner(margin.left + margin.right - me.state.width),
           )
@@ -289,7 +318,8 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
           .call(
             d3
               .axisBottom(x_scale)
-              .ticks(1 + me.state.width / 80)
+              .ticks(xTickCount)
+              .tickValues(xTickValues as any)
               .tickFormat(xTickFormatter as any)
               .tickSizeInner(margin.bottom + margin.top - me.state.height),
           )
