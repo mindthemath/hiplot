@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hiplot-mm"
-version = "0.0.4rc13"
+version = "0.0.4rc14"
 description = "High dimensional Interactive Plotting tool"
 readme = "README.md"
 license = "MIT"
