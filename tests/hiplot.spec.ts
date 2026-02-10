@@ -491,3 +491,71 @@ test("inverting another axis does not temporarily unhide ticks on an actively fi
   expect(result.hiddenBeforeCount).toBeGreaterThan(0);
   expect(result.flashed).toBe(false);
 });
+
+test("table keeps correct column-value mapping after column reorder and brush update", async ({
+  page,
+}) => {
+  await loadDemo(page);
+  const result = await page.evaluate(async () => {
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const hiplot = (window as any).hiplot_last_instance;
+    const table = hiplot?.plugins_ref?.TABLE?.current;
+    const pplot = hiplot?.plugins_ref?.PARALLEL_PLOT?.current;
+    if (!hiplot || !table || !table.dt || !pplot) {
+      return { error: "missing-hiplot-table-or-pplot" };
+    }
+    const dt = table.dt;
+    const expMetricOriginalIdx = table.ordered_cols.indexOf("exp_metric");
+    if (expMetricOriginalIdx < 0) {
+      return { error: "missing-exp-metric-column" };
+    }
+
+    const currentOrder = dt.colReorder.order() as number[];
+    const without = currentOrder.filter((idx) => idx !== expMetricOriginalIdx);
+    // Keep color column first, move exp_metric as the second visible data column.
+    without.splice(2, 0, expMetricOriginalIdx);
+    dt.colReorder.order(without);
+
+    const dims = Array.from(pplot.state.dimensions);
+    if (dims.length === 0) {
+      return { error: "no-parallel-dimensions" };
+    }
+    const brushDim = dims[0];
+    const brushEl = pplot.dimensions_dom
+      .filter((d: string) => d === brushDim)
+      .select(".pplot-brush");
+    pplot.d3brush.move(brushEl, [60, Math.min(260, pplot.h - 20)]);
+    await sleep(300);
+
+    const headers = Array.from(document.querySelectorAll("table.sample-rows-table thead th")).map(
+      (th) => (th.textContent || "").trim(),
+    );
+    const expMetricVisibleIdx = headers.indexOf("exp_metric");
+    if (expMetricVisibleIdx < 0) {
+      return { error: "exp-metric-not-visible", headers };
+    }
+
+    const cells = Array.from(
+      document.querySelectorAll(
+        `table.sample-rows-table tbody tr td:nth-child(${expMetricVisibleIdx + 1})`,
+      ),
+    )
+      .map((td) => (td.textContent || "").trim())
+      .filter((v) => v.length > 0)
+      .slice(0, 20);
+    if (cells.length === 0) {
+      return { error: "no-cells-read" };
+    }
+    const numericCount = cells.filter((v) => Number.isFinite(Number(v))).length;
+    const uidLikeHexCount = cells.filter((v) => /^[a-f0-9]{6,}$/i.test(v)).length;
+    return {
+      cells,
+      numericCount,
+      uidLikeHexCount,
+    };
+  });
+
+  expect(result.error).toBeUndefined();
+  expect(result.numericCount).toBeGreaterThan(0);
+  expect(result.uidLikeHexCount).toBe(0);
+});
