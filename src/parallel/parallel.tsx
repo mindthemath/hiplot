@@ -980,7 +980,7 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
       // transition axis numbers
       d3.select(node).transition().duration(720).call(this.get_axis(d));
 
-      d3.select(node).selectAll("text").style("font-weight", null).style("font-size", null);
+      d3.select(node).selectAll(".tick text").style("font-weight", null).style("font-size", null);
     });
     this.setState(function (prevState) {
       return { brush_count: prevState.brush_count + 1 };
