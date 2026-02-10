@@ -16,11 +16,10 @@
  * limitations under the License.
  */
 
-
 /** Data sent in the custom Streamlit render event. */
 export interface RenderData {
-  args: any
-  disabled: boolean
+  args: any;
+  disabled: boolean;
 }
 
 /** Messages from Component -> Streamlit */
@@ -51,15 +50,15 @@ export class Streamlit {
    * The Streamlit component API version we're targetting.
    * There's currently only 1!
    */
-  public static readonly API_VERSION = 1
+  public static readonly API_VERSION = 1;
 
-  public static readonly RENDER_EVENT = "streamlit:render"
+  public static readonly RENDER_EVENT = "streamlit:render";
 
   /** Dispatches events received from Streamlit. */
-  public static readonly events = new EventTarget()
+  public static readonly events = new EventTarget();
 
-  private static registeredMessageListener = false
-  private static lastFrameHeight?: number
+  private static registeredMessageListener = false;
+  private static lastFrameHeight?: number;
 
   /**
    * Tell Streamlit that the component is ready to start receiving data.
@@ -69,14 +68,14 @@ export class Streamlit {
   public static setComponentReady = (): void => {
     if (!Streamlit.registeredMessageListener) {
       // Register for message events if we haven't already
-      window.addEventListener("message", Streamlit.onMessageEvent)
-      Streamlit.registeredMessageListener = true
+      window.addEventListener("message", Streamlit.onMessageEvent);
+      Streamlit.registeredMessageListener = true;
     }
 
     Streamlit.sendBackMsg(ComponentMessageType.COMPONENT_READY, {
       apiVersion: Streamlit.API_VERSION,
-    })
-  }
+    });
+  };
 
   /**
    * Report the component's height to Streamlit.
@@ -88,17 +87,17 @@ export class Streamlit {
       // `height` is optional. If undefined, it defaults to scrollHeight,
       // which is the entire height of the element minus its border,
       // scrollbar, and margin.
-      height = document.body.scrollHeight
+      height = document.body.scrollHeight;
     }
 
     if (height === Streamlit.lastFrameHeight) {
       // Don't bother updating if our height hasn't changed.
-      return
+      return;
     }
 
-    Streamlit.lastFrameHeight = height
-    Streamlit.sendBackMsg(ComponentMessageType.SET_FRAME_HEIGHT, { height })
-  }
+    Streamlit.lastFrameHeight = height;
+    Streamlit.sendBackMsg(ComponentMessageType.SET_FRAME_HEIGHT, { height });
+  };
 
   /**
    * Set the component's value. This value will be returned to the Python
@@ -116,46 +115,43 @@ export class Streamlit {
    * The value must be serializable into JSON.
    */
   public static setComponentValue = (value: any): void => {
-    Streamlit.sendBackMsg(ComponentMessageType.SET_COMPONENT_VALUE, { value })
-  }
+    Streamlit.sendBackMsg(ComponentMessageType.SET_COMPONENT_VALUE, { value });
+  };
 
   /** Receive a ForwardMsg from the Streamlit app */
   private static onMessageEvent = (event: MessageEvent): void => {
-    const type = event.data["type"]
+    const type = event.data["type"];
     switch (type) {
       case Streamlit.RENDER_EVENT:
-        Streamlit.onRenderMessage(event.data)
-        break
+        Streamlit.onRenderMessage(event.data);
+        break;
     }
-  }
+  };
 
   /**
    * Handle an untyped Streamlit render event and redispatch it as a
    * StreamlitRenderEvent.
    */
   private static onRenderMessage = (data: any): void => {
-    let args = data["args"]
+    let args = data["args"];
     if (args == null) {
-      console.error(
-        `Got null args in onRenderMessage. This should never happen`
-      )
-      args = {}
+      console.error(`Got null args in onRenderMessage. This should never happen`);
+      args = {};
     }
 
     args = {
       ...args,
-    }
+    };
 
-    const disabled = Boolean(data["disabled"])
+    const disabled = Boolean(data["disabled"]);
 
     // Dispatch a render event!
-    const eventData = { disabled, args }
+    const eventData = { disabled, args };
     const event = new CustomEvent<RenderData>(Streamlit.RENDER_EVENT, {
       detail: eventData,
-    })
-    Streamlit.events.dispatchEvent(event)
-  }
-
+    });
+    Streamlit.events.dispatchEvent(event);
+  };
 
   /** Post a message to the Streamlit app. */
   private static sendBackMsg = (type: string, data?: any): void => {
@@ -165,7 +161,7 @@ export class Streamlit {
         type: type,
         ...data,
       },
-      "*"
-    )
-  }
+      "*",
+    );
+  };
 }

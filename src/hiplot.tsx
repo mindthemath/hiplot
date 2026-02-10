@@ -6,13 +6,19 @@
  */
 
 // Exported from HiPlot library
-export { PlotXY, PlotXYDisplayData } from "./plotxy";
-export { ParallelPlot, ParallelPlotDisplayData } from "./parallel/parallel";
+export { PlotXY } from "./plotxy";
+export type { PlotXYDisplayData } from "./plotxy";
+export { ParallelPlot } from "./parallel/parallel";
+export type { ParallelPlotDisplayData } from "./parallel/parallel";
 export { RowsDisplayTable } from "./rowsdisplaytable";
-export { HiPlotDistributionPlugin, DistributionDisplayData } from "./distribution/plugin";
+export { HiPlotDistributionPlugin } from "./distribution/plugin";
+export type { DistributionDisplayData } from "./distribution/plugin";
 
-export { PersistentState, PersistentStateInURL, PersistentStateInMemory } from "./lib/savedstate";
+export type { PersistentState } from "./lib/savedstate";
+export { PersistentStateInURL, PersistentStateInMemory } from "./lib/savedstate";
 
-export { HiPlotPluginData } from "./plugin";
-export { Datapoint, HiPlotExperiment, IDatasets, HiPlotLoadStatus, Experiment } from "./types";
-export { HiPlot, HiPlotProps, createDefaultPlugins, DefaultPlugins } from "./component";
+export type { HiPlotPluginData } from "./plugin";
+export type { Datapoint, HiPlotExperiment, IDatasets } from "./types";
+export { HiPlotLoadStatus, Experiment } from "./types";
+export { HiPlot, createDefaultPlugins, DefaultPlugins } from "./component";
+export type { HiPlotProps } from "./component";

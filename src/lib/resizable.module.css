@@ -6,21 +6,21 @@
  */
 
 .resizableH {
-    padding-bottom: 4px;
-    position: relative;
+  padding-bottom: 4px;
+  position: relative;
 }
 
 .resizableH:after {
-    content: " ";
-    background-color: #ccc;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    cursor: row-resize;
+  content: " ";
+  background-color: #ccc;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  cursor: row-resize;
 }
 
 .pendingDelete {
-    background-color: red;
+  background-color: red;
 }

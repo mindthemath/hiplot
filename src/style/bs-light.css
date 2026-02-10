@@ -1,0 +1,18 @@
+/*
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/* Light theme overrides */
+.hip_thm--light table {
+  color: inherit;
+}
+
+.hip_thm--light .table {
+  --bs-table-striped-bg: rgba(0, 0, 0, 0.05);
+  --bs-table-striped-color: inherit;
+  --bs-table-hover-bg: rgba(0, 0, 0, 0.075);
+  --bs-table-hover-color: inherit;
+}

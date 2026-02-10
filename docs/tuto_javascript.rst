@@ -3,11 +3,11 @@
 NPM library (javascript)
 ===============================
 
-HiPlot is released as a React component in an `NPM package <https://www.npmjs.com/package/hiplot-mm>`_, and can be embeded in any javascript/React codebase.
+HiPlot is released as a React component in an `NPM package <https://www.npmjs.com/package/hiplot-mm>`_, and can be embedded in any javascript/React codebase.
 
 .. warning::
 
-    The Javascript library API is very recent, subject to changes, and less used compared to the python API. Please report any bug or suggestion by creating a `github issue <https://github.com/mindthemath/hiplot/issues/new>`_
+    The Javascript library API is very recent, subject to changes, and less used compared to the python API. Please report any bug or suggestion in the `issue tracker <https://github.com/mindthemath/hiplot/issues>`_
 
 
 
@@ -16,8 +16,8 @@ Getting started
 
 Download hiplot in your favorite package manager
 
->>> npm install hiplot  # if using npm
->>> yarn add hiplot # for yarn users
+>>> npm install hiplot-mm  # if using npm
+>>> yarn add hiplot-mm # for yarn users
 
 
 Basic example
@@ -25,7 +25,7 @@ Basic example
 
 
 .. literalinclude:: ../examples/javascript/src/index.js
-    :language: typescript
+    :language: text
     :start-after: BEGIN_DOC_BASIC_EXAMPLE
     :end-before: END_DOC_BASIC_EXAMPLE
 
@@ -51,7 +51,7 @@ React properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. literalinclude:: ../src/component.tsx
-    :language: typescript
+    :language: text
     :start-after: BEGIN_HIPLOT_PROPS
     :end-before: END_HIPLOT_PROPS
 
@@ -62,7 +62,7 @@ An advanced example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. literalinclude:: ../examples/javascript/src/index.js
-    :language: typescript
+    :language: text
     :start-after: BEGIN_DOC_CUSTOM_EXAMPLE
     :end-before: END_DOC_CUSTOM_EXAMPLE
 

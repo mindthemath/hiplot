@@ -1,7 +1,21 @@
 .. _contributing:
 
 Building HiPlot from source
-==========================
+===========================
+
+Quick commands
+--------------
+
+.. code-block:: bash
+
+    # Install default contributor dependencies (dev/test)
+    uv sync
+
+    # Run Python tests
+    uv run pytest
+
+    # Build docs (docs deps are resolved on-demand)
+    uv run --no-default-groups --group docs sphinx-build -b html docs docs/_build/html
 
 Python developer setup
 --------------------------
@@ -14,25 +28,24 @@ Building Javascript bundle
 
 HiPlot's frontend is built with React in TypeScript.
 Those files need to be compiled and bundled into plain Javascript to generate :code:`hiplot.bundle.js`.
-Node/npm is required in order to build those files
+Bun is required in order to build those files.
 
 .. code-block:: bash
 
-    # First, install npm packages
-    npm install
-    # Then either:
-    # (1) Dev (recommended): automatically re-build when a change is detected
-    npm run build-dev-watch
-    # (2) Build in release mode (for better performance)
-    npm run webpack-dev-watch
+    # First, install frontend packages
+    bun install
+    # Build in release mode (for better performance)
+    bun run build
+    # For frontend dev server (optional)
+    bun run vite:dev
 
 
 It's also recommended to run a HiPlot server locally to experiment:
 
 .. code-block:: bash
 
-    pip install -e .
-    python -m hiplot --dev
+    uv pip install -e .
+    uv run hiplot --dev
 
 Now open your browser and play with the code :)
 
@@ -46,6 +59,4 @@ Building documentation
 
 .. code-block:: bash
 
-    pip install -r requirements/dev.txt
-    cd docs
-    make html
+    uv run --no-default-groups --group docs sphinx-build -b html docs docs/_build/html

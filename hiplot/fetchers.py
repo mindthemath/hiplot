@@ -116,7 +116,14 @@ class InlineJsonFetcher:
 
 def load_demo(uri: str) -> hip.Experiment:
     if uri in README_DEMOS:
-        return README_DEMOS[uri]()
+        # Keep demo data deterministic across page reloads/tests while preserving
+        # the caller's RNG state outside this function.
+        random_state = random.getstate()
+        try:
+            random.seed(f"hiplot-demo:{uri}")
+            return README_DEMOS[uri]()
+        finally:
+            random.setstate(random_state)
     raise hip.ExperimentFetcherDoesntApply()
 
 

@@ -1,38 +1,38 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <title>HiPlot</title>
     <link rel="icon" href="static/icon.png" />
   </head>
-  <body style="margin:0px">
-    <div id="hiplot_element_id" style="background-color: white"><div style="text-align: center">Loading HiPlot...</div>
-      <noscript>
-        HiPlot needs JavaScript to run
-      </noscript>
+  <body style="margin: 0px">
+    <div id="hiplot_element_id" style="background-color: white">
+      <div style="text-align: center">Loading HiPlot...</div>
+      <noscript> HiPlot needs JavaScript to run </noscript>
     </div>
 
-    <script src="static/built/hiplot.bundle.js" type="text/javascript" > /*BUNDLE_FILE*/ </script>
+    <script src="static/built/hiplot.bundle.js" type="text/javascript">
+      /*BUNDLE_FILE*/
+    </script>
     <script type="text/javascript">
-    function _hiplot_setup() {
-      if (typeof hiplot == "undefined") {
-        console.info("waiting for HiPlot bundle to be loaded...");
-        setTimeout(_hiplot_setup, 1000);
-        return;
+      function _hiplot_setup() {
+        if (typeof hiplot == "undefined") {
+          console.info("waiting for HiPlot bundle to be loaded...");
+          setTimeout(_hiplot_setup, 1000);
+          return;
+        }
+        var options = {};
+        /*ON_LOAD_SCRIPT_INJECT*/
+        var hiplot_instance = hiplot.render(document.getElementById("hiplot_element_id"), options);
+        Object.assign(window, { hiplot_last_instance: hiplot_instance }); // For debugging
+        /*AFTER_SETUP_SCRIPT_INJECT*/
       }
-      var options = {};
-      /*ON_LOAD_SCRIPT_INJECT*/
-      var hiplot_instance = hiplot.render(document.getElementById("hiplot_element_id"), options);
-      Object.assign(window, {'hiplot_last_instance': hiplot_instance});  // For debugging
-      /*AFTER_SETUP_SCRIPT_INJECT*/
-    }
-    if (document.readyState == "loading") {
-      document.addEventListener("DOMContentLoaded", _hiplot_setup);
-    }
-    else {
-      // Either "complete" or "interactive"
-      _hiplot_setup();
-    }
+      if (document.readyState == "loading") {
+        document.addEventListener("DOMContentLoaded", _hiplot_setup);
+      } else {
+        // Either "complete" or "interactive"
+        _hiplot_setup();
+      }
     </script>
   </body>
 </html>
