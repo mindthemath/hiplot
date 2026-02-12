@@ -10,8 +10,14 @@ import * as d3 from "d3";
 import style from "../hiplot.module.css";
 import { create_d3_scale_without_outliers, ParamDef } from "../infertypes";
 import { convert_to_categorical_input } from "../lib/d3_scales";
-import { foCreateAxisLabel, foDynamicSizeFitContent } from "../lib/svghelpers";
 import { ParamType, Datapoint } from "../types";
+
+function labelTextFromHtml(html: string, fallback: string): string {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html || "";
+  const text = (tmp.textContent || tmp.innerText || "").trim();
+  return text.length ? text : fallback;
+}
 
 const margin = { top: 20, right: 20, bottom: 50, left: 60 };
 
@@ -87,19 +93,11 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
       );
       d3.select(this.axisBottomName.current)
         .html(null)
-        .append(
-          function () {
-            return foCreateAxisLabel(this.props.param_def, null, null);
-          }.bind(this),
-        )
-        .classed("distrplot_axislabel", true)
-        .attr("x", -4)
-        .attr("text-anchor", "end");
-      d3.select(this.axisBottomName.current)
-        .select(".distrplot_axislabel")
-        .each(function (this: SVGForeignObjectElement) {
-          foDynamicSizeFitContent(this);
-        });
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("font-weight", "bold")
+        .attr("fill", "currentColor")
+        .text(labelTextFromHtml(this.props.param_def.label_html, this.props.axis));
       this.axisRight.current.innerHTML = "";
     } else {
       dataScale.range([this.figureHeight(), 0]);
@@ -112,6 +110,13 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
         .transition()
         .duration(animate ? this.props.animateMs : 0)
         .call(d3.axisLeft(dataScale).ticks(1 + this.props.height / 50));
+      d3.select(this.axisBottomName.current)
+        .html(null)
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("font-weight", "bold")
+        .attr("fill", "currentColor")
+        .text("Density");
     }
   }
   createDataScaleAndAxis(): void {
@@ -354,14 +359,21 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
   }
 
   render() {
-    const leftAxisLabel = this.isVertical() ? "Density" : this.props.axis;
     return (
       <div data-testid="distribution-plot" data-axis={this.props.axis}>
         <svg width={this.props.width} height={this.props.height}>
-          <g transform={`translate(${margin.left}, 15)`} textAnchor="start" fontWeight="bold">
-            <text style={{ stroke: "white", strokeWidth: "0.2em" }}>{leftAxisLabel}</text>
-            <text>{leftAxisLabel}</text>
-          </g>
+          <text
+            x={13}
+            y={15}
+            textAnchor="start"
+            fontWeight="bold"
+            fill="currentColor"
+            className={style.axisLabelText}
+          >
+            {this.isVertical()
+              ? "Density"
+              : labelTextFromHtml(this.props.param_def.label_html, this.props.axis)}
+          </text>
           <g
             ref={this.svgContainer}
             className={style["distr-graph-svg"]}
@@ -386,8 +398,8 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
             ></g>
             <g
               ref={this.axisBottomName}
-              transform={`translate(${this.figureWidth()}, ${this.props.height - margin.top - 30})`}
-              textAnchor="end"
+              transform={`translate(${this.figureWidth() / 2}, ${this.props.height - margin.top - 10})`}
+              textAnchor="middle"
               fontWeight="bold"
             ></g>
           </g>
