@@ -375,6 +375,29 @@ def demo_big_floats() -> hip.Experiment:
     )
 
 
+def demo_decay() -> hip.Experiment:
+    """Simulated exponential decay: remaining = initial_mass * exp(-ln2 / half_life * elapsed).
+    Produces a wide numeric range in remaining_grams (spans many orders of magnitude),
+    useful for testing log-scale tick labels alongside plain numeric columns.
+    """
+    rng = random.Random(42)
+    data: t.List[t.Dict[str, t.Any]] = []
+    for _ in range(500):
+        initial_mass = rng.uniform(50, 500)
+        half_life = rng.uniform(1, 30)
+        elapsed = rng.uniform(1, 50)
+        remaining = initial_mass * math.exp(-math.log(2) / half_life * elapsed)
+        data.append({
+            'initial_mass': initial_mass,
+            'half_life': half_life,
+            'elapsed_years': elapsed,
+            'remaining_grams': remaining,
+        })
+    xp = hip.Experiment.from_iterable(data)
+    xp.parameters_definition["remaining_grams"].type = hip.ValueType.NUMERIC_LOG
+    return xp
+
+
 README_DEMOS: t.Dict[str, t.Callable[[], hip.Experiment]] = {
     "demo": demo,
     "demo_3xcols": demo_3xcols,
@@ -404,4 +427,5 @@ README_DEMOS: t.Dict[str, t.Callable[[], hip.Experiment]] = {
     "demo_col_html": demo_col_html,
     "demo_disable_table": demo_disable_table,
     "demo_big_floats": demo_big_floats,
+    "demo_decay": demo_decay,
 }

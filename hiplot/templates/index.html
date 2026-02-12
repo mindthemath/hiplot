@@ -22,6 +22,11 @@
           return;
         }
         var options = {};
+        var _sp = new URLSearchParams(location.search);
+        var _provider = _sp.get("provider");
+        if (_provider) {
+          options.dataProviderName = _provider;
+        }
         /*ON_LOAD_SCRIPT_INJECT*/
         var hiplot_instance = hiplot.render(document.getElementById("hiplot_element_id"), options);
         Object.assign(window, { hiplot_last_instance: hiplot_instance }); // For debugging
