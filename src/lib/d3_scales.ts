@@ -255,8 +255,10 @@ export function getLogScaleTickValues(domain: number[], approxTickCount: number)
   if (!Number.isFinite(dMin) || !Number.isFinite(dMax) || dMin <= 0 || dMax <= 0) {
     return null;
   }
-  const minExp = Math.floor(Math.log10(dMin));
-  const maxExp = Math.ceil(Math.log10(dMax));
+  // Use ceil/floor to keep ticks within the domain, preventing labels
+  // from bleeding outside the chart area (especially on the distribution plot).
+  const minExp = Math.ceil(Math.log10(dMin));
+  const maxExp = Math.floor(Math.log10(dMax));
   const majorTicks: number[] = [];
   for (let exp = minExp; exp <= maxExp; exp++) {
     majorTicks.push(Math.pow(10, exp));
