@@ -16,11 +16,18 @@ import { UploadDataProvider } from "./dataproviders/upload";
 
 export function build_props(extra?: any): HiPlotProps {
   const searchParams = new URLSearchParams(location.search);
+  const themeParam =
+    searchParams.get("hip.theme") ??
+    searchParams.get("hiplot.theme") ??
+    searchParams.get("HIPLOT.theme");
   const darkParam =
     searchParams.get("hip.dark") ??
     searchParams.get("hiplot.dark") ??
     searchParams.get("HIPLOT.dark");
-  const darkValue = normalizeDarkModeSetting(darkParam, "auto");
+  // `hip.theme` is the preferred query parameter. Keep `hip.dark` as a
+  // compatibility fallback for existing links.
+  const themeOrDarkParam = themeParam !== null ? themeParam : darkParam;
+  const darkValue = normalizeDarkModeSetting(themeOrDarkParam, "auto");
   var props = {
     experiment: null,
     persistentState: new PersistentStateInURL("hip"),

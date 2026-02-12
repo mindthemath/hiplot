@@ -7,7 +7,7 @@ Installing
 
 Python version
 ^^^^^^^^^^^^^^
-HiPlot requires python version 3.6 or newer (you can check your python version with :code:`python3 --version`)
+HiPlot requires Python version greater than 3.9 (you can check your Python version with :code:`python3 --version`)
 
 
 Python virtualenv
@@ -38,7 +38,7 @@ Within the activated environment, use the following command to install HiPlot:
 
 .. code-block:: bash
 
-    pip install -U hiplot  # Or for conda users: conda install -c conda-forge hiplot
+    pip install -U "hiplot-mm>=0.0.4"
 
 
 Congratulation, HiPlot is now ready to use! You can either:
@@ -65,7 +65,7 @@ Once we have created this object, we can display it with :class:`hiplot.Experime
 
 .. raw:: html
 
-    <iframe src="./_static/demo/demo_basic_usage.html?hip.PARALLEL_PLOT.height=300" height="700px" width="100%"></iframe>
+    <iframe src="./_static/demo/demo_basic_usage.html?hip.PARALLEL_PLOT.height=300&amp;hip.theme=light" height="700px" width="100%"></iframe>
 
 
 **Learn more** in the tutorial: :ref:`tutoNotebook`

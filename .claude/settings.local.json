@@ -3,10 +3,10 @@
     "allow": [
       "Bash(npm run build:*)",
       "mcp__plugin_playwright_playwright__browser_drag",
-      "Bash(bun run build:*)",
-      "Bash(pip uninstall:*)",
       "Bash(bunx playwright test:*)",
-      "Bash(./build.sh:*)"
+      "Bash(./build.sh:*)",
+      "mcp__plugin_playwright_playwright__browser_run_code",
+      "Bash(make build:*)"
     ]
   }
 }

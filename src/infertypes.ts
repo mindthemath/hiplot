@@ -387,7 +387,7 @@ export function infertypes(
       }
     }
     if (info.type == ParamType.NUMERICLOG) {
-      info.ticks_format = d3.format(".1e");
+      info.ticks_format = ".1e";
     }
     return info;
   }

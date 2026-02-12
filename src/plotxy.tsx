@@ -15,8 +15,8 @@ import React from "react";
 import { ResizableH } from "./lib/resizable";
 import _ from "underscore";
 import { Datapoint, ParamType } from "./types";
-import { foCreateAxisLabel, foDynamicSizeFitContent } from "./lib/svghelpers";
 import { ContextMenu } from "./contextmenu";
+import { IS_MOBILE } from "./lib/browsercompat";
 
 // DISPLAYS_DATA_DOC_BEGIN
 // Corresponds to values in the dict of `exp.display_data(hip.Displays.XY)`
@@ -46,6 +46,13 @@ interface PlotXYState extends PlotXYDisplayData {
 
 const HIGHLIGHT_PARENT = "parent";
 const HIGHLIGHT_CHILDREN = "children";
+
+function labelTextFromHtml(html: string, fallback: string): string {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html || "";
+  const text = (tmp.textContent || tmp.innerText || "").trim();
+  return text.length ? text : fallback;
+}
 
 interface PlotXYInternal {
   clear_canvas: () => void;
@@ -222,21 +229,37 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
       if (
         !paramDef ||
         paramDef.type !== ParamType.NUMERICLOG ||
-        typeof scale.ticks !== "function"
+        typeof scale.domain !== "function"
       ) {
         return null;
       }
-      const ticks = scale.ticks(approxTickCount);
-      if (!Array.isArray(ticks)) {
+      const domain = scale.domain();
+      if (!Array.isArray(domain) || domain.length < 2) {
         return null;
       }
-      const majorTicks = ticks.filter((tick: number) => {
-        if (!Number.isFinite(tick) || tick <= 0) {
-          return false;
+      const dMin = Number(domain[0]);
+      const dMax = Number(domain[domain.length - 1]);
+      if (!Number.isFinite(dMin) || !Number.isFinite(dMax) || dMin <= 0 || dMax <= 0) {
+        return null;
+      }
+      // Generate powers of 10 spanning the domain, including boundary powers
+      // so that e.g. domain [1.05, 99.3] produces ticks [1, 10, 100]
+      const minExp = Math.floor(Math.log10(dMin));
+      const maxExp = Math.ceil(Math.log10(dMax));
+      const majorTicks: number[] = [];
+      for (let exp = minExp; exp <= maxExp; exp++) {
+        majorTicks.push(Math.pow(10, exp));
+      }
+      // Thin out if there are too many powers of 10 for the available space
+      if (majorTicks.length > approxTickCount && majorTicks.length > 2) {
+        const step = Math.ceil(majorTicks.length / approxTickCount);
+        const thinned: number[] = [majorTicks[0]];
+        for (let i = step; i < majorTicks.length - 1; i += step) {
+          thinned.push(majorTicks[i]);
         }
-        const lg = Math.log10(tick);
-        return Math.abs(lg - Math.round(lg)) < 1e-10;
-      });
+        thinned.push(majorTicks[majorTicks.length - 1]);
+        return thinned;
+      }
       return majorTicks.length > 1 ? majorTicks : null;
     }
     function redraw_axis() {
@@ -290,28 +313,51 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
               .tickSizeInner(margin.left + margin.right - me.state.width),
           )
           .call((g) => g.select(".domain").remove())
-          .call((g) =>
-            g
-              .select(".tick:last-of-type")
-              .append(function (this: SVGGElement) {
-                const label = foCreateAxisLabel(
-                  me.props.params_def[me.state.axis_y],
-                  me.props.context_menu_ref,
-                );
-                d3.select(label).attr("y", `${-this.transform.baseVal[0].matrix.f + 10}`);
-                return label;
-              })
-              .attr("x", 3)
+          .call((g) => {
+            const pd = me.props.params_def[me.state.axis_y];
+            g.append("text")
+              .attr("x", 13)
+              .attr("y", 25)
               .attr("text-anchor", "start")
               .attr("font-weight", "bold")
-              .classed("plotxy-label", true),
-          )
-          .attr("font-size", null)
-          .call((g) =>
-            g.selectAll(".plotxy-label").each(function () {
-              foDynamicSizeFitContent(this);
-            }),
-          );
+              .attr("fill", "currentColor")
+              .classed(style.axisLabelText, true)
+              .classed("plotxy-label", true)
+              .text(labelTextFromHtml(pd.label_html, pd.name))
+              .append("title")
+              .text(IS_MOBILE ? "Long-press for options" : "Right click for options");
+            g.select(".plotxy-label")
+              .on("contextmenu", function (event) {
+                if (me.props.context_menu_ref && me.props.context_menu_ref.current) {
+                  me.props.context_menu_ref.current.show(event.pageX, event.pageY, pd.name);
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+              })
+              .on("touchstart", function (event) {
+                if (!me.props.context_menu_ref || !me.props.context_menu_ref.current) return;
+                const target = this as any;
+                target.__longPressFired = false;
+                const touch = (event as TouchEvent).touches[0];
+                target.__longPressTimer = window.setTimeout(() => {
+                  me.props.context_menu_ref.current.show(touch.pageX, touch.pageY, pd.name);
+                  target.__longPressFired = true;
+                  target.__longPressTimer = null;
+                }, 500);
+              })
+              .on("touchend touchcancel touchmove", function (event) {
+                const target = this as any;
+                if (target.__longPressTimer) {
+                  window.clearTimeout(target.__longPressTimer);
+                  target.__longPressTimer = null;
+                }
+                if (target.__longPressFired) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+              });
+          })
+          .attr("font-size", null);
       xAxis = (g) =>
         g
           .attr("transform", `translate(0,${me.state.height - margin.bottom})`)
@@ -322,23 +368,6 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
               .tickValues(xTickValues as any)
               .tickFormat(xTickFormatter as any)
               .tickSizeInner(margin.bottom + margin.top - me.state.height),
-          )
-          .call((g) =>
-            g.select(".tick:last-of-type").each(function (this: SVGGElement) {
-              const fo = foCreateAxisLabel(
-                me.props.params_def[me.state.axis_x],
-                me.props.context_menu_ref,
-                /* label */ null,
-              );
-              d3.select(fo)
-                .attr("y", 40)
-                .attr("text-anchor", "end")
-                .attr("font-weight", "bold")
-                .classed("plotxy-label", true);
-              const clone = this.cloneNode(false);
-              clone.appendChild(fo);
-              this.parentElement.appendChild(clone);
-            }),
           )
           // Make odd ticks below (to prevent overlap when very long labels)
           .call((g) =>
@@ -354,12 +383,52 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
               }
             }),
           )
-          .attr("font-size", null)
-          .call((g) =>
-            g.selectAll(".plotxy-label").each(function () {
-              foDynamicSizeFitContent(this);
-            }),
-          );
+          .call((g) => {
+            const pd = me.props.params_def[me.state.axis_x];
+            const centerX = (margin.left + me.state.width - margin.right) / 2;
+            g.append("text")
+              .attr("x", centerX)
+              .attr("y", 45)
+              .attr("text-anchor", "middle")
+              .attr("font-weight", "bold")
+              .attr("fill", "currentColor")
+              .classed(style.axisLabelText, true)
+              .classed("plotxy-label", true)
+              .text(labelTextFromHtml(pd.label_html, pd.name))
+              .append("title")
+              .text(IS_MOBILE ? "Long-press for options" : "Right click for options");
+            g.select(".plotxy-label")
+              .on("contextmenu", function (event) {
+                if (me.props.context_menu_ref && me.props.context_menu_ref.current) {
+                  me.props.context_menu_ref.current.show(event.pageX, event.pageY, pd.name);
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+              })
+              .on("touchstart", function (event) {
+                if (!me.props.context_menu_ref || !me.props.context_menu_ref.current) return;
+                const target = this as any;
+                target.__longPressFired = false;
+                const touch = (event as TouchEvent).touches[0];
+                target.__longPressTimer = window.setTimeout(() => {
+                  me.props.context_menu_ref.current.show(touch.pageX, touch.pageY, pd.name);
+                  target.__longPressFired = true;
+                  target.__longPressTimer = null;
+                }, 500);
+              })
+              .on("touchend touchcancel touchmove", function (event) {
+                const target = this as any;
+                if (target.__longPressTimer) {
+                  window.clearTimeout(target.__longPressTimer);
+                  target.__longPressTimer = null;
+                }
+                if (target.__longPressFired) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+              });
+          })
+          .attr("font-size", null);
       div
         .selectAll("canvas")
         .attr("width", me.state.width - margin.left - margin.right)
@@ -428,18 +497,31 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
       else svg.on("mousemove", moved).on("mouseenter", entered).on("mouseleave", left);
 
       function moved(event) {
+        // Only process hover within the plot area (inside margins).
+        // This allows touch-scrolling over axis labels on mobile.
+        const ex = event.layerX,
+          ey = event.layerY;
+        if (
+          ex < margin.left ||
+          ex > me.state.width - margin.right ||
+          ey < margin.top ||
+          ey > me.state.height - margin.bottom
+        ) {
+          left();
+          return;
+        }
         event.preventDefault();
         var closest = null;
         var closest_dist = null;
         $.each(currently_displayed, function (_, dp) {
-          var dist = (dp["layerX"] - event.layerX) ** 2 + (dp["layerY"] - event.layerY) ** 2;
+          var dist = (dp["layerX"] - ex) ** 2 + (dp["layerY"] - ey) ** 2;
           if (closest_dist == null || dist < closest_dist) {
             closest_dist = dist;
             closest = dp;
           }
         });
         if (closest === null) {
-          dot.attr("transform", `translate(${event.layerX},${event.layerY})`);
+          dot.attr("transform", `translate(${ex},${ey})`);
           dot.select("text").text("No point found?!");
           return;
         }
@@ -576,7 +658,6 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
       d3.select(me.canvas_highlighted_ref.current).style("opacity", "0");
       d3.select(me.canvas_lines_ref.current).style("opacity", "1.0");
       if (!highlighted.length) {
-        // Stop highlight
         return;
       }
       d3.select(me.canvas_highlighted_ref.current).style("opacity", "1.0");
