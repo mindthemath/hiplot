@@ -9,7 +9,7 @@ import React from "react";
 import * as d3 from "d3";
 import style from "../hiplot.module.css";
 import { create_d3_scale_without_outliers, ParamDef } from "../infertypes";
-import { convert_to_categorical_input } from "../lib/d3_scales";
+import { convert_to_categorical_input, getLogScaleTickValues } from "../lib/d3_scales";
 import { ParamType, Datapoint } from "../types";
 
 function labelTextFromHtml(html: string, fallback: string): string {
@@ -85,12 +85,25 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
   figureHeight() {
     return this.props.height - margin.top - margin.bottom;
   }
+  applyLogScaleTicks(axis: any, tickCount: number): void {
+    if (this.props.param_def.type !== ParamType.NUMERICLOG) {
+      return;
+    }
+    const tickValues = getLogScaleTickValues(this.dataScale.domain(), tickCount);
+    if (tickValues) {
+      axis.tickValues(tickValues);
+    }
+    if (this.props.param_def.ticks_format) {
+      axis.tickFormat(d3.format(this.props.param_def.ticks_format));
+    }
+  }
   createDataAxis(dataScale: any, animate: boolean): void {
     if (this.isVertical()) {
       dataScale.range([0, this.figureWidth()]);
-      d3.select(this.axisBottom.current).call(
-        d3.axisBottom(dataScale).ticks(1 + this.props.width / 50),
-      );
+      const tickCount = 1 + this.props.width / 50;
+      const axis = d3.axisBottom(dataScale).ticks(tickCount);
+      this.applyLogScaleTicks(axis, tickCount);
+      d3.select(this.axisBottom.current).call(axis);
       d3.select(this.axisBottomName.current)
         .html(null)
         .append("text")
@@ -101,15 +114,20 @@ export class DistributionPlot extends React.Component<DistributionPlotData, {}> 
       this.axisRight.current.innerHTML = "";
     } else {
       dataScale.range([this.figureHeight(), 0]);
+      const tickCount = 1 + this.props.height / 50;
+      const axisRight = d3.axisRight(dataScale).ticks(tickCount);
+      const axisLeft = d3.axisLeft(dataScale).ticks(tickCount);
+      this.applyLogScaleTicks(axisRight, tickCount);
+      this.applyLogScaleTicks(axisLeft, tickCount);
       d3.select(this.axisRight.current)
         .transition()
         .duration(animate ? this.props.animateMs : 0)
-        .call(d3.axisRight(dataScale).ticks(1 + this.props.height / 50))
+        .call(axisRight)
         .attr("text-anchor", "end");
       d3.select(this.axisLeft.current)
         .transition()
         .duration(animate ? this.props.animateMs : 0)
-        .call(d3.axisLeft(dataScale).ticks(1 + this.props.height / 50));
+        .call(axisLeft);
       d3.select(this.axisBottomName.current)
         .html(null)
         .append("text")

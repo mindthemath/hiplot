@@ -242,6 +242,37 @@ export function d3_scale_percentile_values_sorted(values: Array<number>): d3Scal
   return scale;
 }
 
+/**
+ * Generate tick values restricted to powers of 10 for log scales.
+ * Thins out ticks if there are more than fit in the available space.
+ */
+export function getLogScaleTickValues(domain: number[], approxTickCount: number): number[] | null {
+  if (!Array.isArray(domain) || domain.length < 2) {
+    return null;
+  }
+  const dMin = Number(domain[0]);
+  const dMax = Number(domain[domain.length - 1]);
+  if (!Number.isFinite(dMin) || !Number.isFinite(dMax) || dMin <= 0 || dMax <= 0) {
+    return null;
+  }
+  const minExp = Math.floor(Math.log10(dMin));
+  const maxExp = Math.ceil(Math.log10(dMax));
+  const majorTicks: number[] = [];
+  for (let exp = minExp; exp <= maxExp; exp++) {
+    majorTicks.push(Math.pow(10, exp));
+  }
+  if (majorTicks.length > approxTickCount && majorTicks.length > 2) {
+    const step = Math.ceil(majorTicks.length / approxTickCount);
+    const thinned: number[] = [majorTicks[0]];
+    for (let i = step; i < majorTicks.length - 1; i += step) {
+      thinned.push(majorTicks[i]);
+    }
+    thinned.push(majorTicks[majorTicks.length - 1]);
+    return thinned;
+  }
+  return majorTicks.length > 1 ? majorTicks : null;
+}
+
 function cpy_properties(from, to) {
   for (var prop in from) {
     if (from.hasOwnProperty(prop)) {

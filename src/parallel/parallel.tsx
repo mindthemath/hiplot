@@ -21,6 +21,7 @@ import { HiPlotPluginData } from "../plugin";
 import { ResizableH } from "../lib/resizable";
 import { Filter, FilterType, apply_filters } from "../filters";
 import { IS_MOBILE } from "../lib/browsercompat";
+import { getLogScaleTickValues } from "../lib/d3_scales";
 
 interface StringMapping<V> {
   [key: string]: V;
@@ -347,8 +348,28 @@ export class ParallelPlot extends React.Component<ParallelPlotData, ParallelPlot
   }
 
   get_axis = function (d: string) {
-    const fmt = this.props.params_def[d].ticks_format;
-    var axis = this.axis.scale(this.yscale[d]).ticks(1 + this.state.height / 50, fmt);
+    const pd = this.props.params_def[d];
+    const fmt = pd.ticks_format;
+    const tickCount = 1 + this.state.height / 50;
+    var axis = this.axis.scale(this.yscale[d]).ticks(tickCount, fmt);
+    if (pd.type === ParamType.NUMERICLOG) {
+      const scale = this.yscale[d];
+      const domain = scale.domain();
+      const tickValues = getLogScaleTickValues(domain, tickCount);
+      if (tickValues) {
+        // Preserve the NaN tick if the scale includes outlier handling
+        if (scale.__scale_orig) {
+          tickValues.push(NaN);
+        }
+        axis.tickValues(tickValues);
+      } else {
+        // Clear any tickValues left from a previous column on the shared axis
+        axis.tickValues(null);
+      }
+    } else {
+      // Clear any tickValues left from a previous column on the shared axis
+      axis.tickValues(null);
+    }
     return axis;
   }.bind(this);
 

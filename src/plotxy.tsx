@@ -17,6 +17,7 @@ import _ from "underscore";
 import { Datapoint, ParamType } from "./types";
 import { ContextMenu } from "./contextmenu";
 import { IS_MOBILE } from "./lib/browsercompat";
+import { getLogScaleTickValues } from "./lib/d3_scales";
 
 // DISPLAYS_DATA_DOC_BEGIN
 // Corresponds to values in the dict of `exp.display_data(hip.Displays.XY)`
@@ -233,34 +234,7 @@ export class PlotXY extends React.Component<PlotXYProps, PlotXYState> {
       ) {
         return null;
       }
-      const domain = scale.domain();
-      if (!Array.isArray(domain) || domain.length < 2) {
-        return null;
-      }
-      const dMin = Number(domain[0]);
-      const dMax = Number(domain[domain.length - 1]);
-      if (!Number.isFinite(dMin) || !Number.isFinite(dMax) || dMin <= 0 || dMax <= 0) {
-        return null;
-      }
-      // Generate powers of 10 spanning the domain, including boundary powers
-      // so that e.g. domain [1.05, 99.3] produces ticks [1, 10, 100]
-      const minExp = Math.floor(Math.log10(dMin));
-      const maxExp = Math.ceil(Math.log10(dMax));
-      const majorTicks: number[] = [];
-      for (let exp = minExp; exp <= maxExp; exp++) {
-        majorTicks.push(Math.pow(10, exp));
-      }
-      // Thin out if there are too many powers of 10 for the available space
-      if (majorTicks.length > approxTickCount && majorTicks.length > 2) {
-        const step = Math.ceil(majorTicks.length / approxTickCount);
-        const thinned: number[] = [majorTicks[0]];
-        for (let i = step; i < majorTicks.length - 1; i += step) {
-          thinned.push(majorTicks[i]);
-        }
-        thinned.push(majorTicks[majorTicks.length - 1]);
-        return thinned;
-      }
-      return majorTicks.length > 1 ? majorTicks : null;
+      return getLogScaleTickValues(scale.domain(), approxTickCount);
     }
     function redraw_axis() {
       me.svg.selectAll(".axis_render").remove();
