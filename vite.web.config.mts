@@ -152,6 +152,7 @@ export default defineConfig(({ mode }) => {
           name: "hiplot",
           entryFileNames: `${entryName}.bundle.js`,
           inlineDynamicImports: true,
+          intro: `if(!Object.hasOwn){Object.hasOwn=function(o,p){return Object.prototype.hasOwnProperty.call(o,p)};}`,
         },
       },
     },
