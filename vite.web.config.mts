@@ -143,7 +143,7 @@ export default defineConfig(({ mode }) => {
       outDir: "npm-dist",
       emptyOutDir: false,
       sourcemap: true,
-      target: "es2020",
+      target: "es2017",
       chunkSizeWarningLimit: 2000,
       rollupOptions: {
         input: entryPath,
@@ -152,6 +152,7 @@ export default defineConfig(({ mode }) => {
           name: "hiplot",
           entryFileNames: `${entryName}.bundle.js`,
           inlineDynamicImports: true,
+          intro: `if(!Object.hasOwn){Object.hasOwn=function(o,p){return Object.prototype.hasOwnProperty.call(o,p)};}`,
         },
       },
     },

@@ -99,6 +99,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         external: ["react"],
         output: {
+          intro: `if(!Object.hasOwn){Object.hasOwn=function(o,p){return Object.prototype.hasOwnProperty.call(o,p)};}`,
           globals: {
             react: "React",
           },
