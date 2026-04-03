@@ -143,7 +143,7 @@ export default defineConfig(({ mode }) => {
       outDir: "npm-dist",
       emptyOutDir: false,
       sourcemap: true,
-      target: "es2020",
+      target: "es2017",
       chunkSizeWarningLimit: 2000,
       rollupOptions: {
         input: entryPath,
